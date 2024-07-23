@@ -2,17 +2,15 @@
 "use client";
 import React from "react";
 import { HeroParallax } from "@/components/ui/hero-parrallax";
-import { FlipWords } from "@/components/ui/flip-words";
-
+import Feature from "@/container/features/features"
+import Partners from "@/container/partners/partners";
 export default function Home() {
   return (
-    <div className="container mx-auto p-4">
-      <HeroParallax products={products} />
 
-     <footer className="bg-gray-800 text-white py-6">
-        <div className="container mx-auto text-center">
-        </div>
-      </footer>
+    <div id="Herosection" className="container p-4">
+      <HeroParallax products={products} />
+      <Feature></Feature>
+      <Partners></Partners>
     </div>
     
   );
