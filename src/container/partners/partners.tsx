@@ -8,6 +8,8 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
+
+import  Carousel  from "@/container/carousel/carousel"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -65,20 +67,20 @@ Powtech는 전력 변환 및 관리 솔루션 분야에서 혁신적인 제품�
 GTM은 반도체 및 전자 부품의 글로벌 공급업체로, 첨단 기술과 우수한 품질로 인정받고 있습니다. GTM의 제품은 다양한 산업 분야에서 사용되며, 고객에게 최상의 솔루션을 제공합니다.
 
  */}
-                        <div className="mt-5 lg:mt-8 flex flex-col sm:items-center gap-2 sm:flex-row sm:gap-3">
+                        {/* <div className="mt-5 lg:mt-8 flex flex-col sm:items-center gap-2 sm:flex-row sm:gap-3">
                             <div className="w-full max-w-lg  lg:w-auto">
                                 <Label className="sr-only">Search</Label>
                                 <Input placeholder="Enter work email" type="email" />
                             </div>
                             <Button className="w-min">Request demo</Button>
-                        </div>
+                        </div> */}
                         {/* Brands */}
 
                         <div className="mt-6 lg:mt-12">
                             <span className="text-xs font-medium uppercase">Trusted by:</span>
-                            <div className="grid sm:grid-cols-2 lg:grid-cols-3 items-center gap-8">
+                            <div className="grid sm:grid-cols-2 lg:grid-cols-4 items-center gap-8">
                                 {/* Icon Block */}
-                                <div className="text-center border rounded-md shadow-none transition-shadow duration-300 cursor-pointer hover:shadow-lg hover:shadow-gray-400 hover:scale-150">
+                                <div className="text-center border rounded-md shadow-none transition-shadow duration-300 cursor-pointer hover:shadow-lg hover:shadow-gray-400 hover:scale-105">
                                 <div className="flex justify-center items-center w-full rounded-full  mx-auto">
                                     <Image     
                                    alt="macroblock"
@@ -86,67 +88,121 @@ GTM은 반도체 및 전자 부품의 글로벌 공급업체로, 첨단 기술�
                                     height={60}
                                     src="/banners/macroblock_banner.jpg"/>
                                     </div>
-                                    <div className="mt-3">
-                                        <h3 className="text-lg font-semibold ">Macroblock</h3>
+                                    <div className="mt-2">
+                                        <h3 className="text-sm font-semibold ">Macroblock</h3>
                                     </div>
                                 </div>
                                 {/* End Icon Block */}
                                 {/* Icon Block */}
-                                <div className="text-center">
-                                    <div className="flex justify-center items-center w-12 h-12 bg-primary border rounded-full mx-auto">
-                                        <Settings2Icon className="flex-shrink-0 w-5 h-5 text-primary-foreground" />
+                                <div className="text-center border rounded-md shadow-none transition-shadow duration-300 cursor-pointer hover:shadow-lg hover:shadow-gray-400 hover:scale-125">
+                                <div className="flex justify-center items-center w-full rounded-full  mx-auto">
+                                    <Image     
+                                   alt="macroblock"
+                                    width={150}
+                                    height={60}
+                                    src="/banners/zowie_banner.jpg"/>
                                     </div>
-                                    <div className="mt-3">
-                                        <h3 className="text-lg font-semibold ">Customizable</h3>
-                                        <p className="mt-1 text-muted-foreground">
-                                            Components are easily customized and extendable
-                                        </p>
-                                    </div>
-                                </div>
-                                {/* End Icon Block */}
-                                {/* Icon Block */}
-                                <div className="text-center">
-                                    <div className="flex justify-center items-center w-12 h-12 bg-primary border rounded-full mx-auto">
-                                        <BookOpenIcon className="flex-shrink-0 w-5 h-5 text-primary-foreground" />
-                                    </div>
-                                    <div className="mt-3">
-                                        <h3 className="text-lg font-semibold ">Documentation</h3>
-                                        <p className="mt-1 text-muted-foreground">
-                                            Every component and plugin is well documented
-                                        </p>
+                                    <div className="mt-2">
+                                        <h3 className="text-sm font-semibold ">Macroblock</h3>
                                     </div>
                                 </div>
                                 {/* End Icon Block */}
-                                {/* Icon Block */}
-                                <div className="text-center">
-                                    <div className="flex justify-center items-center w-12 h-12 bg-primary border rounded-full mx-auto">
-                                        <MessagesSquareIcon className="flex-shrink-0 w-5 h-5 text-primary-foreground" />
+                                 {/* Icon Block */}
+                                 <div className="text-center border rounded-md shadow-none transition-shadow duration-300 cursor-pointer hover:shadow-lg hover:shadow-gray-400 hover:scale-125">
+                                <div className="flex justify-center items-center w-full rounded-full  mx-auto">
+                                    <Image     
+                                   alt="macroblock"
+                                    width={150}
+                                    height={60}
+                                    src="/banners/gtm_banner.jpg"/>
                                     </div>
-                                    <div className="mt-3">
-                                        <h3 className="text-lg font-semibold ">24/7 Support</h3>
-                                        <p className="mt-1 text-muted-foreground">
-                                            Contact us 24 hours a day, 7 days a week
-                                        </p>
+                                    <div className="mt-2">
+                                        <h3 className="text-sm font-semibold ">Macroblock</h3>
+                                    </div>
+                                </div>
+                                {/* End Icon Block */}
+                                 {/* Icon Block */}
+                                 <div className="text-center border rounded-md shadow-none transition-shadow duration-300 cursor-pointer hover:shadow-lg hover:shadow-gray-400 hover:scale-125">
+                                <div className="flex justify-center items-center w-full rounded-full  mx-auto">
+                                    <Image     
+                                   alt="macroblock"
+                                    width={150}
+                                    height={60}
+                                    src="/banners/llt_banner.jpg"/>
+                                    </div>
+                                    <div className="mt-2">
+                                        <h3 className="text-sm font-semibold ">Macroblock</h3>
+                                    </div>
+                                </div>
+                                {/* End Icon Block */} 
+                                {/* Icon Block */}
+                                <div className="text-center border rounded-md shadow-none transition-shadow duration-300 cursor-pointer hover:shadow-lg hover:shadow-gray-400 hover:scale-125">
+                                <div className="flex justify-center items-center w-full rounded-full  mx-auto">
+                                    <Image     
+                                   alt="macroblock"
+                                    width={150}
+                                    height={60}
+                                    src="/banners/xlsemi_banner.jpg"/>
+                                    </div>
+                                    <div className="mt-2">
+                                        <h3 className="text-sm font-semibold ">Macroblock</h3>
+                                    </div>
+                                </div>
+                                {/* End Icon Block */} 
+                                {/* Icon Block */}
+                                <div className="text-center border rounded-md shadow-none transition-shadow duration-300 cursor-pointer hover:shadow-lg hover:shadow-gray-400 hover:scale-105">
+                                <div className="flex justify-center items-center w-full rounded-full  mx-auto">
+                                    <Image     
+                                   alt="macroblock"
+                                    width={150}
+                                    height={60}
+                                    src="/banners/morethanall_banner.png"/>
+                                    </div>
+                                    <div className="mt-2">
+                                        <h3 className="text-sm font-semibold ">Macroblock</h3>
+                                    </div>
+                                </div>
+                                {/* End Icon Block */} 
+                                {/* Icon Block */}
+                                <div className="text-center border rounded-md shadow-none transition-shadow duration-300 cursor-pointer hover:shadow-lg hover:shadow-gray-400 hover:scale-125">
+                                <div className="flex justify-center items-center w-full rounded-full  mx-auto">
+                                    <Image     
+                                   alt="macroblock"
+                                    width={150}
+                                    height={60}
+                                    src="/banners/powtech_banner.jpg"/>
+                                    </div>
+                                    <div className="mt-2">
+                                        <h3 className="text-sm font-semibold ">Macroblock</h3>
+                                    </div>
+                                </div>
+                                {/* End Icon Block */}
+                                 {/* Icon Block */}
+                                 <div className="text-center border rounded-md shadow-none transition-shadow duration-300 cursor-pointer hover:shadow-lg hover:shadow-gray-400 hover:scale-125">
+                                <div className="flex justify-center items-center w-full rounded-full  mx-auto">
+                                    <Image     
+                                   alt="macroblock"
+                                    width={150}
+                                    height={60}
+                                    src="/banners/kube_banner.jpg"/>
+                                    </div>
+                                    <div className="mt-2">
+                                        <h3 className="text-sm font-semibold ">Macroblock</h3>
                                     </div>
                                 </div>
                                 {/* End Icon Block */}
                             </div>
-                            <div className="mt-4 flex gap-x-8">
-                                <Image
-                                    className="w-20 h-auto"
-                                    alt="macroblock"
-                                    width={106}
-                                    height={36}
-                                    src="/banners/macroblock_banner.jpg"
-                                >
-                                </Image>
-                            </div>
+                            
                         </div>
                         {/* End Brands */}
                     </div>
                     {/* End Col */}
+                    
                     <div className="lg:col-span-4 mt-10 lg:mt-0">
-                        <Card className="w-full rounded-xl">
+                        <Carousel>
+
+                        </Carousel>
+                        {/* <Card className="w-full rounded-xl">
                             <CardHeader>
                                 <CardTitle>Macroblock</CardTitle>
                                 <CardDescription>Macroblock은 LED 드라이버 IC 분야에서 세계적인 선두주자입니다. Macroblock의 제품은 뛰어난 성능과 신뢰성을 자랑하며, 고품질의 LED 조명과 디스플레이 솔루션을 제공합니다. 혁신적인 기술력으로 시장을 선도하는 Macroblock과 함께, 고객 여러분께 최상의 LED 드라이버 솔루션을 제공해드리겠습니다.</CardDescription>
@@ -165,7 +221,7 @@ GTM은 반도체 및 전자 부품의 글로벌 공급업체로, 첨단 기술�
                                 <Separator orientation="vertical" className="mx-4"></Separator>
                                 <Button className="grow">제조사 소개</Button>
                             </CardFooter>
-                        </Card>
+                        </Card> */}
                     </div>
                     {/* End Col */}
                 </div>
