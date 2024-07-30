@@ -9,7 +9,7 @@ import {
     CardTitle,
 } from "@/components/ui/card"
 
-import  Carousel  from "@/container/carousel/carousel"
+import Carousel from "@/container/carousel/carousel"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -80,124 +80,93 @@ GTM은 반도체 및 전자 부품의 글로벌 공급업체로, 첨단 기술�
                             <span className="text-xs font-medium uppercase">Trusted by:</span>
                             <div className="grid sm:grid-cols-2 lg:grid-cols-4 items-center gap-8">
                                 {/* Icon Block */}
-                                <div className="text-center border rounded-md shadow-none transition-shadow duration-300 cursor-pointer hover:shadow-lg hover:shadow-gray-400 hover:scale-105">
-                                <div className="flex justify-center items-center w-full rounded-full  mx-auto">
-                                    <Image     
-                                   alt="macroblock"
-                                    width={150}
-                                    height={60}
-                                    src="/banners/macroblock_banner.jpg"/>
-                                    </div>
-                                    <div className="mt-2">
-                                        <h3 className="text-sm font-semibold ">Macroblock</h3>
+                                <div className="text-center rounded-full shadow-none transition-shadow duration-300 cursor-pointer  hover:scale-105">
+                                    <div className="flex justify-center items-center mx-auto">
+                                        <Image
+                                            alt="macroblock"
+                                            width={30}
+                                            height={30}
+                                            src="/svgs/macroblock-logo.svg" />
                                     </div>
                                 </div>
                                 {/* End Icon Block */}
                                 {/* Icon Block */}
-                                <div className="text-center border rounded-md shadow-none transition-shadow duration-300 cursor-pointer hover:shadow-lg hover:shadow-gray-400 hover:scale-125">
-                                <div className="flex justify-center items-center w-full rounded-full  mx-auto">
-                                    <Image     
-                                   alt="macroblock"
-                                    width={150}
-                                    height={60}
-                                    src="/banners/zowie_banner.jpg"/>
-                                    </div>
-                                    <div className="mt-2">
-                                        <h3 className="text-sm font-semibold ">Macroblock</h3>
+                                <div className="text-center rounded-full shadow-none transition-shadow duration-300 cursor-pointer hover:border  hover:scale-105">
+                                <div className="flex justify-center items-center mx-auto">
+                                        <Image
+                                            alt="macroblock"
+                                            width={30}
+                                            height={30}
+                                            src="/svgs/zowie-logo.svg" />
                                     </div>
                                 </div>
                                 {/* End Icon Block */}
-                                 {/* Icon Block */}
-                                 <div className="text-center border rounded-md shadow-none transition-shadow duration-300 cursor-pointer hover:shadow-lg hover:shadow-gray-400 hover:scale-125">
-                                <div className="flex justify-center items-center w-full rounded-full  mx-auto">
-                                    <Image     
-                                   alt="macroblock"
-                                    width={150}
-                                    height={60}
-                                    src="/banners/gtm_banner.jpg"/>
-                                    </div>
-                                    <div className="mt-2">
-                                        <h3 className="text-sm font-semibold ">Macroblock</h3>
+                                {/* Icon Block */}
+                                <div className="text-center rounded-full shadow-none transition-shadow duration-300 cursor-pointer hover:scale-105">
+                                <div className="flex justify-center items-center mx-auto">
+                                        <Image src="/svgs/GTM-logo.svg" alt="GTM" width={30} height={30} />
                                     </div>
                                 </div>
                                 {/* End Icon Block */}
-                                 {/* Icon Block */}
-                                 <div className="text-center border rounded-md shadow-none transition-shadow duration-300 cursor-pointer hover:shadow-lg hover:shadow-gray-400 hover:scale-125">
-                                <div className="flex justify-center items-center w-full rounded-full  mx-auto">
-                                    <Image     
-                                   alt="macroblock"
-                                    width={150}
-                                    height={60}
-                                    src="/banners/llt_banner.jpg"/>
-                                    </div>
-                                    <div className="mt-2">
-                                        <h3 className="text-sm font-semibold ">Macroblock</h3>
-                                    </div>
-                                </div>
-                                {/* End Icon Block */} 
                                 {/* Icon Block */}
-                                <div className="text-center border rounded-md shadow-none transition-shadow duration-300 cursor-pointer hover:shadow-lg hover:shadow-gray-400 hover:scale-125">
-                                <div className="flex justify-center items-center w-full rounded-full  mx-auto">
-                                    <Image     
-                                   alt="macroblock"
-                                    width={150}
-                                    height={60}
-                                    src="/banners/xlsemi_banner.jpg"/>
-                                    </div>
-                                    <div className="mt-2">
-                                        <h3 className="text-sm font-semibold ">Macroblock</h3>
-                                    </div>
-                                </div>
-                                {/* End Icon Block */} 
-                                {/* Icon Block */}
-                                <div className="text-center border rounded-md shadow-none transition-shadow duration-300 cursor-pointer hover:shadow-lg hover:shadow-gray-400 hover:scale-105">
-                                <div className="flex justify-center items-center w-full rounded-full  mx-auto">
-                                    <Image     
-                                   alt="macroblock"
-                                    width={150}
-                                    height={60}
-                                    src="/banners/morethanall_banner.png"/>
-                                    </div>
-                                    <div className="mt-2">
-                                        <h3 className="text-sm font-semibold ">Macroblock</h3>
-                                    </div>
-                                </div>
-                                {/* End Icon Block */} 
-                                {/* Icon Block */}
-                                <div className="text-center border rounded-md shadow-none transition-shadow duration-300 cursor-pointer hover:shadow-lg hover:shadow-gray-400 hover:scale-125">
-                                <div className="flex justify-center items-center w-full rounded-full  mx-auto">
-                                    <Image     
-                                   alt="macroblock"
-                                    width={150}
-                                    height={60}
-                                    src="/banners/powtech_banner.jpg"/>
-                                    </div>
-                                    <div className="mt-2">
-                                        <h3 className="text-sm font-semibold ">Macroblock</h3>
+                                <div className="text-center rounded-full shadow-none transition-shadow duration-300 cursor-pointer hover:scale-105">
+                                <div className="flex justify-center items-center mx-auto">
+                                    <Image src="/svgs/xlsemi-logo.svg" alt="XLSEMI" width={30} height={30} />
+                                    
                                     </div>
                                 </div>
                                 {/* End Icon Block */}
-                                 {/* Icon Block */}
-                                 <div className="text-center border rounded-md shadow-none transition-shadow duration-300 cursor-pointer hover:shadow-lg hover:shadow-gray-400 hover:scale-125">
-                                <div className="flex justify-center items-center w-full rounded-full  mx-auto">
-                                    <Image     
-                                   alt="macroblock"
-                                    width={150}
-                                    height={60}
-                                    src="/banners/kube_banner.jpg"/>
+                                {/* Icon Block */}
+                                <div className="text-center rounded-full shadow-none transition-shadow duration-300 cursor-pointer hover:scale-105">
+                                <div className="flex justify-center items-center mx-auto">
+                                        <Image
+                                            alt="Morethanall"
+                                            width={30}
+                                            height={30}
+                                            src="/svgs/morethanall-logo.svg" />
                                     </div>
-                                    <div className="mt-2">
-                                        <h3 className="text-sm font-semibold ">Macroblock</h3>
+                                </div>
+                                {/* End Icon Block */}
+                                {/* Icon Block */}
+                                <div className="text-center rounded-full shadow-none transition-shadow duration-300 cursor-pointer hover:scale-105">
+                                <div className="flex justify-center items-center mx-auto">
+                                        <Image
+                                            alt="Powtech"
+                                            width={30}
+                                            height={30}
+                                            src="/svgs/powtech-logo.svg" />
+                                    </div>
+                                </div>
+                                {/* End Icon Block */}
+                                {/* Icon Block */}
+                                <div className="text-center rounded-full shadow-none transition-shadow duration-300 cursor-pointer hover:scale-105">
+                                <div className="flex justify-center items-center">
+                                        <Image
+                                            alt="Kube Electronics"
+                                            width={30}
+                                            height={30}
+                                            src="/svgs/kube-logo.svg" />
+                                    </div>
+                                </div>
+                                {/* End Icon Block */}
+                                {/* Icon Block */}
+                                <div className="text-center rounded-full shadow-none transition-shadow duration-300 cursor-pointer hover:scale-105">
+                                    <div className="flex justify-center items-center mx-auto">
+                                        <Image
+                                            alt="LLT"
+                                            width={30}
+                                            height={30}
+                                            src="/svgs/llt-logo.svg" />
                                     </div>
                                 </div>
                                 {/* End Icon Block */}
                             </div>
-                            
+
                         </div>
                         {/* End Brands */}
                     </div>
                     {/* End Col */}
-                    
+
                     <div className="lg:col-span-4 mt-10 lg:mt-0">
                         <Carousel>
 

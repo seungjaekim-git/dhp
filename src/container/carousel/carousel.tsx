@@ -7,6 +7,8 @@ import {
     CarouselThumbsContainer,
     SliderThumbItem,
   } from "@/components/extension/carousel";
+
+  
    
   const CarouselOrientation = () => {
     return (

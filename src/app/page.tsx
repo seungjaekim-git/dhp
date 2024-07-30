@@ -8,7 +8,7 @@ export default function Home() {
   return (
 
     <div id="Herosection" className="container p-4">
-      <HeroParallax products={products} />
+      <HeroParallax products={products}/>
       <Feature></Feature>
       <Partners></Partners>
     </div>
@@ -51,7 +51,7 @@ export const products = [
     title: "Pixel Perfect",
     link: "https://app.pixelperfect.quest",
     thumbnail:
-      "/images/.png",
+      "/images/connector_category_banner.png",
   },
  
   {
