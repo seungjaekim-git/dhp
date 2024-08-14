@@ -7,8 +7,8 @@ export default function Test() {
     return (
         <>
             <NavigationBar></NavigationBar>
-            <Filter></Filter>
-            <Timeline></Timeline>
+            {/* <Filter></Filter>
+            <Timeline></Timeline> */}
 
         </>
     )
