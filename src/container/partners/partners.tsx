@@ -38,7 +38,7 @@ export default function PartnersSection() {
                             파트너사
                         </h1>
                         <p className="mt-3 text-xl text-muted-foreground">
-                            <strong>대한플러스전자(주)</strong>는 전 세계 최고의 반도체 부품 제조사들과의 파트너십을 통해 고객에게 최고의 품질과 신뢰성을 제공하고 있습니다.
+                            <strong>서비스이름(주)</strong>는 전 세계 최고의 반도체 부품 제조사들과의 파트너십을 통해 고객에게 최고의 품질과 신뢰성을 제공하고 있습니다.
                             <br />저희 파트너사는 각기 다른 전문 분야에서 혁신적인 제품을 공급하며,
                             <br />저희는 그들의 우수한 기술력과 품질을 바탕으로 고객의 다양한 요구를 충족시키고 있습니다.
                         </p>

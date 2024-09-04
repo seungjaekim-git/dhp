@@ -14,7 +14,7 @@ import {
           <div className="grid md:grid-cols-2 gap-12">
             <div className="lg:w-3/4">
               <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0">
-              <strong>대한플러스전자(주)</strong>는 지난 30년간 업계에서 쌓아온 풍부한 경험과 전문성을 바탕으로 고객 여러분께 최고의 서비스를 제공하고 있습니다.
+              <strong>서비스이름(주)</strong>
             </h2>
               <p className="mt-3 text-muted-foreground">
               <br></br>저희는 고객의 성공이 곧 우리의 성공이라고 믿습니다. 언제든지 문의해 주시면 최선을 다해 도와드리겠습니다.
@@ -25,7 +25,7 @@ import {
                   className="inline-flex items-center gap-x-1 group font-medium hover:underline underline-offset-4 "
                   href="#"
                 >
-                  대한플러스전자를 소개합니다
+                 서비스이름를 소개합니다
                   <ChevronRightIcon className="flex-shrink-0 w-4 h-4 transition ease-in-out group-hover:translate-x-1" />
                 </a>
               </p>

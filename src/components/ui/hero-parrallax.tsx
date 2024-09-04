@@ -117,7 +117,7 @@ const Header: React.FC = () => (
           당신이 원하던 <br /> <FlipWords words={WORDS} />
         </h1>
         <p className="mt-3 text-xl text-muted-foreground">
-          <strong>대한플러스전자(주)</strong>에서 고성능/고품질의 전자부품을 만나보세요 !
+          <strong>서비스이름(주)</strong>에서 고성능/고품질의 전자부품을 만나보세요 !
         </p>
         <SearchForm />
         <CategoryButtons />
