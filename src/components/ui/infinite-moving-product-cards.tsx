@@ -10,6 +10,27 @@ type Product = {
   thumbnail: string;
 };
 
+const ProductCard: React.FC<{ product: Product }> = ({ product }) => (
+  <motion.div
+    whileHover={{ y: -20 }}
+    className="group/product h-60 w-[350px] max-w-full relative flex-shrink-0"
+  >
+    <Link href={product.link} className="block group-hover/product:shadow-2xl">
+      <Image
+        src={product.thumbnail}
+        height={800}
+        width={800}
+        className="object-cover object-left-top absolute h-full w-full inset-0"
+        alt={product.title}
+      />
+    </Link>
+    <div className="absolute inset-0 h-full w-full opacity-0 group-hover/product:opacity-80 bg-black pointer-events-none"></div>
+    <h2 className="absolute bottom-4 left-4 opacity-0 group-hover/product:opacity-100 text-white">
+      {product.title}
+    </h2>
+  </motion.div>
+);
+
 export const InfiniteMovingProductCards = ({
   products,
   direction = "left",
@@ -94,28 +115,8 @@ export const InfiniteMovingProductCards = ({
         )}
       >
         {products.map((product, idx) => (
-          <li
-            key={`${product.title}-${idx}`}
-            className="w-[350px] max-w-full relative flex-shrink-0"
-          >
-            <motion.div
-              whileHover={{ y: -20 }}
-              className="group/product h-60 w-full relative"
-            >
-              <Link href={product.link} className="block group-hover/product:shadow-2xl">
-                <Image
-                  src={product.thumbnail}
-                  height={800}
-                  width={800}
-                  className="object-cover object-left-top absolute h-full w-full inset-0"
-                  alt={product.title}
-                />
-              </Link>
-              <div className="absolute inset-0 h-full w-full opacity-0 group-hover/product:opacity-80 bg-black pointer-events-none"></div>
-              <h2 className="absolute bottom-4 left-4 opacity-0 group-hover/product:opacity-100 text-white">
-                {product.title}
-              </h2>
-            </motion.div>
+          <li key={`${product.title}-${idx}`}>
+            <ProductCard product={product} />
           </li>
         ))}
       </ul>

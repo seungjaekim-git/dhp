@@ -45,10 +45,7 @@ const footerSections = [
   {
     title: "견적요청",
     items: [
-      { name: "Terms", href: "#" },
-      { name: "Privacy", href: "#" },
-      { name: "Cookies", href: "#" },
-      { name: "Licenses", href: "#" },
+      { name: "견적요청", href: "#" },
     ],
   },
   {

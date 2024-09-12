@@ -1,17 +1,11 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   motion,
   useScroll,
   useTransform,
   useSpring,
-  MotionValue,
-  useMotionValue,
-  animate,
 } from "framer-motion";
-import useMeasure from 'react-use-measure'
-import Image from "next/image";
-import Link from "next/link";
 import { FlipWords } from "@/components/ui/flip-words";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,10 +33,6 @@ type Product = {
   thumbnail: string;
 };
 
-type ProductCardProps = {
-  product: Product;
-  translate: MotionValue<number>;
-};
 
 // Utility functions
 const createSpringConfig = () => ({ stiffness: 200, damping: 30, bounce: 100 });
@@ -85,30 +75,6 @@ const useScrollAnimation = () => {
 };
 
 
-// Components
-const ProductCard: React.FC<ProductCardProps> = ({ product, translate }) => (
-  <motion.div
-    style={{ x: translate }}
-    whileHover={{ y: -20 }}
-    key={product.title}
-    className="group/product h-60 w-[22rem] relative flex-shrink-0"
-  >
-    <Link href={product.link} className="block group-hover/product:shadow-2xl">
-      <Image
-        src={product.thumbnail}
-        height="800"
-        width="800"
-        className="object-cover object-left-top absolute h-full w-full inset-0"
-        alt={product.title}
-      />
-    </Link>
-    <div className="absolute inset-0 h-full w-full opacity-0 group-hover/product:opacity-80 bg-black pointer-events-none"></div>
-    <h2 className="absolute bottom-4 left-4 opacity-0 group-hover/product:opacity-100 text-white">
-      {product.title}
-    </h2>
-  </motion.div>
-);
-
 const Header: React.FC = () => (
   <div className="max-w-7xl overflow-hidden relative mx-auto md:py-10 px-4 w-full left-0 top-0">
     <div className="container">
@@ -129,7 +95,7 @@ const Header: React.FC = () => (
 const SearchForm: React.FC = () => (
   <div className="mt-7 sm:mt-12 mx-auto max-w-xl relative">
     <form>
-      <div className="relative z-10 flex space-x-3 p-3 border bg-background rounded-lg shadow-lg">
+      <div className="relative z-10 flex space-x-3 p-3 border bg-background rounded-lg">
         <div className="flex-[1_0_0%]">
           <Label htmlFor="article" className="sr-only">
             Search article
@@ -155,28 +121,32 @@ const SearchForm: React.FC = () => (
 );
 
 const CategoryButtons: React.FC = () => (
-  <div className="sm:mt-10 flex flex-wrap gap-2 justify-center">
-    <CategoryButton icon={<BriefcaseIcon />} text="LED 드라이버 IC" />
-    <CategoryButton icon={<SettingsIcon />} text="다이오드" />
-    <CategoryButton icon={<HeartIcon />} text="전원관리 IC" />
-    <CategoryButton icon={<LightbulbIcon />} text="커넥터" />
-    <CategoryButton icon={<FlowerIcon />} text="센서" />
-    <CategoryButton icon={<MountainSnow />} text="자동차 인증 부품" />
+
+  <div className="block bg-white z-20 m-4">
+    <div className="sm:mt-10 flex flex-wrap p-3 gap-2 justify-center  mr-2 ">
+      <CategoryButton icon={<BriefcaseIcon />} text="LED 드라이버 IC" />
+      <CategoryButton icon={<SettingsIcon />} text="다이오드" />
+      <CategoryButton icon={<HeartIcon />} text="전원관리 IC" />
+      <CategoryButton icon={<LightbulbIcon />} text="커넥터" />
+      <CategoryButton icon={<FlowerIcon />} text="센서" />
+      <CategoryButton icon={<MountainSnow />} text="자동차 인증 부품" />
+    </div>
   </div>
+
 );
 
 const CategoryButton: React.FC<{ icon: React.ReactNode; text: string }> = ({ icon, text }) => (
   <Button variant={"outline"} className="z-10 hover:bg-black hover:text-white">
-    {React.cloneElement(icon as React.ReactElement, { className: "flex-shrink-0 w-3 h-auto mr-2" })}
+    {React.cloneElement(icon as React.ReactElement, { className: "mr-2" })}
     {text}
   </Button>
 );
 
 export const HeroParallax: React.FC<{ products: Product[] }> = ({ products }) => {
-  const { ref, rotateX, rotateZ, translateY, opacity, translateX, translateXReverse } = useScrollAnimation();
+  const { ref, rotateX, rotateZ, translateY, opacity } = useScrollAnimation();
 
   const rows = [
-    products.slice(0, 5) ,
+    products.slice(0, 5),
     products.slice(5, 10),
     products.slice(10, 15),
   ];
