@@ -4,7 +4,8 @@ import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { InstagramIcon, TwitterIcon, LinkedinIcon, GithubIcon } from 'lucide-react'
+import { LinkedinIcon } from 'lucide-react'
+
 
 const footerSections = [
   {
@@ -30,14 +31,14 @@ const footerSections = [
   {
     title: "파트너사",
     items: [
-      { name: "Macroblock", href: "#", icon: TwitterIcon },
-      { name: "Zowie", href: "#", icon: InstagramIcon },
+      { name: "Macroblock", href: "#", icon: LinkedinIcon },
+      { name: "Zowie", href: "#", icon: LinkedinIcon },
       { name: "XLSEMI", href: "#", icon: LinkedinIcon },
-      { name: "LLT", href: "#", icon: GithubIcon },
-      { name: "Kube Electronics AG", href: "#", icon: GithubIcon },
-      { name: "Morethanall", href: "#", icon: GithubIcon },
-      { name: "Powtech", href: "#", icon: GithubIcon },
-      { name: "GTM", href: "#", icon: GithubIcon },
+      { name: "LLT", href: "#", icon: LinkedinIcon },
+      { name: "Kube Electronics AG", href: "#", icon: LinkedinIcon },
+      { name: "Morethanall", href: "#", icon: LinkedinIcon },
+      { name: "Powtech", href: "#", icon: LinkedinIcon },
+      { name: "GTM", href: "#", icon: LinkedinIcon },
 
 
     ],
@@ -68,7 +69,7 @@ const Footer = () => {
         <div className="flex flex-col lg:flex-row justify-between">
           <div className="lg:w-1/3 mb-8 lg:mb-0">
             <Link href="/" className="flex items-center space-x-2">
-              <Image src="/logo.svg" alt="Logo" width={40} height={40} />
+              <Image src="/svgs/vercel.svg" alt="Logo" width={40} height={40} />
               <span className="font-bold text-xl">YourCompany</span>
             </Link>
             <p className="mt-4 text-sm text-gray-500">
@@ -88,7 +89,7 @@ const Footer = () => {
                         href={item.href}
                         className="text-sm text-gray-500 hover:text-primary flex items-center"
                       >
-                        {item.icon && <item.icon className="h-5 w-5 mr-2" />}
+                        {'icon' in item && item.icon && <item.icon className="h-5 w-5 mr-2" />}
                         {item.name}
                       </Link>
                     </li>

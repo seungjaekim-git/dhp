@@ -23,7 +23,7 @@ const FirstLayer = () => (
   <div className="sticky h-[64px] top-0 z-50 bg-white border-b">
     <div className="container mx-auto px-4 py-2 flex items-center justify-between">
       <Link href="/" className="flex items-center space-x-2">
-        <Image src="/logo.svg" alt="Logo" width={40} height={40} />
+        <Image src="/svgs/vercel.svg" alt="Logo" width={40} height={40} />
         <span className="font-bold text-xl">YourCompany</span>
       </Link>
       <div className="flex items-center space-x-4 flex-1 max-w-md mx-4">
@@ -49,9 +49,8 @@ const FirstLayer = () => (
     </div>
   </div>
 );
-const SecondLayer = ({ isVisible }) => {
-  const [activeCategory, setActiveCategory] = React.useState(null);
-  const [activeStory, setActiveStory] = React.useState(() => {
+const SecondLayer = ({ isVisible }: { isVisible: boolean }) => {
+  const [activeCategory, setActiveCategory] = React.useState<string | null>(null);  const [activeStory, setActiveStory] = React.useState(() => {
     const macroblockItem = resourceItems.find(item => item.title === "Macroblock");
     return macroblockItem ? macroblockItem.partnerStory : null;
   });
@@ -74,7 +73,8 @@ const SecondLayer = ({ isVisible }) => {
               <NavigationMenuTrigger>Product</NavigationMenuTrigger>
               <NavigationMenuContent>
                 <div className="w-screen">
-                  <ProductContent activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
+                  <ProductContent activeCategory={activeCategory || ''} setActiveCategory={setActiveCategory} />
+
                 </div>
               </NavigationMenuContent>
             </NavigationMenuItem>

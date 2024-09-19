@@ -164,14 +164,14 @@ const items = [
 
 
 // Reusable components
-export const CategoryLink = ({ href, title, description }) => (
+export const CategoryLink = ({ href, title, description }: { href: string, title: string, description: string }) => (
     <Link href={href} className="p-2 rounded-md hover:bg-gray-100">
         <h3 className="dark:text-white text-neutral-950">{title}</h3>
         <p className="text-neutral-500 text-sm">{description}</p>
     </Link>
 );
 
-export const ResourceLink = ({ item, onMouseEnter }) => (
+export const ResourceLink = ({ item, onMouseEnter }: { item: any, onMouseEnter: () => void }) => (
     <Link href="#" className="group block" onMouseEnter={onMouseEnter}>
         <div className="flex items-center">
             <Image src="/icons/gtm_icon.svg" alt="icon" width="50" height="50" className="mr-3" />
@@ -183,7 +183,7 @@ export const ResourceLink = ({ item, onMouseEnter }) => (
     </Link>
 );
 
-export const SupportLink = ({ title, description }) => (
+export const SupportLink = ({ title, description }: { title: string, description: string }) => (
     <span className="block hover:dark:bg-neutral-900 hover:bg-neutral-100 p-3 rounded-md transition-colors w-fit">
         <h3 className="dark:text-white text-neutral-950 flex items-center gap-1">
             {title}
@@ -216,7 +216,7 @@ export const CompanyIntroContent = () => (
     </div>
 );
 
-export const ProductContent = ({ activeCategory, setActiveCategory }) => (
+export const ProductContent = ({ activeCategory, setActiveCategory }: { activeCategory: string, setActiveCategory: (category: string) => void }) => (
     <div className="flex">
         <div className="w-1/4 bg-gray-100">
             {items.map((item) => (
@@ -228,11 +228,11 @@ export const ProductContent = ({ activeCategory, setActiveCategory }) => (
         <div className="w-3/4 bg-white p-4">
             {activeCategory && (
                 <div className="grid grid-cols-3 gap-4">
-                    {Object.entries(items.find(item => item.title === activeCategory).content).map(([category, subItems]) => (
+                    {Object.entries(items.find(item => item.title === activeCategory)?.content || []).map(([category, subItems]) => (
                         <div key={category} className="space-y-4">
                             <h2 className="text-lg font-bold">{category}</h2>
                             <div className="space-y-2">
-                                {subItems.map((subItem) => (
+                                {subItems.map((subItem: any) => (
                                     <Link key={subItem.title} href={`#${subItem.title.toLowerCase().replace(' ', '-')}`} className="flex items-center space-x-2 rounded-md p-2 hover:bg-gray-100">
                                         <span className="h-6 w-6 flex-shrink-0 text-gray-400"></span>
                                         <span className="text-sm">{subItem.title}</span>
@@ -247,7 +247,7 @@ export const ProductContent = ({ activeCategory, setActiveCategory }) => (
     </div>
 );
 
-export const PartnerContent = ({ activeStory, setActiveStory }) => (
+export const PartnerContent = ({ activeStory, setActiveStory }: { activeStory: any, setActiveStory: (story: any) => void }) => (
     <div className="grid grid-cols-3 gap-6">
         <div className="col-span-2 grid grid-cols-2 gap-6">
             {resourceItems.map((item) => (
