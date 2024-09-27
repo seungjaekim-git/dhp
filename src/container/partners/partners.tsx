@@ -26,6 +26,8 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
+
+// TODO : React Alice Carousel 적용
 export default function PartnersSection() {
     return (
         <>

@@ -1,64 +1,57 @@
-"use client"
-
-import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import BrandOverview from '@/app/partners/BrandOverview';
-import BrandProducts from '@/app/partners/BrandProducts';
-import BrandIntroduction from '@/app/partners/BrandIntroduction';
-import BrandNews from '@/app/partners/BrandNews';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 
 const PartnersPage = () => {
   return (
-    <div className="relative">
-      <Tabs defaultValue="overview" className="w-full">
-        <div className="sticky top-0 z-10 bg-white shadow-md">
-          <div className="container mx-auto">
-            <TabsList className="w-full flex justify-between bg-gray-100 p-1 rounded-lg">
-              <TabsTrigger value="overview" className="flex-1 py-2 px-4 rounded-md transition-all data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm">개요</TabsTrigger>
-              <TabsTrigger value="products" className="flex-1 py-2 px-4 rounded-md transition-all data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm">상품</TabsTrigger>
-              <TabsTrigger value="introduction" className="flex-1 py-2 px-4 rounded-md transition-all data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm">소개</TabsTrigger>
-              <TabsTrigger value="news" className="flex-1 py-2 px-4 rounded-md transition-all data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm">뉴스</TabsTrigger>
-            </TabsList>
-          </div>
-        </div>
-        
-        <div className="container mx-auto px-4 mt-6">
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* 브랜드 소개 카드 */}
-            <div className="w-full md:w-1/4">
-              <div className="bg-white shadow-lg rounded-lg p-6">
-                <h2 className="text-xl font-bold mb-4">아크롱스튜디오</h2>
-                <div className="flex items-center mb-4">
-                  <span className="text-blue-500 font-bold">4.8</span>
-                  <span className="text-gray-500 ml-2">· 리뷰 18</span>
-                </div>
-                <button className="bg-blue-500 text-white py-2 px-4 rounded-md w-full">상담신청</button>
-                <ul className="mt-4 space-y-2">
-                  <li>여자친구와 같이</li>
-                  <li>사진과 장소가 동일한지 확인</li>
-                  <li>친절한 상담</li>
-                </ul>
-              </div>
-            </div>
+    <div className="container mx-auto px-4 py-8">
+      {/* 파트너 소개 문구 */}
+      <h1 className="text-3xl font-bold mb-6 text-center">우리의 소중한 파트너사</h1>
+      <p className="text-lg text-gray-600 mb-8 text-center">
+        혁신과 성장을 함께 이뤄나가는 파트너들을 소개합니다.
+      </p>
 
-            {/* 메인 콘텐츠 영역 */}
-            <div className="w-full md:w-3/4">
-              <TabsContent value="overview">
-                <BrandOverview />
-              </TabsContent>
-              <TabsContent value="products">
-                <BrandProducts />
-              </TabsContent>
-              <TabsContent value="introduction">
-                <BrandIntroduction />
-              </TabsContent>
-              <TabsContent value="news">
-                <BrandNews />
-              </TabsContent>
+      {/* 뉴스 캐러셀 */}
+      <Card className="mb-12">
+        <CardHeader>
+          <CardTitle>파트너사 최신 소식</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Carousel>
+            <CarouselContent>
+              {/* 여기에 실제 뉴스 아이템을 추가하세요 */}
+              <CarouselItem>뉴스 아이템 1</CarouselItem>
+              <CarouselItem>뉴스 아이템 2</CarouselItem>
+              <CarouselItem>뉴스 아이템 3</CarouselItem>
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
+        </CardContent>
+      </Card>
+
+      {/* 파트너사 목록 */}
+      <h2 className="text-2xl font-semibold mb-6">파트너사 목록</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* 파트너사 카드 예시 */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <div className="bg-blue-500 text-white p-2 rounded-full mr-3">
+                {/* 아이콘 */}
+              </div>
+              파트너사 이름
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-600 mb-4">파트너사에 대한 간단한 설명입니다.</p>
+            <div className="flex justify-between text-sm text-gray-500">
+              <span>설립연도: 2010년</span>
+              <span>직원 수: 100+</span>
             </div>
-          </div>
-        </div>
-      </Tabs>
+          </CardContent>
+        </Card>
+        {/* 추가 파트너사 카드들... */}
+      </div>
     </div>
   );
 };
