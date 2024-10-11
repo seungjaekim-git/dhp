@@ -1,0 +1,282 @@
+[
+  {
+    "id": 1,
+    "name": "샘플 제품 1",
+    "price": 10000,
+    "description": "이것은 샘플 제품 1의 설명입니다.",
+    "image": "https://example.com/sample1.jpg"
+  },
+  {
+    "id": 2,
+    "name": "샘플 제품 2",
+    "price": 20000,
+    "description": "이것은 샘플 제품 2의 설명입니다.",
+    "image": "https://example.com/sample2.jpg"
+  },
+  {
+    "id": 3,
+    "name": "샘플 제품 3",
+    "price": 30000,
+    "description": "이것은 샘플 제품 3의 설명입니다.",
+    "image": "https://example.com/sample3.jpg"
+  },
+  {
+    "id": 4,
+    "name": "샘플 제품 4",
+    "price": 40000,
+    "description": "이것은 샘플 제품 4의 설명입니다.",
+    "image": "https://example.com/sample4.jpg"
+  },
+  {
+    "id": 5,
+    "name": "샘플 제품 5",
+    "price": 50000,
+    "description": "이것은 샘플 제품 5의 설명입니다.",
+    "image": "https://example.com/sample5.jpg"
+  },
+  {
+    "id": 6,
+    "name": "샘플 제품 6",
+    "price": 60000,
+    "description": "이것은 샘플 제품 6의 설명입니다.",
+    "image": "https://example.com/sample6.jpg"
+  },
+  {
+    "id": 7,
+    "name": "샘플 제품 7",
+    "price": 70000,
+    "description": "이것은 샘플 제품 7의 설명입니다.",
+    "image": "https://example.com/sample7.jpg"
+  },
+  {
+    "id": 8,
+    "name": "샘플 제품 8",
+    "price": 80000,
+    "description": "이것은 샘플 제품 8의 설명입니다.",
+    "image": "https://example.com/sample8.jpg"
+  },
+  {
+    "id": 9,
+    "name": "샘플 제품 9",
+    "price": 90000,
+    "description": "이것은 샘플 제품 9의 설명입니다.",
+    "image": "https://example.com/sample9.jpg"
+  },
+  {
+    "id": 10,
+    "name": "샘플 제품 10",
+    "price": 100000,
+    "description": "이것은 샘플 제품 10의 설명입니다.",
+    "image": "https://example.com/sample10.jpg"
+  },
+  {
+    "id": 11,
+    "name": "샘플 제품 11",
+    "price": 110000,
+    "description": "이것은 샘플 제품 11의 설명입니다.",
+    "image": "https://example.com/sample11.jpg"
+  },
+  {
+    "id": 12,
+    "name": "샘플 제품 12",
+    "price": 120000,
+    "description": "이것은 샘플 제품 12의 설명입니다.",
+    "image": "https://example.com/sample12.jpg"
+  },
+  {
+    "id": 13,
+    "name": "샘플 제품 13",
+    "price": 130000,
+    "description": "이것은 샘플 제품 13의 설명입니다.",
+    "image": "https://example.com/sample13.jpg"
+  },
+  {
+    "id": 14,
+    "name": "샘플 제품 14",
+    "price": 140000,
+    "description": "이것은 샘플 제품 14의 설명입니다.",
+    "image": "https://example.com/sample14.jpg"
+  },
+  {
+    "id": 15,
+    "name": "샘플 제품 15",
+    "price": 150000,
+    "description": "이것은 샘플 제품 15의 설명입니다.",
+    "image": "https://example.com/sample15.jpg"
+  },
+  {
+    "id": 16,
+    "name": "샘플 제품 16",
+    "price": 160000,
+    "description": "이것은 샘플 제품 16의 설명입니다.",
+    "image": "https://example.com/sample16.jpg"
+  },
+  {
+    "id": 17,
+    "name": "샘플 제품 17",
+    "price": 170000,
+    "description": "이것은 샘플 제품 17의 설명입니다.",
+    "image": "https://example.com/sample17.jpg"
+  },
+  {
+    "id": 18,
+    "name": "샘플 제품 18",
+    "price": 180000,
+    "description": "이것은 샘플 제품 18의 설명입니다.",
+    "image": "https://example.com/sample18.jpg"
+  },
+  {
+    "id": 19,
+    "name": "샘플 제품 19",
+    "price": 190000,
+    "description": "이것은 샘플 제품 19의 설명입니다.",
+    "image": "https://example.com/sample19.jpg"
+  },
+  {
+    "id": 20,
+    "name": "샘플 제품 20",
+    "price": 200000,
+    "description": "이것은 샘플 제품 20의 설명입니다.",
+    "image": "https://example.com/sample20.jpg"
+  },
+  {
+    "id": 21,
+    "name": "샘플 제품 21",
+    "price": 210000,
+    "description": "이것은 샘플 제품 21의 설명입니다.",
+    "image": "https://example.com/sample21.jpg"
+  },
+  {
+    "id": 22,
+    "name": "샘플 제품 22",
+    "price": 220000,
+    "description": "이것은 샘플 제품 22의 설명입니다.",
+    "image": "https://example.com/sample22.jpg"
+  },
+  {
+    "id": 23,
+    "name": "샘플 제품 23",
+    "price": 230000,
+    "description": "이것은 샘플 제품 23의 설명입니다.",
+    "image": "https://example.com/sample23.jpg"
+  },
+  {
+    "id": 24,
+    "name": "샘플 제품 24",
+    "price": 240000,
+    "description": "이것은 샘플 제품 24의 설명입니다.",
+    "image": "https://example.com/sample24.jpg"
+  },
+  {
+    "id": 25,
+    "name": "샘플 제품 25",
+    "price": 250000,
+    "description": "이것은 샘플 제품 25의 설명입니다.",
+    "image": "https://example.com/sample25.jpg"
+  },
+  {
+    "id": 26,
+    "name": "샘플 제품 26",
+    "price": 260000,
+    "description": "이것은 샘플 제품 26의 설명입니다.",
+    "image": "https://example.com/sample26.jpg"
+  },
+  {
+    "id": 27,
+    "name": "샘플 제품 27",
+    "price": 270000,
+    "description": "이것은 샘플 제품 27의 설명입니다.",
+    "image": "https://example.com/sample27.jpg"
+  },
+  {
+    "id": 28,
+    "name": "샘플 제품 28",
+    "price": 280000,
+    "description": "이것은 샘플 제품 28의 설명입니다.",
+    "image": "https://example.com/sample28.jpg"
+  },
+  {
+    "id": 29,
+    "name": "샘플 제품 29",
+    "price": 290000,
+    "description": "이것은 샘플 제품 29의 설명입니다.",
+    "image": "https://example.com/sample29.jpg"
+  },
+  {
+    "id": 30,
+    "name": "샘플 제품 30",
+    "price": 300000,
+    "description": "이것은 샘플 제품 30의 설명입니다.",
+    "image": "https://example.com/sample30.jpg"
+  },
+  {
+    "id": 31,
+    "name": "샘플 제품 31",
+    "price": 310000,
+    "description": "이것은 샘플 제품 31의 설명입니다.",
+    "image": "https://example.com/sample31.jpg"
+  },
+  {
+    "id": 32,
+    "name": "샘플 제품 32",
+    "price": 320000,
+    "description": "이것은 샘플 제품 32의 설명입니다.",
+    "image": "https://example.com/sample32.jpg"
+  },
+  {
+    "id": 33,
+    "name": "샘플 제품 33",
+    "price": 330000,
+    "description": "이것은 샘플 제품 33의 설명입니다.",
+    "image": "https://example.com/sample33.jpg"
+  },
+  {
+    "id": 34,
+    "name": "샘플 제품 34",
+    "price": 340000,
+    "description": "이것은 샘플 제품 34의 설명입니다.",
+    "image": "https://example.com/sample34.jpg"
+  },
+  {
+    "id": 35,
+    "name": "샘플 제품 35",
+    "price": 350000,
+    "description": "이것은 샘플 제품 35의 설명입니다.",
+    "image": "https://example.com/sample35.jpg"
+  },
+  {
+    "id": 36,
+    "name": "샘플 제품 36",
+    "price": 360000,
+    "description": "이것은 샘플 제품 36의 설명입니다.",
+    "image": "https://example.com/sample36.jpg"
+  },
+  {
+    "id": 37,
+    "name": "샘플 제품 37",
+    "price": 370000,
+    "description": "이것은 샘플 제품 37의 설명입니다.",
+    "image": "https://example.com/sample37.jpg"
+  },
+  {
+    "id": 38,
+    "name": "샘플 제품 38",
+    "price": 380000,
+    "description": "이것은 샘플 제품 38의 설명입니다.",
+    "image": "https://example.com/sample38.jpg"
+  },
+  {
+    "id": 39,
+    "name": "샘플 제품 39",
+    "price": 390000,
+    "description": "이것은 샘플 제품 39의 설명입니다.",
+    "image": "https://example.com/sample39.jpg"
+  },
+  {
+    "id": 40,
+    "name": "샘플 제품 40",
+    "price": 400000,
+    "description": "이것은 샘플 제품 40의 설명입니다.",
+    "image": "https://example.com/sample40.jpg"
+  }
+]

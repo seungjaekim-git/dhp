@@ -19,7 +19,7 @@ export default function RootLayout({
     <html>
       <body>
         <TwoLayerNavigation/>
-        <DynamicBreadcrumb />
+        {/* <DynamicBreadcrumb /> */}
         {children}
         <Footer />
       </body>

@@ -35,8 +35,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { DataTablePagination } from "@/components/data-table/data-table-pagination"
-import { DataTableToolbar } from "@/components/data-table/data-table-toolbar"
+// import { DataTablePagination } from "@/components/data-table/data-table-pagination"
+// import { DataTableToolbar } from "@/components/data-table/data-table-toolbar"
 
 const LEDDriverPage = () => {
   const [sorting, setSorting] = useState<SortingState>([])
@@ -256,7 +256,7 @@ const LEDDriverPage = () => {
       <h1 className="text-3xl font-bold mb-6">LED 드라이버 IC</h1>
       
       <div className="w-full">
-        <DataTableToolbar table={table} />
+        {/* <DataTableToolbar table={table} />
         <div className="rounded-md border overflow-hidden">
           <div className="overflow-x-auto">
             <Table>
@@ -301,7 +301,7 @@ const LEDDriverPage = () => {
             </Table>
           </div>
         </div>
-        <DataTablePagination table={table} />
+        <DataTablePagination table={table} /> */}
       </div>
     </div>
   );
