@@ -13,8 +13,8 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue, SelectLabel, SelectGroup } from "@/components/ui/select";
 
 import { CompanyIntroContent, ProductContent, PartnerContent, SupportContent } from './NavigationContents';
 import { resourceItems } from './NavigationContents';
@@ -33,57 +33,53 @@ const FirstLayer = () => (
         </div>
       </div>
       <div className="flex items-center space-x-4">
-        <Button variant="outline">Login</Button>
-        <NavigationMenu>
-          <NavigationMenuItem>
-            <NavigationMenuTrigger>
-             Language
-            </NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <NavigationMenuLink>English</NavigationMenuLink>
-              <NavigationMenuLink>한국어</NavigationMenuLink>
-            </NavigationMenuContent>
-          </NavigationMenuItem>
-        </NavigationMenu>
+        <Select>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="Language" />
+          </SelectTrigger>
+          <SelectContent>
+          <SelectGroup>
+            <SelectLabel>Language</SelectLabel>
+            <SelectItem value="en" className="w-[140px]">English</SelectItem>
+            <SelectItem value="ko" className="w-[140px]">한국어</SelectItem>
+          </SelectGroup>
+          </SelectContent>
+        </Select>
       </div>
     </div>
   </div>
 );
 const SecondLayer = ({ isVisible }: { isVisible: boolean }) => {
-  const [activeCategory, setActiveCategory] = React.useState<string | null>(null);  const [activeStory, setActiveStory] = React.useState(() => {
+  const [activeCategory, setActiveCategory] = React.useState<string | null>(null);  
+  const [activeStory, setActiveStory] = React.useState(() => {
     const macroblockItem = resourceItems.find(item => item.title === "Macroblock");
     return macroblockItem ? macroblockItem.partnerStory : null;
   });
 
   return (
     <div className={`sticky bg-white top-[64px] border-b transition-all duration-300 ${isVisible ? 'opacity-100 translate-y-0 z-50' : 'opacity-0 -translate-y-full'}`}>
-      <div className="container mx-auto px-4">
+      <div className="container w-full mx-auto px-4">
         <NavigationMenu>
           <NavigationMenuList>
             <NavigationMenuItem>
               <NavigationMenuTrigger>회사소개</NavigationMenuTrigger>
 
-              <NavigationMenuContent>
-                <div className="w-screen">
-                  <CompanyIntroContent />
-                </div>
+              <NavigationMenuContent className="w-screen">
+                <CompanyIntroContent/>
+                
               </NavigationMenuContent>
             </NavigationMenuItem>
             <NavigationMenuItem>
               <NavigationMenuTrigger>Product</NavigationMenuTrigger>
               <NavigationMenuContent>
-                <div className="w-screen">
+                
                   <ProductContent activeCategory={activeCategory || ''} setActiveCategory={setActiveCategory} />
-
-                </div>
               </NavigationMenuContent>
             </NavigationMenuItem>
             <NavigationMenuItem>
               <NavigationMenuTrigger>파트너사</NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <div className="w-screen">
-                  <PartnerContent activeStory={activeStory} setActiveStory={setActiveStory} />
-                </div>
+              <NavigationMenuContent>                  
+                <PartnerContent activeStory={activeStory} setActiveStory={setActiveStory} />
               </NavigationMenuContent>
             </NavigationMenuItem>
             <NavigationMenuItem>
@@ -96,9 +92,7 @@ const SecondLayer = ({ isVisible }: { isVisible: boolean }) => {
             <NavigationMenuItem>
               <NavigationMenuTrigger>고객 지원</NavigationMenuTrigger>
               <NavigationMenuContent>
-                <div className="w-screen">
                   <SupportContent />
-                </div>
               </NavigationMenuContent>
             </NavigationMenuItem>
           </NavigationMenuList>
@@ -112,9 +106,12 @@ export default function TwoLayerNavigation() {
   const [showSecondLayer, setShowSecondLayer] = React.useState(true);
   const [lastScrollY, setLastScrollY] = React.useState(0);
   const [hasScrolledDown, setHasScrolledDown] = React.useState(false);
+  const [isNavigationFocused, setIsNavigationFocused] = React.useState(false);
 
   React.useEffect(() => {
     const handleScroll = () => {
+      if (isNavigationFocused) return;
+      
       const currentScrollY = window.scrollY;
       
       if (currentScrollY < lastScrollY) {
@@ -134,12 +131,15 @@ export default function TwoLayerNavigation() {
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY, hasScrolledDown]);
+  }, [lastScrollY, hasScrolledDown, isNavigationFocused]);
 
   return (
-    <>
+    <div 
+      onMouseEnter={() => setIsNavigationFocused(true)}
+      onMouseLeave={() => setIsNavigationFocused(false)}
+    >
       <FirstLayer />
       <SecondLayer isVisible={showSecondLayer} />
-    </>
+    </div>
   );
 }

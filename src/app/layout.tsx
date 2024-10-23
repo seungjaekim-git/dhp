@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
+
 import Footer from "@/container/footer/footer"
 import TwoLayerNavigation from "@/container/navbar/navigationBar"
-import DynamicBreadcrumb from "@/container/breadcrumb/breadcrumb"
+
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -18,7 +19,7 @@ export default function RootLayout({
   return (
     <html>
       <body>
-        <TwoLayerNavigation/>
+        <TwoLayerNavigation />
         {/* <DynamicBreadcrumb /> */}
         {children}
         <Footer />

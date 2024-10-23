@@ -12,14 +12,33 @@ const items = [
     {
       title: "LED Driver IC",
       content: {
-        "LED Driver IC": [
-          { title: "Tailwind CSS", icon: "tailwind" },
-          { title: "Bootstrap", icon: "bootstrap" },
-          { title: "Angular", icon: "angular" },
-          { title: "React", icon: "react" },
-          { title: "Vuejs", icon: "vue" },
-          { title: "React Native", icon: "react-native" },
-          { title: "Svelte", icon: "svelte" },
+        "LED Display ": [
+          { title: "mini/micro LED", icon: "tailwind" },
+          { title: "SRAM S-PWM", icon: "bootstrap" },
+          { title: "MOSFET", icon: "angular" },
+          { title: "S-PWM", icon: "react" },
+          { title: "Multi-Function", icon: "vue" },
+          { title: "Classic", icon: "react-native" },
+        ],
+        "Automotive Lighting and Display": [
+          { title: "Automotive Lighting", icon: "tailwind" },
+          { title: "Automotive FALD Backlight Display", icon: "bootstrap" },
+          { title: "Automotive Interactive LED Matrix Display", icon: "bootstrap" },
+        ],
+        "Full-Array Local Dimming": [
+          { title: "FALD Backlight", icon: "tailwind" },
+        ],
+        "RGB Lighting": [
+          { title: "RGB LED Driver", icon: "tailwind" },
+          { title: "AMUSE LED Driver", icon: "bootstrap" },
+        
+        ],
+        "DC/DC": [
+          { title: "DC/DC Converter", icon: "tailwind" },
+          { title: "DC/DC Controller", icon: "bootstrap" },
+        ],
+        "Linear Regulator": [
+          { title: "All-Ways-On™ LED Driver CSS", icon: "tailwind" },
         ],
       },
     },
@@ -65,6 +84,33 @@ const items = [
       title: "센서",
       content: {
         "센서": [
+          { title: "Tailwind CSS", icon: "tailwind" },
+          { title: "Bootstrap", icon: "bootstrap" },
+          { title: "Angular", icon: "angular" },
+          { title: "React", icon: "react" },
+          { title: "Vuejs", icon: "vue" },
+          { title: "React Native", icon: "react-native" },
+          { title: "Svelte", icon: "svelte" },
+        ],
+      },
+    },{
+      title: "케이블",
+      content: {
+        "케이블": [
+          { title: "Tailwind CSS", icon: "tailwind" },
+          { title: "Bootstrap", icon: "bootstrap" },
+          { title: "Angular", icon: "angular" },
+          { title: "React", icon: "react" },
+          { title: "Vuejs", icon: "vue" },
+          { title: "React Native", icon: "react-native" },
+          { title: "Svelte", icon: "svelte" },
+        ],
+      }
+    },
+      {
+      title: "케이블",
+      content: {
+        "케이블": [
           { title: "Tailwind CSS", icon: "tailwind" },
           { title: "Bootstrap", icon: "bootstrap" },
           { title: "Angular", icon: "angular" },
@@ -166,8 +212,8 @@ const items = [
 // Reusable components
 export const CategoryLink = ({ href, title, description }: { href: string, title: string, description: string }) => (
     <Link href={href} className="p-2 rounded-md hover:bg-gray-100">
-        <h3 className="dark:text-white text-neutral-950">{title}</h3>
-        <p className="text-neutral-500 text-sm">{description}</p>
+        <h3 className="dark:text-white text-neutral-950 text-xs sm:text-sm md:text-base">{title}</h3>
+        <p className="text-neutral-500 text-xs sm:text-sm">{description}</p>
     </Link>
 );
 
@@ -176,8 +222,8 @@ export const ResourceLink = ({ item, onMouseEnter }: { item: any, onMouseEnter: 
         <div className="flex items-center">
             <Image src="/icons/gtm_icon.svg" alt="icon" width="50" height="50" className="mr-3" />
             <div>
-                <div className="font-semibold text-gray-900 group-hover:text-blue-500">{item.title}</div>
-                <p className="mt-1 text-sm text-gray-500">{item.description}</p>
+                <div className="font-semibold text-gray-900 group-hover:text-blue-500 text-xs sm:text-sm md:text-base">{item.title}</div>
+                <p className="mt-1 text-xs sm:text-sm text-gray-500">{item.description}</p>
             </div>
         </div>
     </Link>
@@ -185,22 +231,22 @@ export const ResourceLink = ({ item, onMouseEnter }: { item: any, onMouseEnter: 
 
 export const SupportLink = ({ title, description }: { title: string, description: string }) => (
     <span className="block hover:dark:bg-neutral-900 hover:bg-neutral-100 p-3 rounded-md transition-colors w-fit">
-        <h3 className="dark:text-white text-neutral-950 flex items-center gap-1">
+        <h3 className="dark:text-white text-neutral-950 flex items-center gap-1 text-xs sm:text-sm md:text-base">
             {title}
             <svg viewBox="0 0 12 12" width="10px" xmlns="http://www.w3.org/2000/svg" className="transition-all duration-100 dark:fill-neutral-500 fill-neutral-900">
                 <path d="M11 9.283V1H2.727v1.44h5.83L1 9.99 2.01 11l7.556-7.55v5.833H11Z" />
             </svg>
         </h3>
-        <p className="text-neutral-500 text-sm">{description}</p>
+        <p className="text-neutral-500 text-xs sm:text-sm">{description}</p>
     </span>
 );
 
 export const CompanyIntroContent = () => (
-    <div className="flex gap-4 p-4 w-full h-full justify-center">
+    <div className="flex w-full gap-4 p-4 justify-center overflow-y-auto max-h-[80vh]">
         <NavigationMenuLink asChild>
             <a className="flex w-[250px] select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md" href="/">
-                <div className="mb-2 mt-4 text-lg font-medium">(주)대한플러스전자</div>
-                <p className="text-sm leading-tight text-muted-foreground">
+                <div className="mb-2 mt-4 text-sm sm:text-base md:text-lg font-medium">(주)대한플러스전자</div>
+                <p className="text-xs sm:text-sm leading-tight text-muted-foreground">
                     Since 1997 <br />
                     With 1000+ Partners <br />
                     Over 10000+ Products <br />
@@ -217,25 +263,25 @@ export const CompanyIntroContent = () => (
 );
 
 export const ProductContent = ({ activeCategory, setActiveCategory }: { activeCategory: string, setActiveCategory: (category: string) => void }) => (
-    <div className="flex">
-        <div className="w-1/4 bg-gray-100">
+    <div className="flex overflow-y-auto max-h-[80vh]">
+        <div className="w-1/5 lg:w-1/4 bg-gray-100">
             {items.map((item) => (
-                <div key={item.title} className="p-4 cursor-pointer hover:bg-gray-200" onMouseEnter={() => setActiveCategory(item.title)}>
+                <div key={item.title} className="p-4 cursor-pointer hover:bg-gray-200 text-xs sm:text-sm md:text-base" onMouseEnter={() => setActiveCategory(item.title)}>
                     {item.title}
                 </div>
             ))}
         </div>
-        <div className="w-3/4 bg-white p-4">
+        <div className="w-4/5 lg:w-4/5 bg-white p-4">
             {activeCategory && (
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
                     {Object.entries(items.find(item => item.title === activeCategory)?.content || []).map(([category, subItems]) => (
                         <div key={category} className="space-y-4">
-                            <h2 className="text-lg font-bold">{category}</h2>
+                            <h2 className="text-xs sm:text-sm font-bold">{category}</h2>
                             <div className="space-y-2">
                                 {subItems.map((subItem: any) => (
                                     <Link key={subItem.title} href={`#${subItem.title.toLowerCase().replace(' ', '-')}`} className="flex items-center space-x-2 rounded-md p-2 hover:bg-gray-100">
-                                        <span className="h-6 w-6 flex-shrink-0 text-gray-400"></span>
-                                        <span className="text-sm">{subItem.title}</span>
+                                        <span className="h-6 w-6 sm:w-1  flex-shrink-0 text-gray-400"></span>
+                                        <span className="text-xs">{subItem.title}</span>
                                     </Link>
                                 ))}
                             </div>
@@ -248,18 +294,18 @@ export const ProductContent = ({ activeCategory, setActiveCategory }: { activeCa
 );
 
 export const PartnerContent = ({ activeStory, setActiveStory }: { activeStory: any, setActiveStory: (story: any) => void }) => (
-    <div className="grid grid-cols-3 gap-6">
+    <div className="grid grid-cols-3 gap-6 overflow-y-auto max-h-[80vh]">
         <div className="col-span-2 grid grid-cols-2 gap-6">
             {resourceItems.map((item) => (
                 <ResourceLink key={item.title} item={item} onMouseEnter={() => setActiveStory(item.partnerStory)} />
             ))}
         </div>
         <div className="col-span-1">
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">파트너사 개요</h3>
+            <h3 className="text-xs sm:text-sm font-semibold text-gray-900 mb-4">파트너사 개요</h3>
             <div className="bg-gray-100 rounded-lg p-4">
                 <img src={activeStory.image} alt="Customer" className="w-full h-32 object-cover rounded-lg mb-4" />
-                <p className="text-sm text-gray-600 mb-2">{activeStory.text}</p>
-                <Link href={activeStory.learnMoreLink} className="text-sm text-blue-500 hover:underline">
+                <p className="text-xs sm:text-sm text-gray-600 mb-2">{activeStory.text}</p>
+                <Link href={activeStory.learnMoreLink} className="text-xs sm:text-sm text-blue-500 hover:underline">
                     Learn more →
                 </Link>
             </div>
@@ -268,7 +314,7 @@ export const PartnerContent = ({ activeStory, setActiveStory }: { activeStory: a
 );
 
 export const SupportContent = () => (
-    <div className="flex justify-center">
+    <div className="flex justify-center overflow-y-auto max-h-[80vh]">
         {[
             {
                 title: '문의', items: [
@@ -290,7 +336,7 @@ export const SupportContent = () => (
             },
         ].map((section, index) => (
             <div key={index} className="p-4 border-r dark:border-neutral-800">
-                <div className="text-sm dark:text-neutral-500 text-neutral-400 px-3">{section.title}</div>
+                <div className="text-xs sm:text-sm dark:text-neutral-500 text-neutral-400 px-3">{section.title}</div>
                 {section.items.map((item, itemIndex) => (
                     <SupportLink key={itemIndex} title={item.title} description={item.description} />
                 ))}
