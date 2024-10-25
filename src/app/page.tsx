@@ -4,6 +4,9 @@ import React from "react";
 import { HeroParallax } from "@/components/ui/hero-parrallax";
 import Feature from "@/container/features/features"
 import Partners from "@/container/partners/partners";
+
+import { ThreeDCard } from "@/components/custom/3d-card";
+
 export default function Home() {
   const products = [
     {
@@ -106,6 +109,7 @@ export default function Home() {
       <HeroParallax products={products}/>
       <Feature></Feature>
       <Partners></Partners>
+      <ThreeDCard></ThreeDCard>
     </div>
     
   );
