@@ -20,8 +20,8 @@ import { CompanyIntroContent, ProductContent, PartnerContent, SupportContent } f
 import { resourceItems } from './NavigationContents';
 
 const FirstLayer = () => (
-  <div className="sticky h-[64px] top-0 z-50 bg-white border-b">
-    <div className="container mx-auto px-4 py-2 flex items-center justify-between">
+  <div className="w-full h-[64px] bg-white border-b">
+    <div className="container py-2 flex items-center justify-between">
       <Link href="/" className="flex items-center space-x-2">
         <Image src="/svgs/vercel.svg" alt="Logo" width={40} height={40} />
         <span className="font-bold text-xl">YourCompany</span>
@@ -57,8 +57,7 @@ const SecondLayer = ({ isVisible }: { isVisible: boolean }) => {
   });
 
   return (
-    <div className={`sticky bg-white top-[64px] border-b transition-all duration-300 ${isVisible ? 'opacity-100 translate-y-0 z-50' : 'opacity-0 -translate-y-full'}`}>
-      <div className="container w-full mx-auto px-4">
+    <div className={`flex w-full items-center justify-center bg-white top-[64px] border-b transition-all duration-300 ${isVisible ? 'opacity-100 translate-y-0 z-50' : 'opacity-0 -translate-y-full'}`}>
         <NavigationMenu>
           <NavigationMenuList>
             <NavigationMenuItem>
@@ -71,7 +70,7 @@ const SecondLayer = ({ isVisible }: { isVisible: boolean }) => {
             </NavigationMenuItem>
             <NavigationMenuItem>
               <NavigationMenuTrigger>Product</NavigationMenuTrigger>
-              <NavigationMenuContent>
+              <NavigationMenuContent className="w-screen">
                 
                   <ProductContent activeCategory={activeCategory || ''} setActiveCategory={setActiveCategory} />
               </NavigationMenuContent>
@@ -97,7 +96,6 @@ const SecondLayer = ({ isVisible }: { isVisible: boolean }) => {
             </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
-      </div>
     </div>
   );
 };
@@ -137,6 +135,7 @@ export default function TwoLayerNavigation() {
     <div 
       onMouseEnter={() => setIsNavigationFocused(true)}
       onMouseLeave={() => setIsNavigationFocused(false)}
+      className="sticky top-0 z-50 flex-col min-w-screen mx-auto items-center justify-center"
     >
       <FirstLayer />
       <SecondLayer isVisible={showSecondLayer} />

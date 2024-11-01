@@ -18,11 +18,13 @@ export default function RootLayout({
 }>) {
   return (
     <html>
-      <body>
+      <body className="flex-col min-h-screen container flex mx-auto">
+        <div className="flex-grow w-full h-full items-center justify-center">
         <TwoLayerNavigation />
         {/* <DynamicBreadcrumb /> */}
         {children}
         <Footer />
+        </div>
       </body>
     </html>
   );

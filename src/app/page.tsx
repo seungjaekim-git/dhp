@@ -105,7 +105,7 @@ export default function Home() {
   
   return (
 
-    <div id="Herosection" className="container p-4">
+    <div id="Herosection" className="container">
       <HeroParallax products={products}/>
       <Feature></Feature>
       <Partners></Partners>

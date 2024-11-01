@@ -45,9 +45,14 @@ const CarouselOrientation: React.FC<CarouselProps> = ({
                     <SliderThumbItem 
                         key={id} 
                         index={index} 
-                        className="bg-transparent hover:scale-110 hover:shadow-lg active:scale-95 transition-all duration-300 cursor-pointer rounded-lg p-2 hover:bg-white/10 active:bg-white/20"
+                        className="flex items-center justify-center bg-transparent hover:scale-110 hover:shadow-lg active:scale-95 transition-all duration-300 cursor-pointer rounded-lg p-2 hover:bg-white/10 active:bg-white/20"
                     >
-                        {content}
+                        <div className="flex items-center justify-center">
+                            {content}
+                            <span className="absolute group-hover:flex transition-all duration-300 text-black font-bold">
+                                {id}
+                            </span>
+                        </div>
                     </SliderThumbItem>
                 ))}
             </CarouselThumbsContainer>

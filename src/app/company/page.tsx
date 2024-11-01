@@ -2,7 +2,7 @@
 import React from 'react';
 import { InfiniteMovingCards } from '@/components/ui/infinite-moving-cards';
 import { Button } from '@/components/ui/button';
-import { Building2, ChevronRightIcon, Download, Globe, MonitorPlay, Network, Users } from 'lucide-react';
+import { Building, Building2, CalendarDays, ChevronRightIcon, Cpu, Download, Globe, Link, MonitorPlay, Network, UserCircle2, Users } from 'lucide-react';
 import Image from 'next/image';
 export default function CompanyPage() {
 
@@ -77,7 +77,7 @@ export default function CompanyPage() {
       </section>
       {/* 간단한 회사소개 섹션 */}
       <section>
-        <div className="flex flex-col md:flex-row gap-4 justify-center">
+        <div className="flex flex-col lg:flex-row gap-4 justify-center">
           <div className='flex-1'></div>
           <div className="flex-none  p-4">
             <div className="sticky top-0 w-full text-2xl font-bold">
@@ -87,7 +87,7 @@ export default function CompanyPage() {
 
           <div className="flex-[2_1_30%] px-4">
             <div className="flex flex-col gap-2">
-              <div className="flex-1  p-4">
+              <div className="flex-1 p-4">
                 [회사명]은 1997년에 설립되어 25년이 넘는 시간 동안 반도체 유통업에 종사하며, 신뢰할 수 있는 글로벌 반도체 유통 파트너로 자리매김했습니다. 특히 LED 드라이버 IC를 포함한 다양한 반도체 부품을 Turn key 방식으로 제공하며, 고객에게 최적의 솔루션을 제안하고 있습니다.
 
               </div>
@@ -111,63 +111,65 @@ export default function CompanyPage() {
       </section>
       <section className="bg-white py-16">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
-            <div className="flex flex-col items-center justify-center p-6 hover:bg-gray-50 transition-colors rounded-lg">
-              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-                <Building2 className="w-8 h-8 text-primary" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            <div className="p-6 bg-white rounded-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-gray-100 relative">
+              <Link href="/company/history" className="absolute top-4 right-4 text-sm text-primary hover:underline">
+                회사연혁 바로가기
+              </Link>
+              <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-4">
+                <CalendarDays className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">법적인 서비스</h3>
-              <p className="text-sm text-gray-600 text-center">
-                분쟁조정 서비스를 및<br />
-                중소 중견기업 상담을 지원
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">28년</h3>
+              <p className="text-gray-600">
+                1997년 설립 이후<br />
+                28년간의 전문성과 노하우
               </p>
             </div>
 
-            <div className="flex flex-col items-center justify-center p-6 hover:bg-gray-50 transition-colors rounded-lg">
-              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-                <Globe className="w-8 h-8 text-primary" />
+            <div className="p-6 bg-white rounded-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-gray-100 relative">
+              <Link href="/company/location" className="absolute top-4 right-4 text-sm text-primary hover:underline">
+                찾아오시는 길 바로가기
+              </Link>
+              <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-4">
+                <Building className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">세계화 지원</h3>
-              <p className="text-sm text-gray-600 text-center">
-                새로운 중소기업의 지원 및<br />
-                글로벌화 지원
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">본사</h3>
+              <p className="text-gray-600">
+                서울특별시 구로구 경인로 53길 15<br />
+                중앙유통단지 바동 3217-3218호
               </p>
             </div>
 
-            <div className="flex flex-col items-center justify-center p-6 hover:bg-gray-50 transition-colors rounded-lg">
-              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-                <MonitorPlay className="w-8 h-8 text-primary" />
+            <div className="p-6 bg-white rounded-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-gray-100 relative">
+              <Link href="/company/ceo" className="absolute top-4 right-4 text-sm text-primary hover:underline">
+                대표이사 인사말 바로가기
+              </Link>
+              <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-4">
+                <UserCircle2 className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">디지털 서비스</h3>
-              <p className="text-sm text-gray-600 text-center">
-                디지털화된 서비스 상담 및<br />
-                이해관계자 지원
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">대표이사</h3>
+              <p className="text-gray-600">
+                김영구<br />
+                Kim Young Goo
               </p>
             </div>
 
-            <div className="flex flex-col items-center justify-center p-6 hover:bg-gray-50 transition-colors rounded-lg">
-              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-                <Network className="w-8 h-8 text-primary" />
+            <div className="p-6 bg-white rounded-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-gray-100 relative">
+              <Link href="/products" className="absolute top-4 right-4 text-sm text-primary hover:underline">
+                제품 검색 바로가기
+              </Link>
+              <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-4">
+                <Cpu className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">글로벌 네트워크</h3>
-              <p className="text-sm text-gray-600 text-center">
-                글로벌 수준의 파트너십과<br />
-                수출 컨설팅 지원
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">주력사업</h3>
+              <p className="text-gray-600">
+                LED Driver IC &<br />
+                전자부품 유통
               </p>
             </div>
 
-            <div className="flex flex-col items-center justify-center p-6 hover:bg-gray-50 transition-colors rounded-lg">
-              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-                <Users className="w-8 h-8 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">고객 지원</h3>
-              <p className="text-sm text-gray-600 text-center">
-                신속한 수출상담 제공 및<br />
-                수출자 지원가능 제공
-              </p>
-            </div>
           </div>
-
         </div>
       </section>
 

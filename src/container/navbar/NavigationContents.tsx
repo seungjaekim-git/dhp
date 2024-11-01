@@ -263,7 +263,7 @@ export const CompanyIntroContent = () => (
 );
 
 export const ProductContent = ({ activeCategory, setActiveCategory }: { activeCategory: string, setActiveCategory: (category: string) => void }) => (
-    <div className="flex overflow-y-auto max-h-[80vh]">
+    <div className="flex overflow-y-auto mx-auto">
         <div className="w-1/5 lg:w-1/4 bg-gray-100">
             {items.map((item) => (
                 <div key={item.title} className="p-4 cursor-pointer hover:bg-gray-200 text-xs sm:text-sm md:text-base" onMouseEnter={() => setActiveCategory(item.title)}>
@@ -314,7 +314,7 @@ export const PartnerContent = ({ activeStory, setActiveStory }: { activeStory: a
 );
 
 export const SupportContent = () => (
-    <div className="flex justify-center overflow-y-auto max-h-[80vh]">
+    <div className="flex items-center justify-center overflow-y-auto">
         {[
             {
                 title: '문의', items: [
