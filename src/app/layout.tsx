@@ -18,7 +18,10 @@ export default function RootLayout({
 }>) {
   return (
     <html>
-      <body className="flex-col min-h-screen container flex mx-auto">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </head>
+      <body className="flex flex-col min-h-screen container mx-auto">
         <div className="flex-grow w-full h-full items-center justify-center">
         <TwoLayerNavigation />
         {/* <DynamicBreadcrumb /> */}

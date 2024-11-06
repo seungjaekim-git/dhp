@@ -37,7 +37,7 @@ const FirstLayer = () => (
           <SelectTrigger className="w-[140px]">
             <SelectValue placeholder="Language" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent position="popper">
           <SelectGroup>
             <SelectLabel>Language</SelectLabel>
             <SelectItem value="en" className="w-[140px]">English</SelectItem>
