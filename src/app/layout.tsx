@@ -3,6 +3,7 @@ import "./globals.css";
 
 import Footer from "@/container/footer/footer"
 import TwoLayerNavigation from "@/container/navbar/navigationBar"
+import Script from "next/script";
 
 
 export const metadata: Metadata = {
@@ -20,6 +21,10 @@ export default function RootLayout({
     <html>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <Script
+        type="text/javascript"
+        src={`https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${process.env.NEXT_PUBLIC_NAVER_ID}&submodules=geocoder`}
+      />
       </head>
       <body className="flex flex-col min-h-screen container mx-auto">
         <div className="flex-grow w-full h-full items-center justify-center">
