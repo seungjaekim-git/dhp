@@ -1,0 +1,609 @@
+{
+    "Multi-Function_LED_Driver": {
+      "MBI5024": {
+        "manufacturer": "Macroblock",
+        "series": "Multi-Function LED Driver",
+        "type": "LED Driver IC",
+        "mounting_style": ["SMD", "SMT"],
+        "package_case": ["SOP24", "SSOP24"],
+        "number_of_outputs": 16,
+        "output_current": {
+          "min": 5,
+          "typ": 30,
+          "max": 60,
+          "unit": "mA"
+        },
+        "input_voltage": {
+          "min": 3.3,
+          "typ": 5.0,
+          "max": 5.5,
+          "unit": "V"
+        },
+        "topology": "Current Mirror",
+        "operating_frequency": {
+          "min": null,
+          "typ": null,
+          "max": null,
+          "unit": "Hz"
+        },
+        "output_voltage": {
+          "min": 0,
+          "typ": 5.0,
+          "max": 5.5,
+          "unit": "V"
+        },
+        "operating_temperature": {
+          "min": -40,
+          "max": 85,
+          "unit": "°C"
+        },
+        "dimming_method": [
+          "Digital",
+          "PWM",
+          "Dot Correction"
+        ],
+        "internal_switch": {
+          "present": true,
+          "type": "Current mirror",
+          "count": 16
+        },
+        "certifications": ["RoHS"],
+        "packaging": {
+          "type": "Tube",
+          "quantity": 100
+        },
+        "applications": [
+          "LED display",
+          "LED signage",
+          "LED lighting"
+        ],
+        "features": [
+          "6-bit dot correction",
+          "12-bit PWM",
+          "LED error detection",
+          "Cascade capability"
+        ],
+        "LED_Type": "Common anode",
+        "Scan_Type": "Static",
+        "Excellent_Output_Current_Accuracy": {
+          "Between_Channels": {
+            "value": 3.0,
+            "unit": "%",
+            "condition": "typical"
+          },
+          "Between_ICs": {
+            "value": 6.0,
+            "unit": "%",
+            "condition": "typical"
+          }
+        },
+        "Error_Detection": {
+          "LED_Open": true,
+          "LED_Short": true
+        },
+        "Thermal_Shutdown": false,
+        "Current_Gain": {
+          "resolution": 6,
+          "unit": "bit"
+        },
+        "PWM": {
+          "resolution": [12],
+          "unit": "bit"
+        },
+        "Dot_Correction": {
+          "resolution": 6,
+          "unit": "bit"
+        },
+        "Cascade_Capability": true
+      }
+    }
+  }
+
+  {
+    "Multi-Function_LED_Driver": {
+      "MBI5025": {
+        "manufacturer": "Macroblock",
+        "series": "Multi-Function LED Driver",
+        "type": "LED Driver IC",
+        "mounting_style": ["SMD", "SMT"],
+        "package_case": ["SOP24", "SSOP24"],
+        "number_of_outputs": 16,
+        "output_current": {
+          "min": 5,
+          "typ": 30,
+          "max": 60,
+          "unit": "mA"
+        },
+        "input_voltage": {
+          "min": 3.3,
+          "typ": 5.0,
+          "max": 5.5,
+          "unit": "V"
+        },
+        "topology": "Current Mirror",
+        "operating_frequency": {
+          "min": null,
+          "typ": null,
+          "max": null,
+          "unit": "Hz"
+        },
+        "output_voltage": {
+          "min": 0,
+          "typ": 5.0,
+          "max": 5.5,
+          "unit": "V"
+        },
+        "operating_temperature": {
+          "min": -40,
+          "max": 85,
+          "unit": "°C"
+        },
+        "dimming_method": [
+          "Digital",
+          "PWM",
+          "Dot Correction"
+        ],
+        "internal_switch": {
+          "present": true,
+          "type": "Current mirror",
+          "count": 16
+        },
+        "certifications": ["RoHS"],
+        "packaging": {
+          "type": "Tube",
+          "quantity": 100
+        },
+        "applications": [
+          "LED display",
+          "LED signage",
+          "LED lighting"
+        ],
+        "features": [
+          "6-bit dot correction",
+          "14-bit PWM",
+          "LED error detection",
+          "Cascade capability"
+        ],
+        "LED_Type": "Common anode",
+        "Scan_Type": "Static",
+        "Excellent_Output_Current_Accuracy": {
+          "Between_Channels": {
+            "value": 3.0,
+            "unit": "%",
+            "condition": "typical"
+          },
+          "Between_ICs": {
+            "value": 6.0,
+            "unit": "%",
+            "condition": "typical"
+          }
+        },
+        "Error_Detection": {
+          "LED_Open": true,
+          "LED_Short": true
+        },
+        "Thermal_Shutdown": false,
+        "Current_Gain": {
+          "resolution": 6,
+          "unit": "bit"
+        },
+        "PWM": {
+          "resolution": [14],
+          "unit": "bit"
+        },
+        "Dot_Correction": {
+          "resolution": 6,
+          "unit": "bit"
+        },
+        "Cascade_Capability": true
+      }
+    }
+  }
+
+  {
+    "Multi-Function_LED_Driver": {
+      "MBI5026": {
+        "manufacturer": "Macroblock",
+        "series": "Multi-Function LED Driver",
+        "type": "LED Driver IC",
+        "mounting_style": ["SMD", "SMT"],
+        "package_case": ["SOP24", "SSOP24"],
+        "number_of_outputs": 16,
+        "output_current": {
+          "min": 5,
+          "typ": 30,
+          "max": 60,
+          "unit": "mA"
+        },
+        "input_voltage": {
+          "min": 3.3,
+          "typ": 5.0,
+          "max": 5.5,
+          "unit": "V"
+        },
+        "topology": "Current Mirror",
+        "operating_frequency": {
+          "min": null,
+          "typ": null,
+          "max": null,
+          "unit": "Hz"
+        },
+        "output_voltage": {
+          "min": 0,
+          "typ": 5.0,
+          "max": 5.5,
+          "unit": "V"
+        },
+        "operating_temperature": {
+          "min": -40,
+          "max": 85,
+          "unit": "°C"
+        },
+        "dimming_method": [
+          "Digital",
+          "PWM",
+          "Dot Correction"
+        ],
+        "internal_switch": {
+          "present": true,
+          "type": "Current mirror",
+          "count": 16
+        },
+        "certifications": ["RoHS"],
+        "packaging": {
+          "type": "Tube",
+          "quantity": 100
+        },
+        "applications": [
+          "LED display",
+          "LED signage",
+          "LED lighting"
+        ],
+        "features": [
+          "6-bit dot correction",
+          "16-bit PWM",
+          "LED error detection",
+          "Cascade capability"
+        ],
+        "LED_Type": "Common anode",
+        "Scan_Type": "Static",
+        "Excellent_Output_Current_Accuracy": {
+          "Between_Channels": {
+            "value": 3.0,
+            "unit": "%",
+            "condition": "typical"
+          },
+          "Between_ICs": {
+            "value": 6.0,
+            "unit": "%",
+            "condition": "typical"
+          }
+        },
+        "Error_Detection": {
+          "LED_Open": true,
+          "LED_Short": true
+        },
+        "Thermal_Shutdown": false,
+        "Current_Gain": {
+          "resolution": 6,
+          "unit": "bit"
+        },
+        "PWM": {
+          "resolution": [16],
+          "unit": "bit"
+        },
+        "Dot_Correction": {
+          "resolution": 6,
+          "unit": "bit"
+        },
+        "Cascade_Capability": true
+      }
+    }
+  }
+
+  {
+    "Multi-Function_LED_Driver": {
+      "MBI5027": {
+        "manufacturer": "Macroblock",
+        "series": "Multi-Function LED Driver",
+        "type": "LED Driver IC",
+        "mounting_style": ["SMD", "SMT"],
+        "package_case": ["SOP24", "SSOP24"],
+        "number_of_outputs": 16,
+        "output_current": {
+          "min": 5,
+          "typ": 30,
+          "max": 60,
+          "unit": "mA"
+        },
+        "input_voltage": {
+          "min": 3.3,
+          "typ": 5.0,
+          "max": 5.5,
+          "unit": "V"
+        },
+        "topology": "Current Mirror",
+        "operating_frequency": {
+          "min": null,
+          "typ": null,
+          "max": null,
+          "unit": "Hz"
+        },
+        "output_voltage": {
+          "min": 0,
+          "typ": 5.0,
+          "max": 5.5,
+          "unit": "V"
+        },
+        "operating_temperature": {
+          "min": -40,
+          "max": 85,
+          "unit": "°C"
+        },
+        "dimming_method": [
+          "Digital",
+          "PWM",
+          "Dot Correction"
+        ],
+        "internal_switch": {
+          "present": true,
+          "type": "Current mirror",
+          "count": 16
+        },
+        "certifications": ["RoHS"],
+        "packaging": {
+          "type": "Tube",
+          "quantity": 100
+        },
+        "applications": [
+          "LED display",
+          "LED signage",
+          "LED lighting"
+        ],
+        "features": [
+          "6-bit dot correction",
+          "12-bit PWM",
+          "LED error detection",
+          "Cascade capability",
+          "Thermal shutdown"
+        ],
+        "LED_Type": "Common anode",
+        "Scan_Type": "Static",
+        "Excellent_Output_Current_Accuracy": {
+          "Between_Channels": {
+            "value": 3.0,
+            "unit": "%",
+            "condition": "typical"
+          },
+          "Between_ICs": {
+            "value": 6.0,
+            "unit": "%",
+            "condition": "typical"
+          }
+        },
+        "Error_Detection": {
+          "LED_Open": true,
+          "LED_Short": true
+        },
+        "Thermal_Shutdown": true,
+        "Current_Gain": {
+          "resolution": 6,
+          "unit": "bit"
+        },
+        "PWM": {
+          "resolution": [12],
+          "unit": "bit"
+        },
+        "Dot_Correction": {
+          "resolution": 6,
+          "unit": "bit"
+        },
+        "Cascade_Capability": true
+      }
+    }
+  }
+
+  {
+    "Multi-Function_LED_Driver": {
+      "MBI5028": {
+        "manufacturer": "Macroblock",
+        "series": "Multi-Function LED Driver",
+        "type": "LED Driver IC",
+        "mounting_style": ["SMD", "SMT"],
+        "package_case": ["SOP24", "SSOP24"],
+        "number_of_outputs": 16,
+        "output_current": {
+          "min": 5,
+          "typ": 30,
+          "max": 60,
+          "unit": "mA"
+        },
+        "input_voltage": {
+          "min": 3.3,
+          "typ": 5.0,
+          "max": 5.5,
+          "unit": "V"
+        },
+        "topology": "Current Mirror",
+        "operating_frequency": {
+          "min": null,
+          "typ": null,
+          "max": null,
+          "unit": "Hz"
+        },
+        "output_voltage": {
+          "min": 0,
+          "typ": 5.0,
+          "max": 5.5,
+          "unit": "V"
+        },
+        "operating_temperature": {
+          "min": -40,
+          "max": 85,
+          "unit": "°C"
+        },
+        "dimming_method": [
+          "Digital",
+          "PWM",
+          "Dot Correction"
+        ],
+        "internal_switch": {
+          "present": true,
+          "type": "Current mirror",
+          "count": 16
+        },
+        "certifications": ["RoHS"],
+        "packaging": {
+          "type": "Tube",
+          "quantity": 100
+        },
+        "applications": [
+          "LED display",
+          "LED signage",
+          "LED lighting"
+        ],
+        "features": [
+          "6-bit dot correction",
+          "14-bit PWM",
+          "LED error detection",
+          "Cascade capability",
+          "Thermal shutdown"
+        ],
+        "LED_Type": "Common anode",
+        "Scan_Type": "Static",
+        "Excellent_Output_Current_Accuracy": {
+          "Between_Channels": {
+            "value": 3.0,
+            "unit": "%",
+            "condition": "typical"
+          },
+          "Between_ICs": {
+            "value": 6.0,
+            "unit": "%",
+            "condition": "typical"
+          }
+        },
+        "Error_Detection": {
+          "LED_Open": true,
+          "LED_Short": true
+        },
+        "Thermal_Shutdown": true,
+        "Current_Gain": {
+          "resolution": 6,
+          "unit": "bit"
+        },
+        "PWM": {
+          "resolution": [14],
+          "unit": "bit"
+        },
+        "Dot_Correction": {
+          "resolution": 6,
+          "unit": "bit"
+        },
+        "Cascade_Capability": true
+      }
+    }
+  }
+
+
+  {
+    "Multi-Function_LED_Driver": {
+      "MBI5029": {
+        "manufacturer": "Macroblock",
+        "series": "Multi-Function LED Driver",
+        "type": "LED Driver IC",
+        "mounting_style": ["SMD", "SMT"],
+        "package_case": ["SOP24", "SSOP24"],
+        "number_of_outputs": 16,
+        "output_current": {
+          "min": 5,
+          "typ": 30,
+          "max": 60,
+          "unit": "mA"
+        },
+        "input_voltage": {
+          "min": 3.3,
+          "typ": 5.0,
+          "max": 5.5,
+          "unit": "V"
+        },
+        "topology": "Current Mirror",
+        "operating_frequency": {
+          "min": null,
+          "typ": null,
+          "max": null,
+          "unit": "Hz"
+        },
+        "output_voltage": {
+          "min": 0,
+          "typ": 5.0,
+          "max": 5.5,
+          "unit": "V"
+        },
+        "operating_temperature": {
+          "min": -40,
+          "max": 85,
+          "unit": "°C"
+        },
+        "dimming_method": [
+          "Digital",
+          "PWM",
+          "Dot Correction"
+        ],
+        "internal_switch": {
+          "present": true,
+          "type": "Current mirror",
+          "count": 16
+        },
+        "certifications": ["RoHS"],
+        "packaging": {
+          "type": "Tube",
+          "quantity": 100
+        },
+        "applications": [
+          "LED display",
+          "LED signage",
+          "LED lighting"
+        ],
+        "features": [
+          "6-bit dot correction",
+          "16-bit PWM",
+          "LED error detection",
+          "Cascade capability",
+          "Thermal shutdown"
+        ],
+        "LED_Type": "Common anode",
+        "Scan_Type": "Static",
+        "Excellent_Output_Current_Accuracy": {
+          "Between_Channels": {
+            "value": 3.0,
+            "unit": "%",
+            "condition": "typical"
+          },
+          "Between_ICs": {
+            "value": 6.0,
+            "unit": "%",
+            "condition": "typical"
+          }
+        },
+        "Error_Detection": {
+          "LED_Open": true,
+          "LED_Short": true
+        },
+        "Thermal_Shutdown": true,
+        "Current_Gain": {
+          "resolution": 6,
+          "unit": "bit"
+        },
+        "PWM": {
+          "resolution": [16],
+          "unit": "bit"
+        },
+        "Dot_Correction": {
+          "resolution": 6,
+          "unit": "bit"
+        },
+        "Cascade_Capability": true
+      }
+    }
+  }

@@ -1,0 +1,388 @@
+{
+    "S-PWM_LED_Driver": {
+      "MBI5030": {
+        "manufacturer": "Macroblock",
+        "series": "S-PWM LED Driver",
+        "type": "LED Driver IC",
+        "mounting_style": ["SMD", "SMT"],
+        "package_case": ["SOP24", "TSSOP24", "QFN24"],
+        "number_of_outputs": 16,
+        "output_current": {
+          "min": 8,
+          "typ": 45,
+          "max": 90,
+          "unit": "mA"
+        },
+        "input_voltage": {
+          "min": 3.3,
+          "typ": 5.0,
+          "max": 5.5,
+          "unit": "V"
+        },
+        "topology": "Current Mirror",
+        "operating_frequency": {
+          "min": null,
+          "typ": null,
+          "max": null,
+          "unit": "Hz"
+        },
+        "output_voltage": {
+          "min": 0,
+          "typ": 17,
+          "max": 17,
+          "unit": "V"
+        },
+        "operating_temperature": {
+          "min": -40,
+          "max": 85,
+          "unit": "°C"
+        },
+        "dimming_method": [
+          "Digital",
+          "S-PWM"
+        ],
+        "internal_switch": {
+          "present": true,
+          "type": "Current mirror",
+          "count": 16
+        },
+        "certifications": ["RoHS"],
+        "packaging": {
+          "type": "Tube",
+          "quantity": 100
+        },
+        "applications": [
+          "High refresh rate LED display",
+          "High grayscale LED display"
+        ],
+        "features": [
+          "8-bit current gain",
+          "LED open detection",
+          "12/16-bit S-PWM"
+        ],
+        "LED_Type": "Common anode",
+        "Scan_Type": "Typical",
+        "Excellent_Output_Current_Accuracy": {
+          "Between_Channels": {
+            "value": 1.5,
+            "unit": "%",
+            "condition": "typical"
+          },
+          "Between_ICs": {
+            "value": 3.0,
+            "unit": "%",
+            "condition": "typical"
+          }
+        },
+        "Error_Detection": {
+          "LED_Open": true,
+          "LED_Short": false
+        },
+        "Thermal_Shutdown": false,
+        "Current_Gain": {
+          "resolution": 8,
+          "unit": "bit"
+        },
+        "GCLK_Multiplier": false,
+        "Lower_Ghosting_Effect_Elimination": false,
+        "S-PWM": {
+          "resolution": [12, 16],
+          "unit": "bit"
+        },
+        "Dot_Correction": false
+      }
+    }
+  }
+
+  {
+    "S-PWM_LED_Driver": {
+      "MBI5031": {
+        "manufacturer": "Macroblock",
+        "series": "S-PWM LED Driver",
+        "type": "LED Driver IC",
+        "mounting_style": ["SMD", "SMT"],
+        "package_case": ["SOP24", "TSSOP24", "QFN24"],
+        "number_of_outputs": 16,
+        "output_current": {
+          "min": 8,
+          "typ": 45,
+          "max": 90,
+          "unit": "mA"
+        },
+        "input_voltage": {
+          "min": 3.3,
+          "typ": 5.0,
+          "max": 5.5,
+          "unit": "V"
+        },
+        "topology": "Current Mirror",
+        "operating_frequency": {
+          "min": null,
+          "typ": null,
+          "max": null,
+          "unit": "Hz"
+        },
+        "output_voltage": {
+          "min": 0,
+          "typ": 17,
+          "max": 17,
+          "unit": "V"
+        },
+        "operating_temperature": {
+          "min": -40,
+          "max": 85,
+          "unit": "°C"
+        },
+        "dimming_method": [
+          "Digital",
+          "S-PWM"
+        ],
+        "internal_switch": {
+          "present": true,
+          "type": "Current mirror",
+          "count": 16
+        },
+        "certifications": ["RoHS"],
+        "packaging": {
+          "type": "Tube",
+          "quantity": 100
+        },
+        "applications": [
+          "High refresh rate LED display",
+          "High grayscale LED display"
+        ],
+        "features": [
+          "8-bit current gain",
+          "LED open detection",
+          "12-bit S-PWM"
+        ],
+        "LED_Type": "Common anode",
+        "Scan_Type": "Typical",
+        "Excellent_Output_Current_Accuracy": {
+          "Between_Channels": {
+            "value": 1.5,
+            "unit": "%",
+            "condition": "typical"
+          },
+          "Between_ICs": {
+            "value": 3.0,
+            "unit": "%",
+            "condition": "typical"
+          }
+        },
+        "Error_Detection": {
+          "LED_Open": true,
+          "LED_Short": false
+        },
+        "Thermal_Shutdown": false,
+        "Current_Gain": {
+          "resolution": 8,
+          "unit": "bit"
+        },
+        "GCLK_Multiplier": false,
+        "Lower_Ghosting_Effect_Elimination": false,
+        "S-PWM": {
+          "resolution": [12],
+          "unit": "bit"
+        },
+        "Dot_Correction": false
+      }
+    }
+  }
+
+  {
+    "S-PWM_LED_Driver": {
+      "MBI5040": {
+        "manufacturer": "Macroblock",
+        "series": "S-PWM LED Driver",
+        "type": "LED Driver IC",
+        "mounting_style": ["SMD", "SMT"],
+        "package_case": ["SSOP24", "QFN24"],
+        "number_of_outputs": 16,
+        "output_current": {
+          "min": 1,
+          "typ": 20,
+          "max": 45,
+          "unit": "mA"
+        },
+        "input_voltage": {
+          "min": 3.3,
+          "typ": 5.0,
+          "max": 5.5,
+          "unit": "V"
+        },
+        "topology": "Current Mirror",
+        "operating_frequency": {
+          "min": null,
+          "typ": null,
+          "max": null,
+          "unit": "Hz"
+        },
+        "output_voltage": {
+          "min": 0,
+          "typ": 17,
+          "max": 17,
+          "unit": "V"
+        },
+        "operating_temperature": {
+          "min": -40,
+          "max": 85,
+          "unit": "°C"
+        },
+        "dimming_method": [
+          "Digital",
+          "S-PWM",
+          "PWM Enhancement"
+        ],
+        "internal_switch": {
+          "present": true,
+          "type": "Current mirror",
+          "count": 16
+        },
+        "certifications": ["RoHS"],
+        "packaging": {
+          "type": "Tube",
+          "quantity": 100
+        },
+        "applications": [
+          "High refresh rate LED display",
+          "High grayscale LED display"
+        ],
+        "features": [
+          "6-bit current gain",
+          "LED open/short detection",
+          "PWM Enhancement",
+          "GCLK Multiplier",
+          "Lower Ghosting Effect Elimination"
+        ],
+        "LED_Type": "Common anode",
+        "Scan_Type": "Typical",
+        "Excellent_Output_Current_Accuracy": {
+          "Between_Channels": {
+            "value": 1.5,
+            "unit": "%",
+            "condition": "typical"
+          },
+          "Between_ICs": {
+            "value": 1.5,
+            "unit": "%",
+            "condition": "typical"
+          }
+        },
+        "Error_Detection": {
+          "LED_Open": true,
+          "LED_Short": true
+        },
+        "Thermal_Shutdown": true,
+        "Current_Gain": {
+          "resolution": 6,
+          "unit": "bit"
+        },
+        "GCLK_Multiplier": true,
+        "Lower_Ghosting_Effect_Elimination": true,
+        "S-PWM": {
+          "resolution": [16],
+          "unit": "bit"
+        },
+        "Dot_Correction": false
+      }
+    }
+  }
+
+  {
+    "S-PWM_LED_Driver": {
+      "MBI5043": {
+        "manufacturer": "Macroblock",
+        "series": "S-PWM LED Driver",
+        "type": "LED Driver IC",
+        "mounting_style": ["SMD", "SMT"],
+        "package_case": ["SSOP24", "QFN24"],
+        "number_of_outputs": 16,
+        "output_current": {
+          "min": 1,
+          "typ": 20,
+          "max": 45,
+          "unit": "mA"
+        },
+        "input_voltage": {
+          "min": 3.3,
+          "typ": 5.0,
+          "max": 5.5,
+          "unit": "V"
+        },
+        "topology": "Current Mirror",
+        "operating_frequency": {
+          "min": null,
+          "typ": null,
+          "max": null,
+          "unit": "Hz"
+        },
+        "output_voltage": {
+          "min": 0,
+          "typ": 17,
+          "max": 17,
+          "unit": "V"
+        },
+        "operating_temperature": {
+          "min": -40,
+          "max": 85,
+          "unit": "°C"
+        },
+        "dimming_method": [
+          "Digital",
+          "S-PWM",
+          "PWM Enhancement"
+        ],
+        "internal_switch": {
+          "present": true,
+          "type": "Current mirror",
+          "count": 16
+        },
+        "certifications": ["RoHS"],
+        "packaging": {
+          "type": "Tube",
+          "quantity": 100
+        },
+        "applications": [
+          "High refresh rate LED display",
+          "High grayscale LED display"
+        ],
+        "features": [
+          "6-bit current gain",
+          "PWM Enhancement",
+          "GCLK Multiplier",
+          "Lower Ghosting Effect Elimination"
+        ],
+        "LED_Type": "Common anode",
+        "Scan_Type": "Typical",
+        "Excellent_Output_Current_Accuracy": {
+          "Between_Channels": {
+            "value": 1.5,
+            "unit": "%",
+            "condition": "typical"
+          },
+          "Between_ICs": {
+            "value": 1.5,
+            "unit": "%",
+            "condition": "typical"
+          }
+        },
+        "Error_Detection": {
+          "LED_Open": false,
+          "LED_Short": false
+        },
+        "Thermal_Shutdown": false,
+        "Current_Gain": {
+          "resolution": 6,
+          "unit": "bit"
+        },
+        "GCLK_Multiplier": true,
+        "Lower_Ghosting_Effect_Elimination": true,
+        "S-PWM": {
+          "resolution": [16],
+          "unit": "bit"
+        },
+        "Dot_Correction": false
+      }
+    }
+  }

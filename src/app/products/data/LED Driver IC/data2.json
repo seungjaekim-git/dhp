@@ -1,0 +1,146 @@
+{
+    "MOSFET_for_Time-Multiplexing_LED_Display": {
+      "MBI5981": {
+        "manufacturer": "Macroblock",
+        "series": "MOSFET for Time-Multiplexing LED Display",
+        "type": "LED Driver MOSFET",
+        "mounting_style": ["SMD", "SMT"],
+        "package_case": ["SSOP16", "QFN16"],
+        "number_of_outputs": 8,
+        "output_current": {
+          "min": 0,
+          "typ": 2.5,
+          "max": 2.5,
+          "unit": "A"
+        },
+        "input_voltage": {
+          "min": 3.3,
+          "typ": 4.15,
+          "max": 5.0,
+          "unit": "V"
+        },
+        "topology": "NMOS",
+        "operating_frequency": {
+          "min": null,
+          "typ": null,
+          "max": null,
+          "unit": "Hz"
+        },
+        "output_voltage": {
+          "min": 3.3,
+          "typ": 4.15,
+          "max": 5.0,
+          "unit": "V"
+        },
+        "operating_temperature": {
+          "min": -40,
+          "max": 85,
+          "unit": "°C"
+        },
+        "dimming_method": [
+          "External dimming control"
+        ],
+        "internal_switch": {
+          "present": true,
+          "type": "NMOS",
+          "count": 8
+        },
+        "certifications": ["RoHS"],
+        "packaging": {
+          "type": "Tube",
+          "quantity": 100
+        },
+        "applications": [
+          "Common cathode LED driver",
+          "LED display",
+          "LED matrix"
+        ],
+        "features": [
+          "High Contrast Interference Elimination",
+          "Upper Ghosting Effect Elimination",
+          "Short-LED Color Stripe Elimination",
+          "Integrated NMOS switches"
+        ],
+        "LED_Type": "Common cathode",
+        "MOSFET_Type": "NMOS",
+        "ON_Resistance": {
+          "value": 170,
+          "unit": "mΩ"
+        },
+        "High_Contrast_Interference_Elimination": true,
+        "Upper_Ghosting_Effect_Elimination": true,
+        "Short-LED_Color_Stripe_Elimination": true
+      }
+    },
+      "MBI5989": {
+        "manufacturer": "Macroblock",
+        "series": "MOSFET for Time-Multiplexing LED Display",
+        "type": "LED Driver MOSFET",
+        "mounting_style": ["SMD", "SMT"],
+        "package_case": ["SSOP24"],
+        "number_of_outputs": 16,
+        "output_current": {
+          "min": 0,
+          "typ": 3.5,
+          "max": 3.5,
+          "unit": "A"
+        },
+        "input_voltage": {
+          "min": 3.3,
+          "typ": 4.15,
+          "max": 5.0,
+          "unit": "V"
+        },
+        "topology": "PMOS",
+        "operating_frequency": {
+          "min": null,
+          "typ": null,
+          "max": null,
+          "unit": "Hz"
+        },
+        "output_voltage": {
+          "min": 3.3,
+          "typ": 4.15,
+          "max": 5.0,
+          "unit": "V"
+        },
+        "operating_temperature": {
+          "min": -40,
+          "max": 85,
+          "unit": "°C"
+        },
+        "dimming_method": [
+          "External dimming control"
+        ],
+        "internal_switch": {
+          "present": true,
+          "type": "PMOS",
+          "count": 16
+        },
+        "certifications": ["RoHS"],
+        "packaging": {
+          "type": "Tube",
+          "quantity": 100
+        },
+        "applications": [
+          "Common anode LED driver",
+          "LED display",
+          "LED matrix"
+        ],
+        "features": [
+          "High Contrast Interference Elimination",
+          "Upper Ghosting Effect Elimination",
+          "Short-LED Color Stripe Elimination",
+          "Integrated PMOS switches"
+        ],
+        "LED_Type": "Common anode",
+        "MOSFET_Type": "PMOS",
+        "ON_Resistance": {
+          "value": 180,
+          "unit": "mΩ"
+        },
+        "High_Contrast_Interference_Elimination": true,
+        "Upper_Ghosting_Effect_Elimination": true,
+        "Short-LED_Color_Stripe_Elimination": true
+      }
+    }

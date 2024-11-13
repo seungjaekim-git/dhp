@@ -1,0 +1,1584 @@
+{
+    "SRAM_Embedded_S-PWM_LED_Driver": {
+        "MBI5251": {
+            "manufacturer": "Macroblock",
+            "series": "SRAM Embedded S-PWM LED Driver",
+            "type": "LED Driver IC",
+            "mounting_style": [
+                "SMD",
+                "SMT"
+            ],
+            "package_case": [
+                "SSOP24",
+                "QFN24"
+            ],
+            "number_of_outputs": 16,
+            "output_current": {
+                "min": 2,
+                "typ": 20,
+                "max": 45,
+                "unit": "mA"
+            },
+            "input_voltage": {
+                "min": 3.3,
+                "typ": 5.0,
+                "max": 5.5,
+                "unit": "V"
+            },
+            "topology": "Current Mirror with SRAM",
+            "operating_frequency": {
+                "min": null,
+                "typ": null,
+                "max": null,
+                "unit": "Hz"
+            },
+            "output_voltage": {
+                "min": 0,
+                "typ": 7,
+                "max": 7,
+                "unit": "V"
+            },
+            "operating_temperature": {
+                "min": -40,
+                "max": 85,
+                "unit": "°C"
+            },
+            "dimming_method": [
+                "Digital",
+                "S-PWM",
+                "PWM"
+            ],
+            "internal_switch": {
+                "present": true,
+                "type": "Current mirror",
+                "count": 16
+            },
+            "certifications": [
+                "RoHS"
+            ],
+            "packaging": {
+                "type": "Tube",
+                "quantity": 100
+            },
+            "applications": [
+                "Time-multiplexing LED display"
+            ],
+            "features": [
+                "6-bit current gain",
+                "LED open detection",
+                "GCLK Multiplier",
+                "Intelligent Power Saving",
+                "7 Common Problems Solving"
+            ],
+            "LED_Type": "Common anode",
+            "Scan_Type": "Typical",
+            "Excellent_Output_Current_Accuracy": {
+                "Between_Channels": {
+                    "value": 1.5,
+                    "unit": "%",
+                    "condition": "typical"
+                },
+                "Between_ICs": {
+                    "value": 1.5,
+                    "unit": "%",
+                    "condition": "typical"
+                }
+            },
+            "Embedded_MOSFET": false,
+            "Error_Detection": {
+                "LED_Open": true,
+                "LED_Short": false
+            },
+            "Current_Gain": {
+                "resolution": 6,
+                "unit": "bit"
+            },
+            "PWM_Enhancement": false,
+            "GCLK_Multiplier": true,
+            "Solving_7_Common_Problems": true,
+            "Intelligent_Power_Saving": true,
+            "S-PWM": {
+                "resolution": [
+                    13,
+                    14,
+                    15,
+                    16
+                ],
+                "unit": "bit"
+            },
+            "Scan_Design": {
+                "max_scan": 8,
+                "unit": "scan"
+            }
+        },
+        "MBI5253": {
+            "manufacturer": "Macroblock",
+            "series": "SRAM Embedded S-PWM LED Driver",
+            "type": "LED Driver IC",
+            "mounting_style": [
+                "SMD",
+                "SMT"
+            ],
+            "package_case": [
+                "SSOP24",
+                "QFN24"
+            ],
+            "number_of_outputs": 16,
+            "output_current": {
+                "min": 0.5,
+                "typ": 10,
+                "max": 20,
+                "unit": "mA"
+            },
+            "input_voltage": {
+                "min": 3.3,
+                "typ": 5.0,
+                "max": 5.5,
+                "unit": "V"
+            },
+            "topology": "Current Mirror with SRAM",
+            "operating_frequency": {
+                "min": null,
+                "typ": null,
+                "max": null,
+                "unit": "Hz"
+            },
+            "output_voltage": {
+                "min": 0,
+                "typ": 7,
+                "max": 7,
+                "unit": "V"
+            },
+            "operating_temperature": {
+                "min": -40,
+                "max": 85,
+                "unit": "°C"
+            },
+            "dimming_method": [
+                "Digital",
+                "S-PWM",
+                "PWM"
+            ],
+            "internal_switch": {
+                "present": true,
+                "type": "Current mirror",
+                "count": 16
+            },
+            "certifications": [
+                "RoHS"
+            ],
+            "packaging": {
+                "type": "Tube",
+                "quantity": 100
+            },
+            "applications": [
+                "Time-multiplexing LED display"
+            ],
+            "features": [
+                "6-bit current gain",
+                "LED open detection",
+                "GCLK Multiplier",
+                "Intelligent Power Saving",
+                "7 Common Problems Solving"
+            ],
+            "LED_Type": "Common anode",
+            "Scan_Type": "Typical",
+            "Excellent_Output_Current_Accuracy": {
+                "Between_Channels": {
+                    "value": 1.5,
+                    "unit": "%",
+                    "condition": "typical"
+                },
+                "Between_ICs": {
+                    "value": 1.5,
+                    "unit": "%",
+                    "condition": "typical"
+                }
+            },
+            "Embedded_MOSFET": false,
+            "Error_Detection": {
+                "LED_Open": true,
+                "LED_Short": false
+            },
+            "Current_Gain": {
+                "resolution": 6,
+                "unit": "bit"
+            },
+            "PWM_Enhancement": false,
+            "GCLK_Multiplier": true,
+            "Solving_7_Common_Problems": true,
+            "Intelligent_Power_Saving": true,
+            "S-PWM": {
+                "resolution": [
+                    13,
+                    14
+                ],
+                "unit": "bit"
+            },
+            "Scan_Design": {
+                "max_scan": 32,
+                "unit": "scan"
+            }
+        },
+        "MBI5262": {
+            "manufacturer": "Macroblock",
+            "series": "SRAM Embedded S-PWM LED Driver",
+            "type": "LED Driver IC",
+            "mounting_style": [
+                "SMD",
+                "SMT"
+            ],
+            "package_case": [
+                "SSOP24"
+            ],
+            "number_of_outputs": 16,
+            "output_current": {
+                "min": 4,
+                "typ": 30,
+                "max": 60,
+                "unit": "mA"
+            },
+            "input_voltage": {
+                "min": 3.3,
+                "typ": 5.0,
+                "max": 5.5,
+                "unit": "V"
+            },
+            "topology": "Current Mirror with SRAM",
+            "operating_frequency": {
+                "min": null,
+                "typ": null,
+                "max": null,
+                "unit": "Hz"
+            },
+            "output_voltage": {
+                "min": 0,
+                "typ": 7,
+                "max": 7,
+                "unit": "V"
+            },
+            "operating_temperature": {
+                "min": -40,
+                "max": 85,
+                "unit": "°C"
+            },
+            "dimming_method": [
+                "Digital",
+                "S-PWM",
+                "PWM"
+            ],
+            "internal_switch": {
+                "present": true,
+                "type": "Current mirror",
+                "count": 16
+            },
+            "certifications": [
+                "RoHS"
+            ],
+            "packaging": {
+                "type": "Tube",
+                "quantity": 100
+            },
+            "applications": [
+                "Time-multiplexing LED display"
+            ],
+            "features": [
+                "6-bit current gain",
+                "LED open detection",
+                "PWM Enhancement",
+                "GCLK Multiplier",
+                "Intelligent Power Saving",
+                "7 Common Problems Solving"
+            ],
+            "LED_Type": "Common anode",
+            "Scan_Type": "Typical",
+            "Excellent_Output_Current_Accuracy": {
+                "Between_Channels": {
+                    "value": 2.5,
+                    "unit": "%",
+                    "condition": "typical"
+                },
+                "Between_ICs": {
+                    "value": 3.0,
+                    "unit": "%",
+                    "condition": "typical"
+                }
+            },
+            "Embedded_MOSFET": false,
+            "Error_Detection": {
+                "LED_Open": true,
+                "LED_Short": false
+            },
+            "Current_Gain": {
+                "resolution": 6,
+                "unit": "bit"
+            },
+            "PWM_Enhancement": true,
+            "GCLK_Multiplier": true,
+            "Solving_7_Common_Problems": true,
+            "Intelligent_Power_Saving": true,
+            "S-PWM": {
+                "resolution": [
+                    13,
+                    14,
+                    15,
+                    16
+                ],
+                "unit": "bit"
+            },
+            "Scan_Design": {
+                "max_scan": 16,
+                "unit": "scan"
+            }
+        },
+        "MBI5264": {
+            "manufacturer": "Macroblock",
+            "series": "SRAM Embedded S-PWM LED Driver",
+            "type": "LED Driver IC",
+            "mounting_style": [
+                "SMD",
+                "SMT"
+            ],
+            "package_case": [
+                "SSOP24",
+                "QFN24"
+            ],
+            "number_of_outputs": 16,
+            "output_current": {
+                "min": 0.5,
+                "typ": 10,
+                "max": 20,
+                "unit": "mA"
+            },
+            "input_voltage": {
+                "min": 3.3,
+                "typ": 5.0,
+                "max": 5.5,
+                "unit": "V"
+            },
+            "topology": "Current Mirror with SRAM",
+            "operating_frequency": {
+                "min": null,
+                "typ": null,
+                "max": null,
+                "unit": "Hz"
+            },
+            "output_voltage": {
+                "min": 0,
+                "typ": 7,
+                "max": 7,
+                "unit": "V"
+            },
+            "operating_temperature": {
+                "min": -40,
+                "max": 85,
+                "unit": "°C"
+            },
+            "dimming_method": [
+                "Digital",
+                "S-PWM",
+                "PWM Enhancement"
+            ],
+            "internal_switch": {
+                "present": true,
+                "type": "Current mirror",
+                "count": 16
+            },
+            "certifications": [
+                "RoHS"
+            ],
+            "packaging": {
+                "type": "Tube",
+                "quantity": 100
+            },
+            "applications": [
+                "Time-multiplexing LED display"
+            ],
+            "features": [
+                "6-bit current gain",
+                "LED open detection",
+                "PWM Enhancement",
+                "GCLK Multiplier",
+                "Intelligent Power Saving",
+                "7 Common Problems Solving"
+            ],
+            "LED_Type": "Common anode",
+            "Scan_Type": "Typical",
+            "Excellent_Output_Current_Accuracy": {
+                "Between_Channels": {
+                    "value": 1.5,
+                    "unit": "%",
+                    "condition": "typical"
+                },
+                "Between_ICs": {
+                    "value": 1.5,
+                    "unit": "%",
+                    "condition": "typical"
+                }
+            },
+            "Embedded_MOSFET": false,
+            "Error_Detection": {
+                "LED_Open": true,
+                "LED_Short": false
+            },
+            "Current_Gain": {
+                "resolution": 6,
+                "unit": "bit"
+            },
+            "PWM_Enhancement": true,
+            "GCLK_Multiplier": true,
+            "Solving_7_Common_Problems": true,
+            "Intelligent_Power_Saving": true,
+            "S-PWM": {
+                "resolution": [
+                    13,
+                    14,
+                    15,
+                    16
+                ],
+                "unit": "bit"
+            },
+            "Scan_Design": {
+                "max_scan": 64,
+                "unit": "scan"
+            }
+        },
+        "MBI5265": {
+            "manufacturer": "Macroblock",
+            "series": "SRAM Embedded S-PWM LED Driver",
+            "type": "LED Driver IC",
+            "mounting_style": [
+                "SMD",
+                "SMT"
+            ],
+            "package_case": [
+                "SSOP24"
+            ],
+            "number_of_outputs": 16,
+            "output_current": {
+                "min": 1.0,
+                "typ": 15,
+                "max": 30,
+                "unit": "mA"
+            },
+            "input_voltage": {
+                "min": 3.3,
+                "typ": 5.0,
+                "max": 5.5,
+                "unit": "V"
+            },
+            "topology": "Current Mirror with SRAM",
+            "operating_frequency": {
+                "min": null,
+                "typ": null,
+                "max": null,
+                "unit": "Hz"
+            },
+            "output_voltage": {
+                "min": 0,
+                "typ": 7,
+                "max": 7,
+                "unit": "V"
+            },
+            "operating_temperature": {
+                "min": -40,
+                "max": 85,
+                "unit": "°C"
+            },
+            "dimming_method": [
+                "Digital",
+                "S-PWM",
+                "PWM Enhancement"
+            ],
+            "internal_switch": {
+                "present": true,
+                "type": "Current mirror",
+                "count": 16
+            },
+            "certifications": [
+                "RoHS"
+            ],
+            "packaging": {
+                "type": "Tube",
+                "quantity": 100
+            },
+            "applications": [
+                "Time-multiplexing LED display"
+            ],
+            "features": [
+                "6-bit current gain",
+                "LED open detection",
+                "PWM Enhancement",
+                "GCLK Multiplier",
+                "Intelligent Power Saving",
+                "7 Common Problems Solving"
+            ],
+            "LED_Type": "Common anode",
+            "Scan_Type": "Typical",
+            "Excellent_Output_Current_Accuracy": {
+                "Between_Channels": {
+                    "value": 1.5,
+                    "unit": "%",
+                    "condition": "typical"
+                },
+                "Between_ICs": {
+                    "value": 1.5,
+                    "unit": "%",
+                    "condition": "typical"
+                }
+            },
+            "Embedded_MOSFET": false,
+            "Error_Detection": {
+                "LED_Open": true,
+                "LED_Short": false
+            },
+            "Current_Gain": {
+                "resolution": 6,
+                "unit": "bit"
+            },
+            "PWM_Enhancement": true,
+            "GCLK_Multiplier": true,
+            "Solving_7_Common_Problems": true,
+            "Intelligent_Power_Saving": true,
+            "S-PWM": {
+                "resolution": [
+                    13,
+                    14,
+                    15,
+                    16
+                ],
+                "unit": "bit"
+            },
+            "Scan_Design": {
+                "max_scan": 96,
+                "unit": "scan"
+            }
+        },
+        "MBI5268": {
+            "manufacturer": "Macroblock",
+            "series": "SRAM Embedded S-PWM LED Driver",
+            "type": "LED Driver IC",
+            "mounting_style": [
+                "SMD",
+                "SMT"
+            ],
+            "package_case": [
+                "SSOP24"
+            ],
+            "number_of_outputs": 16,
+            "output_current": {
+                "min": 3.0,
+                "typ": 15,
+                "max": 30,
+                "unit": "mA"
+            },
+            "input_voltage": {
+                "min": 3.3,
+                "typ": 5.0,
+                "max": 5.5,
+                "unit": "V"
+            },
+            "topology": "Current Mirror with SRAM",
+            "operating_frequency": {
+                "min": null,
+                "typ": null,
+                "max": null,
+                "unit": "Hz"
+            },
+            "output_voltage": {
+                "min": 0,
+                "typ": 7,
+                "max": 7,
+                "unit": "V"
+            },
+            "operating_temperature": {
+                "min": -40,
+                "max": 85,
+                "unit": "°C"
+            },
+            "dimming_method": [
+                "Digital",
+                "S-PWM",
+                "PWM Enhancement"
+            ],
+            "internal_switch": {
+                "present": true,
+                "type": "Current mirror",
+                "count": 16
+            },
+            "certifications": [
+                "RoHS"
+            ],
+            "packaging": {
+                "type": "Tube",
+                "quantity": 100
+            },
+            "applications": [
+                "Time-multiplexing LED display"
+            ],
+            "features": [
+                "6-bit current gain",
+                "LED open detection",
+                "PWM Enhancement",
+                "GCLK Multiplier",
+                "Intelligent Power Saving",
+                "7 Common Problems Solving"
+            ],
+            "LED_Type": "Common anode",
+            "Scan_Type": "Typical",
+            "Excellent_Output_Current_Accuracy": {
+                "Between_Channels": {
+                    "value": 2.5,
+                    "unit": "%",
+                    "condition": "typical"
+                },
+                "Between_ICs": {
+                    "value": 3.0,
+                    "unit": "%",
+                    "condition": "typical"
+                }
+            },
+            "Embedded_MOSFET": false,
+            "Error_Detection": {
+                "LED_Open": true,
+                "LED_Short": false
+            },
+            "Current_Gain": {
+                "resolution": 6,
+                "unit": "bit"
+            },
+            "PWM_Enhancement": true,
+            "GCLK_Multiplier": true,
+            "Solving_7_Common_Problems": true,
+            "Intelligent_Power_Saving": true,
+            "S-PWM": {
+                "resolution": [
+                    13,
+                    14
+                ],
+                "unit": "bit"
+            },
+            "Scan_Design": {
+                "max_scan": 128,
+                "unit": "scan"
+            }
+        },
+        "MBI5269": {
+            "manufacturer": "Macroblock",
+            "series": "SRAM Embedded S-PWM LED Driver",
+            "type": "LED Driver IC",
+            "mounting_style": [
+                "SMD",
+                "SMT"
+            ],
+            "package_case": [
+                "SSOP24"
+            ],
+            "number_of_outputs": 16,
+            "output_current": {
+                "min": 20,
+                "typ": 40,
+                "max": 60,
+                "unit": "mA"
+            },
+            "input_voltage": {
+                "min": 3.3,
+                "typ": 5.0,
+                "max": 5.5,
+                "unit": "V"
+            },
+            "topology": "Current Mirror with SRAM",
+            "operating_frequency": {
+                "min": null,
+                "typ": null,
+                "max": null,
+                "unit": "Hz"
+            },
+            "output_voltage": {
+                "min": 0,
+                "typ": 7,
+                "max": 7,
+                "unit": "V"
+            },
+            "operating_temperature": {
+                "min": -40,
+                "max": 85,
+                "unit": "°C"
+            },
+            "dimming_method": [
+                "Digital",
+                "S-PWM",
+                "PWM Enhancement"
+            ],
+            "internal_switch": {
+                "present": true,
+                "type": "Current mirror",
+                "count": 16
+            },
+            "certifications": [
+                "RoHS"
+            ],
+            "packaging": {
+                "type": "Tube",
+                "quantity": 100
+            },
+            "applications": [
+                "Time-multiplexing LED display"
+            ],
+            "features": [
+                "6-bit current gain",
+                "LED open detection",
+                "PWM Enhancement",
+                "GCLK Multiplier",
+                "Intelligent Power Saving",
+                "7 Common Problems Solving"
+            ],
+            "LED_Type": "Common anode",
+            "Scan_Type": "Typical",
+            "Excellent_Output_Current_Accuracy": {
+                "Between_Channels": {
+                    "value": 2.5,
+                    "unit": "%",
+                    "condition": "typical"
+                },
+                "Between_ICs": {
+                    "value": 3.0,
+                    "unit": "%",
+                    "condition": "typical"
+                }
+            },
+            "Embedded_MOSFET": false,
+            "Error_Detection": {
+                "LED_Open": true,
+                "LED_Short": false
+            },
+            "Current_Gain": {
+                "resolution": 6,
+                "unit": "bit"
+            },
+            "PWM_Enhancement": true,
+            "GCLK_Multiplier": true,
+            "Solving_7_Common_Problems": true,
+            "Intelligent_Power_Saving": true,
+            "S-PWM": {
+                "resolution": [
+                    13,
+                    14
+                ],
+                "unit": "bit"
+            },
+            "Scan_Design": {
+                "max_scan": 96,
+                "unit": "scan"
+            }
+        }
+    },
+    "MBI5353": {
+        "manufacturer": "Macroblock",
+        "series": "SRAM Embedded S-PWM LED Driver",
+        "type": "LED Driver IC",
+        "mounting_style": [
+            "SMD",
+            "SMT"
+        ],
+        "package_case": [
+            "QFN56"
+        ],
+        "number_of_outputs": 48,
+        "output_current": {
+            "min": 0.5,
+            "typ": 10,
+            "max": 20,
+            "unit": "mA"
+        },
+        "input_voltage": {
+            "min": 3.3,
+            "typ": 5.0,
+            "max": 5.5,
+            "unit": "V"
+        },
+        "topology": "Current Mirror with SRAM",
+        "operating_frequency": {
+            "min": null,
+            "typ": null,
+            "max": null,
+            "unit": "Hz"
+        },
+        "output_voltage": {
+            "min": 0,
+            "typ": 17,
+            "max": 17,
+            "unit": "V"
+        },
+        "operating_temperature": {
+            "min": -40,
+            "max": 85,
+            "unit": "°C"
+        },
+        "dimming_method": [
+            "Digital",
+            "S-PWM",
+            "Global/RGB Current Gain"
+        ],
+        "internal_switch": {
+            "present": true,
+            "type": "Current mirror",
+            "count": 48
+        },
+        "certifications": [
+            "RoHS"
+        ],
+        "packaging": {
+            "type": "Tube",
+            "quantity": 100
+        },
+        "applications": [
+            "Time-multiplexing LED display",
+            "High resolution LED display"
+        ],
+        "features": [
+            "Global/RGB current gain",
+            "LED open/short detection",
+            "GCLK Multiplier",
+            "Intelligent Power Saving",
+            "7 Common Problems Solving"
+        ],
+        "LED_Type": "Common anode",
+        "Scan_Type": "Typical",
+        "Excellent_Output_Current_Accuracy": {
+            "Between_Channels": {
+                "value": 1.5,
+                "unit": "%",
+                "condition": "typical"
+            },
+            "Between_ICs": {
+                "value": 1.5,
+                "unit": "%",
+                "condition": "typical"
+            }
+        },
+        "Embedded_MOSFET": false,
+        "Error_Detection": {
+            "LED_Open": true,
+            "LED_Short": true
+        },
+        "Current_Gain": {
+            "type": "Global/RGB",
+            "unit": "bit"
+        },
+        "PWM_Enhancement": false,
+        "GCLK_Multiplier": true,
+        "Solving_7_Common_Problems": true,
+        "Intelligent_Power_Saving": true,
+        "S-PWM": {
+            "resolution": [
+                13,
+                14,
+                15,
+                16
+            ],
+            "unit": "bit"
+        },
+        "Scan_Design": {
+            "max_scan": 32,
+            "unit": "scan"
+        }
+    },
+    "MBI5359": {
+        "manufacturer": "Macroblock",
+        "series": "SRAM Embedded S-PWM LED Driver",
+        "type": "LED Driver IC",
+        "mounting_style": [
+            "SMD",
+            "SMT"
+        ],
+        "package_case": [
+            "BGA104"
+        ],
+        "number_of_outputs": 48,
+        "output_current": {
+            "min": 0.5,
+            "typ": 10,
+            "max": 20,
+            "unit": "mA"
+        },
+        "input_voltage": {
+            "min": 3.3,
+            "typ": 5.0,
+            "max": 5.5,
+            "unit": "V"
+        },
+        "topology": "Current Mirror with SRAM",
+        "operating_frequency": {
+            "min": null,
+            "typ": null,
+            "max": null,
+            "unit": "Hz"
+        },
+        "output_voltage": {
+            "min": 0,
+            "typ": 17,
+            "max": 17,
+            "unit": "V"
+        },
+        "operating_temperature": {
+            "min": -40,
+            "max": 85,
+            "unit": "°C"
+        },
+        "dimming_method": [
+            "Digital",
+            "S-PWM",
+            "PWM Enhancement",
+            "Global/RGB Current Gain"
+        ],
+        "internal_switch": {
+            "present": true,
+            "type": "MOSFET",
+            "count": 32
+        },
+        "certifications": [
+            "RoHS"
+        ],
+        "packaging": {
+            "type": "Tray",
+            "quantity": 100
+        },
+        "applications": [
+            "Time-multiplexing LED display",
+            "High resolution LED display"
+        ],
+        "features": [
+            "Global/RGB current gain",
+            "LED open/short detection",
+            "Embedded 32 MOSFETs",
+            "PWM Enhancement",
+            "GCLK Multiplier",
+            "Intelligent Power Saving",
+            "7 Common Problems Solving"
+        ],
+        "LED_Type": "Common anode",
+        "Scan_Type": "Typical",
+        "Excellent_Output_Current_Accuracy": {
+            "Between_Channels": {
+                "value": 1.5,
+                "unit": "%",
+                "condition": "typical"
+            },
+            "Between_ICs": {
+                "value": 1.5,
+                "unit": "%",
+                "condition": "typical"
+            }
+        },
+        "Embedded_MOSFET": {
+            "present": true,
+            "count": 32
+        },
+        "Error_Detection": {
+            "LED_Open": true,
+            "LED_Short": true
+        },
+        "Current_Gain": {
+            "type": "Global/RGB",
+            "unit": "bit"
+        },
+        "PWM_Enhancement": true,
+        "GCLK_Multiplier": true,
+        "Solving_7_Common_Problems": true,
+        "Intelligent_Power_Saving": true,
+        "S-PWM": {
+            "resolution": [
+                13,
+                14,
+                15,
+                16
+            ],
+            "unit": "bit"
+        },
+        "Scan_Design": {
+            "max_scan": 32,
+            "unit": "scan"
+        }
+    },
+    "MBI5850": {
+        "manufacturer": "Macroblock",
+        "series": "SRAM Embedded S-PWM LED Driver",
+        "type": "LED Driver IC",
+        "mounting_style": [
+            "SMD",
+            "SMT"
+        ],
+        "package_case": [
+            "SSOP24"
+        ],
+        "number_of_outputs": 12,
+        "output_current": {
+            "min": 0.5,
+            "typ": 10,
+            "max": 20,
+            "unit": "mA"
+        },
+        "input_voltage": {
+            "min": 3.3,
+            "typ": 5.0,
+            "max": 5.5,
+            "unit": "V"
+        },
+        "topology": "Current Mirror with SRAM",
+        "operating_frequency": {
+            "min": null,
+            "typ": null,
+            "max": null,
+            "unit": "Hz"
+        },
+        "output_voltage": {
+            "min": 0,
+            "typ": 7,
+            "max": 7,
+            "unit": "V"
+        },
+        "operating_temperature": {
+            "min": -40,
+            "max": 85,
+            "unit": "°C"
+        },
+        "dimming_method": [
+            "Digital",
+            "S-PWM",
+            "PWM Enhancement",
+            "Global/RGB Current Gain"
+        ],
+        "internal_switch": {
+            "present": true,
+            "type": "MOSFET",
+            "count": 4
+        },
+        "certifications": [
+            "RoHS"
+        ],
+        "packaging": {
+            "type": "Tube",
+            "quantity": 100
+        },
+        "applications": [
+            "Time-multiplexing LED display",
+            "Scan-sharing LED display"
+        ],
+        "features": [
+            "Global/RGB current gain",
+            "LED open/short detection",
+            "Embedded 4 MOSFETs",
+            "PWM Enhancement",
+            "GCLK Multiplier",
+            "Intelligent Power Saving",
+            "7 Common Problems Solving"
+        ],
+        "LED_Type": "Common anode",
+        "Scan_Type": "Scan-sharing",
+        "Excellent_Output_Current_Accuracy": {
+            "Between_Channels": {
+                "value": 1.0,
+                "unit": "%",
+                "condition": "typical"
+            },
+            "Between_ICs": {
+                "value": 1.0,
+                "unit": "%",
+                "condition": "typical"
+            }
+        },
+        "Embedded_MOSFET": {
+            "present": true,
+            "count": 4
+        },
+        "Error_Detection": {
+            "LED_Open": true,
+            "LED_Short": true
+        },
+        "Current_Gain": {
+            "type": "Global/RGB",
+            "unit": "bit"
+        },
+        "PWM_Enhancement": true,
+        "GCLK_Multiplier": true,
+        "Solving_7_Common_Problems": true,
+        "Intelligent_Power_Saving": true,
+        "S-PWM": {
+            "resolution": [
+                13,
+                14,
+                15,
+                16
+            ],
+            "unit": "bit"
+        },
+        "Scan_Design": {
+            "max_scan": 32,
+            "unit": "scan"
+        }
+    },
+    "MBI5864": {
+        "manufacturer": "Macroblock",
+        "series": "SRAM Embedded S-PWM LED Driver",
+        "type": "LED Driver IC",
+        "mounting_style": [
+            "SMD",
+            "SMT"
+        ],
+        "package_case": [
+            "QFN88",
+            "BGA90"
+        ],
+        "number_of_outputs": 48,
+        "output_current": {
+            "min": 0.1,
+            "typ": 2.5,
+            "max": 5.0,
+            "unit": "mA"
+        },
+        "input_voltage": {
+            "min": 3.3,
+            "typ": 5.0,
+            "max": 5.5,
+            "unit": "V"
+        },
+        "topology": "Current Mirror with SRAM",
+        "operating_frequency": {
+            "min": null,
+            "typ": null,
+            "max": null,
+            "unit": "Hz"
+        },
+        "output_voltage": {
+            "min": 0,
+            "typ": 7,
+            "max": 7,
+            "unit": "V"
+        },
+        "operating_temperature": {
+            "min": -40,
+            "max": 85,
+            "unit": "°C"
+        },
+        "dimming_method": [
+            "Digital",
+            "S-PWM",
+            "PWM Enhancement"
+        ],
+        "internal_switch": {
+            "present": true,
+            "type": "MOSFET",
+            "count": 16
+        },
+        "certifications": [
+            "RoHS"
+        ],
+        "packaging": {
+            "type": "Tray",
+            "quantity": 100
+        },
+        "applications": [
+            "Time-multiplexing LED display",
+            "Scan-sharing LED display",
+            "High resolution LED display"
+        ],
+        "features": [
+            "6-bit current gain",
+            "LED open/short detection",
+            "Embedded 16 MOSFETs",
+            "PWM Enhancement",
+            "GCLK Multiplier",
+            "Intelligent Power Saving",
+            "7 Common Problems Solving"
+        ],
+        "LED_Type": "Common anode",
+        "Scan_Type": "Scan-sharing",
+        "Excellent_Output_Current_Accuracy": {
+            "Between_Channels": {
+                "value": 1.0,
+                "unit": "%",
+                "condition": "typical"
+            },
+            "Between_ICs": {
+                "value": 1.0,
+                "unit": "%",
+                "condition": "typical"
+            }
+        },
+        "Embedded_MOSFET": {
+            "present": true,
+            "count": 16
+        },
+        "Error_Detection": {
+            "LED_Open": true,
+            "LED_Short": true
+        },
+        "Current_Gain": {
+            "resolution": 6,
+            "unit": "bit"
+        },
+        "PWM_Enhancement": true,
+        "GCLK_Multiplier": true,
+        "Solving_7_Common_Problems": true,
+        "Intelligent_Power_Saving": true,
+        "S-PWM": {
+            "resolution": [
+                13,
+                14,
+                15,
+                16
+            ],
+            "unit": "bit"
+        },
+        "Scan_Design": {
+            "max_scan": 64,
+            "unit": "scan"
+        }
+    },
+    "MBI5754": {
+        "manufacturer": "Macroblock",
+        "series": "SRAM Embedded S-PWM LED Driver",
+        "type": "LED Driver IC",
+        "mounting_style": [
+            "SMD",
+            "SMT"
+        ],
+        "package_case": [
+            "SSOP24",
+            "QFN24"
+        ],
+        "number_of_outputs": 16,
+        "output_current": {
+            "min": 1,
+            "typ": 9,
+            "max": 18,
+            "unit": "mA"
+        },
+        "input_voltage": {
+            "min": 3.3,
+            "typ": 5.0,
+            "max": 5.5,
+            "unit": "V"
+        },
+        "topology": "Current Mirror with SRAM",
+        "operating_frequency": {
+            "min": null,
+            "typ": null,
+            "max": null,
+            "unit": "Hz"
+        },
+        "output_voltage": {
+            "min": 0,
+            "typ": 7,
+            "max": 7,
+            "unit": "V"
+        },
+        "operating_temperature": {
+            "min": -40,
+            "max": 85,
+            "unit": "°C"
+        },
+        "dimming_method": [
+            "Digital",
+            "S-PWM",
+            "PWM Enhancement"
+        ],
+        "internal_switch": {
+            "present": true,
+            "type": "Current mirror",
+            "count": 16
+        },
+        "certifications": [
+            "RoHS",
+            "Patented"
+        ],
+        "packaging": {
+            "type": "Tube",
+            "quantity": 100
+        },
+        "applications": [
+            "Time-multiplexing LED display"
+        ],
+        "features": [
+            "6-bit current gain",
+            "LED open detection",
+            "PWM Enhancement",
+            "GCLK Multiplier",
+            "Intelligent Power Saving",
+            "7 Common Problems Solving",
+            "Patented technology"
+        ],
+        "LED_Type": "Common anode",
+        "Scan_Type": "Typical",
+        "Excellent_Output_Current_Accuracy": {
+            "Between_Channels": {
+                "value": 1.5,
+                "unit": "%",
+                "condition": "typical"
+            },
+            "Between_ICs": {
+                "value": 1.5,
+                "unit": "%",
+                "condition": "typical"
+            }
+        },
+        "Embedded_MOSFET": false,
+        "Error_Detection": {
+            "LED_Open": true,
+            "LED_Short": false
+        },
+        "Current_Gain": {
+            "resolution": 6,
+            "unit": "bit"
+        },
+        "PWM_Enhancement": true,
+        "GCLK_Multiplier": true,
+        "Solving_7_Common_Problems": true,
+        "Intelligent_Power_Saving": true,
+        "S-PWM": {
+            "resolution": [
+                13,
+                14,
+                15,
+                16
+            ],
+            "unit": "bit"
+        },
+        "Scan_Design": {
+            "max_scan": 64,
+            "unit": "scan"
+        }
+    },
+    "MBI5759": {
+        "manufacturer": "Macroblock",
+        "series": "SRAM Embedded S-PWM LED Driver",
+        "type": "LED Driver IC",
+        "mounting_style": [
+            "SMD",
+            "SMT"
+        ],
+        "package_case": [
+            "BGA104"
+        ],
+        "number_of_outputs": 48,
+        "output_current": {
+            "min": 0.5,
+            "typ": 7.5,
+            "max": 15,
+            "unit": "mA"
+        },
+        "input_voltage": {
+            "min": 3.3,
+            "typ": 5.0,
+            "max": 5.5,
+            "unit": "V"
+        },
+        "topology": "Current Mirror with SRAM",
+        "operating_frequency": {
+            "min": null,
+            "typ": null,
+            "max": null,
+            "unit": "Hz"
+        },
+        "output_voltage": {
+            "min": 0,
+            "typ": 17,
+            "max": 17,
+            "unit": "V"
+        },
+        "operating_temperature": {
+            "min": -40,
+            "max": 85,
+            "unit": "°C"
+        },
+        "dimming_method": [
+            "Digital",
+            "S-PWM",
+            "PWM Enhancement",
+            "Global/RGB Current Gain"
+        ],
+        "internal_switch": {
+            "present": true,
+            "type": "MOSFET",
+            "count": 32
+        },
+        "certifications": [
+            "RoHS",
+            "Patented"
+        ],
+        "packaging": {
+            "type": "Tray",
+            "quantity": 100
+        },
+        "applications": [
+            "Time-multiplexing LED display"
+        ],
+        "features": [
+            "Global/RGB current gain",
+            "LED open/short detection",
+            "Embedded 32 MOSFETs",
+            "PWM Enhancement",
+            "GCLK Multiplier",
+            "Intelligent Power Saving",
+            "7 Common Problems Solving",
+            "Patented technology"
+        ],
+        "LED_Type": "Common cathode",
+        "Scan_Type": "Typical",
+        "Excellent_Output_Current_Accuracy": {
+            "Between_Channels": {
+                "value": 1.5,
+                "unit": "%",
+                "condition": "typical"
+            },
+            "Between_ICs": {
+                "value": 1.5,
+                "unit": "%",
+                "condition": "typical"
+            }
+        },
+        "Embedded_MOSFET": {
+            "present": true,
+            "count": 32
+        },
+        "Error_Detection": {
+            "LED_Open": true,
+            "LED_Short": true
+        },
+        "Current_Gain": {
+            "type": "Global/RGB",
+            "unit": "bit"
+        },
+        "PWM_Enhancement": true,
+        "GCLK_Multiplier": true,
+        "Solving_7_Common_Problems": true,
+        "Intelligent_Power_Saving": true,
+        "S-PWM": {
+            "resolution": [
+                13,
+                14,
+                15,
+                16
+            ],
+            "unit": "bit"
+        },
+        "Scan_Design": {
+            "max_scan": 32,
+            "unit": "scan"
+        }
+    },
+    "MBI5762": {
+        "manufacturer": "Macroblock",
+        "series": "SRAM Embedded S-PWM LED Driver",
+        "type": "LED Driver IC",
+        "mounting_style": [
+            "SMD",
+            "SMT"
+        ],
+        "package_case": [
+            "QFN64"
+        ],
+        "number_of_outputs": 48,
+        "output_current": {
+            "min": 0.5,
+            "typ": 5,
+            "max": 10,
+            "unit": "mA"
+        },
+        "input_voltage": {
+            "min": 3.3,
+            "typ": 5.0,
+            "max": 5.5,
+            "unit": "V"
+        },
+        "topology": "Current Mirror with SRAM",
+        "operating_frequency": {
+            "min": null,
+            "typ": null,
+            "max": null,
+            "unit": "Hz"
+        },
+        "output_voltage": {
+            "min": 0,
+            "typ": 7,
+            "max": 7,
+            "unit": "V"
+        },
+        "operating_temperature": {
+            "min": -40,
+            "max": 85,
+            "unit": "°C"
+        },
+        "dimming_method": [
+            "Digital",
+            "S-PWM",
+            "PWM Enhancement"
+        ],
+        "internal_switch": {
+            "present": true,
+            "type": "Current mirror",
+            "count": 48
+        },
+        "certifications": [
+            "RoHS",
+            "Patented"
+        ],
+        "packaging": {
+            "type": "Tray",
+            "quantity": 100
+        },
+        "applications": [
+            "Time-multiplexing LED display"
+        ],
+        "features": [
+            "7-bit current gain",
+            "LED open/short detection",
+            "PWM Enhancement",
+            "GCLK Multiplier",
+            "Intelligent Power Saving",
+            "7 Common Problems Solving",
+            "Patented technology"
+        ],
+        "LED_Type": "Common cathode",
+        "Scan_Type": "Typical",
+        "Excellent_Output_Current_Accuracy": {
+            "Between_Channels": {
+                "value": 2.0,
+                "unit": "%",
+                "condition": "typical"
+            },
+            "Between_ICs": {
+                "value": 2.5,
+                "unit": "%",
+                "condition": "typical"
+            }
+        },
+        "Embedded_MOSFET": false,
+        "Error_Detection": {
+            "LED_Open": true,
+            "LED_Short": true
+        },
+        "Current_Gain": {
+            "resolution": 7,
+            "unit": "bit"
+        },
+        "PWM_Enhancement": true,
+        "GCLK_Multiplier": true,
+        "Solving_7_Common_Problems": true,
+        "Intelligent_Power_Saving": true,
+        "S-PWM": {
+            "resolution": [
+                13,
+                14,
+                15,
+                16
+            ],
+            "unit": "bit"
+        },
+        "Scan_Design": {
+            "max_scan": 32,
+            "unit": "scan"
+        }
+    }
+}
