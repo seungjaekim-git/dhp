@@ -111,7 +111,7 @@ const ProductCategoryPage = () => {
               <div className="space-y-3">
                 {filteredCategories.map(category => (
                   <motion.div 
-                    key={category.id} 
+                    key={category?.id} 
                     className="space-y-2"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -125,39 +125,39 @@ const ProductCategoryPage = () => {
                         variant="outline"
                         className={`w-full justify-between p-3 h-auto rounded-lg`}
                         onClick={() => {
-                          setSelectedCategory(selectedCategory === category.id ? null : category.id);
-                          handleCategoryExpand(category.id);
+                          setSelectedCategory(selectedCategory === category?.id ? null : category?.id ?? '');
+                          handleCategoryExpand(category?.id ?? '');
                         }}
                       >
                         <span className="flex items-center">
                           <motion.div
-                            animate={{ rotate: selectedCategory === category.id ? 180 : 0 }}
+                            animate={{ rotate: selectedCategory === category?.id ? 180 : 0 }}
                             transition={{ duration: 0.3 }}
                           >
-                            {selectedCategory === category.id ? 
+                            {selectedCategory === category?.id ? 
                               <ChevronRight className="h-4 w-4 mr-2 rotate-90" /> : 
                               <ChevronRight className="h-4 w-4 mr-2" />
                             }
                           </motion.div>
-                          <span className="text-sm font-medium">{category.name}</span>
+                          <span className="text-sm font-medium">{category?.name}</span>
                         </span>
                         <Badge 
                           variant="outline" 
                           className={`ml-2 px-2 py-0.5 text-xs`}>
-                          {category.count}
+                          {category?.count}
                         </Badge>
                       </Button>
                     </motion.div>
                     
                     <AnimatePresence>
-                      {selectedCategory === category.id && (
+                      {selectedCategory === category?.id && (
                         <motion.div
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: "auto" }}
                           exit={{ opacity: 0, height: 0 }}
                           className="ml-8 space-y-2 overflow-hidden"
                         >
-                          {category.subcategories.map((subcat, idx) => (
+                          {category?.subcategories.map((subcat, idx) => (
                             <motion.div
                               key={idx}
                               initial={{ opacity: 0, x: -20 }}

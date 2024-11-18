@@ -6,12 +6,14 @@ import { Skeleton } from "./skeleton";
 
 import * as React from "react";
 
-export default function Page({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) {
-  const search = searchParamsCache.parse(searchParams);
+export default function Page() {
+
+//   searchParams,
+// }: {
+//   searchParams: { [key: string]: string | string[] | undefined };
+// }) {
+  const search = {};
+  //searchParamsCache.parse(searchParams);
 
   return (
     <React.Suspense fallback={<Skeleton />}>

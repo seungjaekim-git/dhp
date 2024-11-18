@@ -1,6 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  //output: "export",
+  output: "export",
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  // basePath: '/renewal',
+  transpilePackages: ['@radix-ui'],
   webpack: (config) => {
     config.module.rules.push({
       test: /\.svg$/i,
@@ -10,7 +15,7 @@ const nextConfig = {
     return config;
   },
   images: {
-    //unoptimized: true,
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",

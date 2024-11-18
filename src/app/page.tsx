@@ -1,5 +1,4 @@
 
-"use client";
 import React from "react";
 import { HeroParallax } from "@/components/ui/hero-parrallax";
 import Feature from "@/container/features/features"

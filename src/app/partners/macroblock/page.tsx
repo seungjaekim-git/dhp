@@ -11,6 +11,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 
 import { Partner } from "@/types/partner"
 import { getpartnersList } from "@/lib/get-partners-list"
+import router from 'next/router';
 
 
 export default function Page({ params }: { params: { partners_name: string } }) {
