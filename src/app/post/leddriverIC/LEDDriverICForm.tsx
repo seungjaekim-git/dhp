@@ -7,7 +7,6 @@ import { z } from "zod"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
 import { useEffect, useState } from "react"
 import { createClient } from "@supabase/supabase-js"
 import {
@@ -23,7 +22,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
 } from "@/components/ui/form"
 import {
   Popover,
@@ -35,49 +33,40 @@ import {
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  { db: { schema: 'DHP' }}
+  { db: { schema: 'dhp' }}
 )
-
-const dimmingMethods = [
-  { label: "Digital", value: "Digital" },
-  { label: "Analog", value: "Analog" }
-] as const
-
-const certifications = [
-  { label: "RoHS", value: "RoHS" },
-  { label: "CE", value: "CE" },
-  { label: "UL", value: "UL" }
-] as const
 
 const FormSchema = z.object({
   part_number: z.string().min(1, "Part Number는 필수입니다"),
-  manufacturer_id: z.string({
+  manufacturer_id: z.number({
     required_error: "제조사를 선택해주세요",
   }),
-  category_id: z.string({
+  category_id: z.number({
     required_error: "카테고리를 선택해주세요",
   }),
-  series: z.string().optional(),
   subtitle: z.string().optional(),
-  number_of_outputs: z.string().min(1, "Number of Outputs는 필수입니다"),
-  output_current_min: z.string().optional(),
-  output_voltage_max: z.string().optional(),
-  operating_temperature_min: z.string().optional(),
-  operating_temperature_max: z.string().optional(),
-  dimming_method: z.string().optional(),
-  certifications: z.array(z.string()).optional(),
-  applications: z.string().optional(),
-  package: z.string().optional(),
-  moq: z.string().optional(),
-  lead_time: z.string().optional(),
-  price: z.string().optional()
+  number_of_outputs: z.number().min(1, "출력 수는 필수입니다"),
+  input_voltage_min: z.number().optional(),
+  input_voltage_max: z.number().optional(),
+  typical_input_voltage: z.number().optional(),
+  operating_frequency_min: z.number().optional(), 
+  operating_frequency_max: z.number().optional(),
+  typical_operating_frequency: z.number().optional(),
+  output_current_min: z.number().optional(),
+  output_current_max: z.number().optional(),
+  typical_output_current: z.number().optional(),
+  output_voltage_min: z.number().optional(),
+  output_voltage_max: z.number().optional(),
+  typical_output_voltage: z.number().optional(),
+  operating_temperature_min: z.number().min(-273.15, "최소 동작 온도는 -273.15°C 이상이어야 합니다"),
+  operating_temperature_max: z.number().min(-273.15, "최대 동작 온도는 -273.15°C 이상이어야 합니다"),
+  category_specific_attributes: z.record(z.unknown()).optional()
 })
 
 export default function LEDDriverICForm() {
   const [manufacturers, setManufacturers] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
 
-  // 제조사와 카테고리 데이터 가져오기
   useEffect(() => {
     const fetchData = async () => {
       // 제조사 데이터 가져오기
@@ -114,7 +103,7 @@ export default function LEDDriverICForm() {
     try {
       // Supabase에 데이터 저장
       const { data: result, error } = await supabase
-        .from('led_driver_ics')
+        .from('led_driver_ic')
         .insert([{...data}])
         .select()
 
@@ -266,220 +255,95 @@ export default function LEDDriverICForm() {
               </FormItem>
             )}
           />
-
-          <FormField
-            control={form.control}
-            name="series"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input {...field} placeholder="Series (예: All-Ways-On)" />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="subtitle"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Textarea {...field} placeholder="Subtitle (제품에 대한 간략한 설명)" />
-                </FormControl>
-              </FormItem>
-            )}
-          />
         </section>
-        
+
         {/* 전기적 특성 섹션 */}
         <section className="space-y-2">
           <h2 className="text-md font-semibold">전기적 특성</h2>
-          <FormField
-            control={form.control}
-            name="number_of_outputs"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input {...field} type="number" placeholder="Number of Outputs" />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="output_current_min"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input {...field} type="number" placeholder="Output Current Min (mA)" />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="output_voltage_max"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input {...field} type="number" placeholder="Output Voltage Max (V)" />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="operating_temperature_min"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input {...field} type="number" placeholder="Operating Temperature Min (°C)" />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="operating_temperature_max"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input {...field} type="number" placeholder="Operating Temperature Max (°C)" />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </section>
-        
-        {/* 기능 및 인증 섹션 */}
-        <section className="space-y-2">
-          <h2 className="text-md font-semibold">기능 및 인증</h2>
-          <FormField
-            control={form.control}
-            name="dimming_method"
-            render={({ field }) => (
-              <FormItem>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className={cn(
-                          "w-full justify-between",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value
-                          ? dimmingMethods.find(
-                              (method) => method.value === field.value
-                            )?.label
-                          : "Dimming Method 선택"}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0">
-                    <Command>
-                      <CommandInput placeholder="Dimming Method 검색..." />
-                      <CommandList>
-                        <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
-                        <CommandGroup>
-                          {dimmingMethods.map((method) => (
-                            <CommandItem
-                              value={method.label}
-                              key={method.value}
-                              onSelect={() => {
-                                form.setValue("dimming_method", method.value)
-                              }}
-                            >
-                              {method.label}
-                              <Check
-                                className={cn(
-                                  "ml-auto",
-                                  method.value === field.value
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                )}
-                              />
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-              </FormItem>
-            )}
-          />
+          
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="input_voltage_min"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input {...field} type="number" step="0.01" placeholder="최소 입력 전압 (V)" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="input_voltage_max"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input {...field} type="number" step="0.01" placeholder="최대 입력 전압 (V)" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
 
-          <FormField
-            control={form.control}
-            name="applications"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Textarea {...field} placeholder="Applications (예: High-flux LED lighting)" />
-                </FormControl>
-              </FormItem>
-            )}
-          />
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="output_current_min"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input {...field} type="number" step="0.01" placeholder="최소 출력 전류 (mA)" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="output_current_max"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input {...field} type="number" step="0.01" placeholder="최대 출력 전류 (mA)" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="operating_temperature_min"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input {...field} type="number" step="0.1" placeholder="최소 동작 온도 (°C)" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="operating_temperature_max"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input {...field} type="number" step="0.1" placeholder="최대 동작 온도 (°C)" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
         </section>
-        
-        {/* 패키지 정보 섹션 */}
-        <section className="space-y-2">
-          <h2 className="text-md font-semibold">패키지 정보</h2>
-          <FormField
-            control={form.control}
-            name="package"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input {...field} placeholder="Package Type (예: SOP8L-150-1.27)" />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="moq"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input {...field} type="number" placeholder="MOQ (최소 주문 수량)" />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="lead_time"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input {...field} type="number" placeholder="Lead Time (주 단위)" />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="price"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input {...field} type="number" step="0.01" placeholder="Price (USD)" />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </section>
-        
+
         <Button type="submit" className="bg-blue-500 text-white">
           저장
         </Button>
       </form>
     </Form>
-  );
+  )
 }
