@@ -94,6 +94,7 @@ export function ManufacturerForm() {
   })
 
   const [divisions, setDivisions] = useState<any[]>([])
+  const [countries, setCountries] = useState<any[]>([])
 
   useEffect(() => {
     const fetchDivisions = async () => {
@@ -108,7 +109,20 @@ export function ManufacturerForm() {
       }
     }
 
+    const fetchCountries = async () => {
+      const { data, error } = await supabase
+        .rpc('get_enum_values', {
+          enum_type_name: 'country',
+        });
+      console.log(data);
+      if (error) {
+        console.error('국가 데이터 로딩 오류:', error)
+      } else {
+        setCountries(data || [])
+      }
+    }
     fetchDivisions()
+    fetchCountries()
   }, [])
 
   const onSubmit = async (data: z.infer<typeof ManufacturerFormSchema>) => {
@@ -149,9 +163,60 @@ export function ManufacturerForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>국가</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="국가를 입력하세요" />
-              </FormControl>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className={cn(
+                        "w-full justify-between",
+                        !field.value && "text-muted-foreground"
+                      )}
+                      onClick={() => {
+                        if (!field.value) {
+                          form.setValue("country", "");
+                        }
+                      }}
+                    >
+                      {field.value
+                        ? countries.find(
+                            (country) => country === field.value
+                          )
+                        : "국가를 선택하세요"}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandInput placeholder="국가 검색..." />
+                    <CommandEmpty>국가를 찾을 수 없습니다.</CommandEmpty>
+                    <CommandGroup>
+                      {countries.map((country) => (
+                        console.log(country),
+                        <CommandItem
+                          value={country}
+                          key={country}
+                          onSelect={() => {
+                            form.setValue("country", country);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              country === field.value
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          {country}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </FormItem>
           )}
         />
