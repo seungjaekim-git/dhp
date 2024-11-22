@@ -66,6 +66,7 @@ create table
     title text,
     url text not null,
     description text,
+    product_id int references products (id) on delete cascade,
     created_at timestamp default now(),
     updated_at timestamp default now()
   );
@@ -85,7 +86,6 @@ create table
   applications (
     id int primary key generated always as identity,
     name text unique not null,
-    description text,
     created_at timestamp default now(),
     updated_at timestamp default now()
   );

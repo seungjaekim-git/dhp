@@ -10,6 +10,7 @@ import { createClient } from "@supabase/supabase-js"
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel
@@ -17,9 +18,12 @@ import {
 import { useEffect, useState } from "react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
-import { ChevronsUpDown } from "lucide-react"
+import { ChevronsUpDown, Trash2 } from "lucide-react"
 import { Command, CommandItem, CommandGroup, CommandInput, CommandEmpty } from "@/components/ui/command"
 import { Check } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
+
 
 // Supabase 클라이언트 초기화
 const supabase = createClient(
@@ -50,20 +54,6 @@ const CategoryFormSchema = z.object({
   description: z.string().optional()
 })
 
-// 문서 폼 스키마
-const DocumentFormSchema = z.object({
-  title: z.string().min(1, "문서 제목은 필수입니다"),
-  url: z.string().url("올바른 URL을 입력해주세요"),
-  type: z.string().optional()
-})
-
-// 이미지 폼 스키마
-const ImageFormSchema = z.object({
-  title: z.string().optional(),
-  url: z.string().url("올바른 URL을 입력해주세요"),
-  description: z.string().optional()
-})
-
 // 인증 폼 스키마
 const CertificationFormSchema = z.object({
   name: z.string().min(1, "인증명은 필수입니다"),
@@ -73,7 +63,6 @@ const CertificationFormSchema = z.object({
 // 애플리케이션 폼 스키마
 const ApplicationFormSchema = z.object({
   name: z.string().min(1, "애플리케이션명은 필수입니다"),
-  description: z.string().optional()
 })
 
 // 특징 폼 스키마
@@ -358,8 +347,83 @@ export function DivisionForm() {
 // 카테고리 폼 컴포넌트
 export function CategoryForm() {
   const form = useForm<z.infer<typeof CategoryFormSchema>>({
-    resolver: zodResolver(CategoryFormSchema)
+    resolver: zodResolver(CategoryFormSchema),
+    defaultValues: {
+      name: '',
+      parent_id: undefined,
+      description: ''
+    }
   })
+
+  const [categories, setCategories] = useState<any[]>([])
+
+  useEffect(() => {
+    fetchCategories()
+  }, [])
+
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('id')
+      
+      if (error) throw error
+      setCategories(data || [])
+    } catch (error) {
+      console.error("카테고리 조회 오류:", error)
+    }
+  }
+
+  const buildCategoryTree = (categories: any[], parentId: number | null = null): any[] => {
+    return categories
+      .filter(category => category.parent_id === parentId)
+      .map(category => ({
+        ...category,
+        children: buildCategoryTree(categories, category.id)
+      }))
+  }
+
+  const renderCategoryTree = (node: any, depth = 0) => {
+    return (
+      <div key={node.id} className="space-y-2">
+        <div className="flex items-center gap-2" style={{ marginLeft: `${depth * 20}px` }}>
+          <span>{node.name}</span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              form.setValue('parent_id', node.id)
+            }}
+          >
+            하위 카테고리 추가
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={async () => {
+              try {
+                const { error } = await supabase
+                  .from('categories')
+                  .delete()
+                  .eq('id', node.id)
+                
+                if (error) throw error
+                fetchCategories()
+              } catch (error) {
+                console.error("카테고리 삭제 오류:", error)
+              }
+            }}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+        {node.children?.map((child: any) => renderCategoryTree(child, depth + 1))}
+      </div>
+    )
+  }
 
   const onSubmit = async (data: z.infer<typeof CategoryFormSchema>) => {
     try {
@@ -370,6 +434,7 @@ export function CategoryForm() {
       if (error) throw error
       
       form.reset()
+      fetchCategories()
       alert("카테고리 정보가 저장되었습니다.")
     } catch (error) {
       console.error("저장 오류:", error)
@@ -377,191 +442,77 @@ export function CategoryForm() {
     }
   }
 
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>카테고리명</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="카테고리명을 입력하세요" />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="parent_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>상위 카테고리 ID</FormLabel>
-              <FormControl>
-                <Input {...field} type="number" placeholder="상위 카테고리 ID를 입력하세요" />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>설명</FormLabel>
-              <FormControl>
-                <Textarea {...field} placeholder="설명을 입력하세요" />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <Button type="submit">저장</Button>
-      </form>
-    </Form>
-  )
-}
-
-// 문서 폼 컴포넌트
-export function DocumentForm() {
-  const form = useForm<z.infer<typeof DocumentFormSchema>>({
-    resolver: zodResolver(DocumentFormSchema)
-  })
-
-  const onSubmit = async (data: z.infer<typeof DocumentFormSchema>) => {
-    try {
-      const { error } = await supabase
-        .from('documents')
-        .insert([data])
-      
-      if (error) throw error
-      
-      form.reset()
-      alert("문서 정보가 저장되었습니다.")
-    } catch (error) {
-      console.error("저장 오류:", error)
-      alert("저장에 실패했습니다.")
-    }
-  }
+  const categoryTree = buildCategoryTree(categories)
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>문서 제목</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="문서 제목을 입력하세요" />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+    <div className="space-y-8">
+      <div className="border rounded-lg p-4">
+        <h3 className="font-semibold mb-4">카테고리 트리</h3>
+        <div className="space-y-2">
+          {categoryTree.map(node => renderCategoryTree(node))}
+        </div>
+      </div>
 
-        <FormField
-          control={form.control}
-          name="url"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>URL</FormLabel>
-              <FormControl>
-                <Input {...field} type="url" placeholder="문서 URL을 입력하세요" />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>카테고리명</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="카테고리명을 입력하세요" />
+                </FormControl>
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>문서 유형</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="문서 유형을 입력하세요" />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="parent_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>상위 카테고리</FormLabel>
+                <FormControl>
+                  <Select
+                    onValueChange={(value) => field.onChange(value === 'null' ? null : Number(value))}
+                    value={field.value?.toString() || 'null'}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="상위 카테고리 선택" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="null">최상위 카테고리</SelectItem>
+                      {categories.map(category => (
+                        <SelectItem key={category.id} value={category.id.toString()}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+              </FormItem>
+            )}
+          />
 
-        <Button type="submit">저장</Button>
-      </form>
-    </Form>
-  )
-}
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>설명</FormLabel>
+                <FormControl>
+                  <Textarea {...field} placeholder="설명을 입력하세요" />
+                </FormControl>
+              </FormItem>
+            )}
+          />
 
-// 이미지 폼 컴포넌트
-export function ImageForm() {
-  const form = useForm<z.infer<typeof ImageFormSchema>>({
-    resolver: zodResolver(ImageFormSchema)
-  })
-
-  const onSubmit = async (data: z.infer<typeof ImageFormSchema>) => {
-    try {
-      const { error } = await supabase
-        .from('images')
-        .insert([data])
-      
-      if (error) throw error
-      
-      form.reset()
-      alert("이미지 정보가 저장되었습니다.")
-    } catch (error) {
-      console.error("저장 오류:", error)
-      alert("저장에 실패했습니다.")
-    }
-  }
-
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>이미지 제목</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="이미지 제목을 입력하세요" />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="url"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>URL</FormLabel>
-              <FormControl>
-                <Input {...field} type="url" placeholder="이미지 URL을 입력하세요" />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>설명</FormLabel>
-              <FormControl>
-                <Textarea {...field} placeholder="이미지 설명을 입력하세요" />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <Button type="submit">저장</Button>
-      </form>
-    </Form>
+          <Button type="submit">저장</Button>
+        </form>
+      </Form>
+    </div>
   )
 }
 
@@ -621,23 +572,74 @@ export function CertificationForm() {
     </Form>
   )
 }
-
 // 애플리케이션 폼 컴포넌트
 export function ApplicationForm() {
+  const [applications, setApplications] = useState<Array<{id: number, name: string}>>([])
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filteredApplications, setFilteredApplications] = useState<Array<{id: number, name: string}>>([])
+
   const form = useForm<z.infer<typeof ApplicationFormSchema>>({
-    resolver: zodResolver(ApplicationFormSchema)
+    resolver: zodResolver(ApplicationFormSchema),
+    defaultValues: {
+      name: ''
+    }
   })
+
+  // 애플리케이션 목록 조회
+  const fetchApplications = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('applications')
+        .select('id, name')
+        .order('name')
+      
+      if (error) throw error
+      if (data) {
+        setApplications(data)
+        setFilteredApplications(data)
+      }
+    } catch (error) {
+      console.error("조회 오류:", error)
+      alert("애플리케이션 목록 조회에 실패했습니다.")
+    }
+  }
+
+  useEffect(() => {
+    fetchApplications()
+  }, [])
+
+  // 검색어에 따른 필터링
+  useEffect(() => {
+    const filtered = applications.filter(app => 
+      app.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    setFilteredApplications(filtered)
+  }, [searchTerm, applications])
 
   const onSubmit = async (data: z.infer<typeof ApplicationFormSchema>) => {
     try {
+      const applicationNames = data.name.split(',').map(name => name.trim()).filter(name => name !== '')
+
+      // 중복 체크
+      const duplicates = applicationNames.filter(newName => 
+        applications.some(app => app.name.toLowerCase() === newName.toLowerCase())
+      )
+
+      if (duplicates.length > 0) {
+        alert(`다음 애플리케이션명이 이미 존재합니다: ${duplicates.join(', ')}`)
+        return
+      }
+
+      const applicationsToInsert = applicationNames.map(name => ({ name }))
       const { error } = await supabase
         .from('applications')
-        .insert([data])
+        .insert(applicationsToInsert)
       
       if (error) throw error
       
-      form.reset()
+      form.reset({ name: '' })
       alert("애플리케이션 정보가 저장되었습니다.")
+      fetchApplications() // 목록 새로고침
     } catch (error) {
       console.error("저장 오류:", error)
       alert("저장에 실패했습니다.")
@@ -645,37 +647,61 @@ export function ApplicationForm() {
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>애플리케이션명</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="애플리케이션명을 입력하세요" />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+    <div className="space-y-6">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>애플리케이션명</FormLabel>
+                <FormControl>
+                  <Input 
+                    {...field}
+                    value={field.value || ''} 
+                    placeholder="애플리케이션명을 입력하세요 (콤마로 구분하여 여러 개 입력 가능)" 
+                  />
+                </FormControl>
+                <FormDescription>
+                  여러 개의 애플리케이션을 입력할 경우 콤마(,)로 구분하여 입력하세요.
+                </FormDescription>
+              </FormItem>
+            )}
+          />
+          <Button type="submit">저장</Button>
+        </form>
+      </Form>
 
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>설명</FormLabel>
-              <FormControl>
-                <Textarea {...field} placeholder="애플리케이션 설명을 입력하세요" />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+      <div className="space-y-4">
+        <div>
+          <Label htmlFor="search">애플리케이션 검색</Label>
+          <Input
+            id="search"
+            type="text"
+            placeholder="검색어를 입력하세요"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
 
-        <Button type="submit">저장</Button>
-      </form>
-    </Form>
+        <div className="border rounded-md">
+          <div className="h-[300px] overflow-y-auto p-4">
+            {filteredApplications.length > 0 ? (
+              <ul className="space-y-2">
+                {filteredApplications.map((app) => (
+                  <li key={app.id} className="p-2 bg-gray-50 rounded-md">
+                    {app.name}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-center text-gray-500">검색 결과가 없습니다.</p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -796,16 +822,6 @@ export default function CommonInfoPage() {
       <section>
         <h2 className="text-xl font-bold mb-4">카테고리 등록</h2>
         <CategoryForm />
-      </section>
-
-      <section>
-        <h2 className="text-xl font-bold mb-4">문서 등록</h2>
-        <DocumentForm />
-      </section>
-
-      <section>
-        <h2 className="text-xl font-bold mb-4">이미지 등록</h2>
-        <ImageForm />
       </section>
 
       <section>
