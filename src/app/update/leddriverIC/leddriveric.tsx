@@ -41,6 +41,7 @@ import {
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import { useRouter } from "next/navigation"
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -127,7 +128,10 @@ export default function LEDDriverICForm() {
   const [storageTypes, setStorageTypes] = useState<string[]>([])
   const [topologies, setTopologies] = useState<string[]>([])
   const [dimmingMethods, setDimmingMethods] = useState<string[]>([])
-
+  const [searchTerm, setSearchTerm] = useState<string>('')
+  const [selectedProduct, setSelectedProduct] = useState<string | null>(null)
+  const router = useRouter();
+    
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -182,66 +186,182 @@ export default function LEDDriverICForm() {
     name: "options"
   })
 
-  useEffect(() => {
-    const fetchData = async () => {
-      // 기본 데이터 가져오기
-      const { data: manufacturersData } = await supabase.from('manufacturers').select('*')
-      const { data: divisionsData } = await supabase.from('divisions').select('*')
-      const { data: categoriesData } = await supabase.from('categories').select('*')
-      const { data: packageTypesData } = await supabase.from('package_types').select('*')
-      const { data: certificationsData } = await supabase.from('certifications').select('*')
-      const { data: featuresData } = await supabase.from('features').select('*')
-      const { data: applicationsData } = await supabase.from('applications').select('*')
-      
-      // Enum 타입 데이터 가져오기
-      const { data: mountingStylesData } = await supabase.rpc('get_enum_values', {
-          enum_type_name: 'mounting_style',
-        });
-      const { data: storageTypesData } = await supabase.rpc('get_enum_values', {
-          enum_type_name: 'storage_type',
-        });
-      const { data: topologiesData } = await supabase.rpc('get_enum_values', {
-          enum_type_name: 'topology',
-        });
-      const { data: dimmingMethodsData } = await supabase.rpc('get_enum_values', {
-          enum_type_name: 'dimming_method',
-        });
+  const searchProducts = async (searchTerm: string) => {
+    const { data, error } = await supabase
+      .from('products')
+      .select('id, name')
+      .eq('name', searchTerm)
+      .single()
+    
+    if (error) {
+      console.error('제품 검색 오류:', error)
+      return null
+    }
+    return data
+  }
 
-      setManufacturers(manufacturersData || [])
-      setDivisions(divisionsData || [])
-      setCategories(categoriesData || [])
-      setPackageTypes(packageTypesData || [])
-      setCertifications(certificationsData || [])
-      setFeatures(featuresData || [])
-      setApplications(applicationsData || [])
-      setMountingStyles(mountingStylesData || [])
-      setStorageTypes(storageTypesData || [])
-      setTopologies(topologiesData || [])
-      setDimmingMethods(dimmingMethodsData || [])
+  const handleSearch = async (value: string) => {
+    setSearchTerm(value)
+    const result = await searchProducts(value)
+    if (result) {
+      handleProductSelect(result.id)
+    }
+  }
+
+  const handleProductSelect = async (productId: string) => {
+    setSelectedProduct(productId)
+    await loadProductData(productId)
+  }
+
+  const loadProductData = async (productId: string) => {
+    // 기본 데이터 가져오기
+    const { data: manufacturersData } = await supabase.from('manufacturers').select('*')
+    const { data: divisionsData } = await supabase.from('divisions').select('*')
+    const { data: categoriesData } = await supabase.from('categories').select('*')
+    const { data: packageTypesData } = await supabase.from('package_types').select('*')
+    const { data: certificationsData } = await supabase.from('certifications').select('*')
+    const { data: featuresData } = await supabase.from('features').select('*')
+    const { data: applicationsData } = await supabase.from('applications').select('*')
+    
+    // Enum 타입 데이터 가져오기
+    const { data: mountingStylesData } = await supabase.rpc('get_enum_values', {
+        enum_type_name: 'mounting_style',
+      });
+    const { data: storageTypesData } = await supabase.rpc('get_enum_values', {
+        enum_type_name: 'storage_type',
+      });
+    const { data: topologiesData } = await supabase.rpc('get_enum_values', {
+        enum_type_name: 'topology',
+      });
+    const { data: dimmingMethodsData } = await supabase.rpc('get_enum_values', {
+        enum_type_name: 'dimming_method',
+      });
+
+    // LED Driver IC 데이터 가져오기
+    const { data: ledDriverData, error: ledDriverError } = await supabase
+      .from('led_driver_ic')
+      .select(`
+        *,
+        products (
+          *,
+          images (*),
+          product_documents (
+            documents (*)
+          )
+        ),
+        led_driver_ic_certifications (certification_id),
+        led_driver_ic_features (feature_id),
+        led_driver_ic_applications (application_id),
+        led_driver_ic_options (
+          *,
+          led_driver_ic_option_package_types (package_type_id)
+        )
+      `)
+      .eq('id', productId)
+      .single()
+
+    if (ledDriverError) {
+      console.error('LED Driver IC 데이터 로드 오류:', ledDriverError)
+      alert('데이터를 불러오는데 실패했습니다.')
+      return
     }
 
-    fetchData()
-  }, [])
+    setManufacturers(manufacturersData || [])
+    setDivisions(divisionsData || [])
+    setCategories(categoriesData || [])
+    setPackageTypes(packageTypesData || [])
+    setCertifications(certificationsData || [])
+    setFeatures(featuresData || [])
+    setApplications(applicationsData || [])
+    setMountingStyles(mountingStylesData || [])
+    setStorageTypes(storageTypesData || [])
+    setTopologies(topologiesData || [])
+    setDimmingMethods(dimmingMethodsData || [])
+
+    // 폼 데이터 설정
+    if (ledDriverData) {
+      const product = ledDriverData.product
+      const formData = {
+        name: product.name,
+        part_number: product.part_number,
+        manufacturer_id: product.manufacturer_id,
+        division_id: product.division_id,
+        description: product.description || '',
+        images: product.images,
+        documents: product.product_documents.map(pd => pd.documents),
+        category_id: ledDriverData.category_id,
+        subtitle: ledDriverData.subtitle || '',
+        number_of_outputs: ledDriverData.number_of_outputs,
+        topologies: ledDriverData.topologies || [],
+        dimming_methods: ledDriverData.dimming_methods || [],
+        input_voltage_min: ledDriverData.input_voltage_range ? JSON.parse(ledDriverData.input_voltage_range)[0] : null,
+        input_voltage_max: ledDriverData.input_voltage_range ? JSON.parse(ledDriverData.input_voltage_range)[1] : null,
+        typical_input_voltage: ledDriverData.typical_input_voltage,
+        operating_frequency_min: ledDriverData.operating_frequency_range ? JSON.parse(ledDriverData.operating_frequency_range)[0] : null,
+        operating_frequency_max: ledDriverData.operating_frequency_range ? JSON.parse(ledDriverData.operating_frequency_range)[1] : null,
+        typical_operating_frequency: ledDriverData.typical_operating_frequency,
+        output_current_min: ledDriverData.output_current_range ? JSON.parse(ledDriverData.output_current_range)[0] : null,
+        output_current_max: ledDriverData.output_current_range ? JSON.parse(ledDriverData.output_current_range)[1] : null,
+        typical_output_current: ledDriverData.typical_output_current,
+        output_voltage_min: ledDriverData.output_voltage_range ? JSON.parse(ledDriverData.output_voltage_range)[0] : null,
+        output_voltage_max: ledDriverData.output_voltage_range ? JSON.parse(ledDriverData.output_voltage_range)[1] : null,
+        typical_output_voltage: ledDriverData.typical_output_voltage,
+        operating_temperature_min: ledDriverData.operating_temperature ? JSON.parse(ledDriverData.operating_temperature)[0] : null,
+        operating_temperature_max: ledDriverData.operating_temperature ? JSON.parse(ledDriverData.operating_temperature)[1] : null,
+        category_specific_attributes: ledDriverData.category_specific_attributes || {},
+        certifications: ledDriverData.led_driver_ic_certifications.map(c => c.certification_id),
+        features: ledDriverData.led_driver_ic_features.map(f => f.feature_id),
+        applications: ledDriverData.led_driver_ic_applications.map(a => a.application_id),
+        options: ledDriverData.led_driver_ic_options.map(option => ({
+          option_name: option.option_name,
+          package_detail: option.package_detail || '',
+          mounting_style: option.mounting_style,
+          storage_type: option.storage_type || '',
+          notes: option.notes || '',
+          moq_start: option.moq_start,
+          moq_step: option.moq_step,
+          lead_time_min: option.lead_time_range ? JSON.parse(option.lead_time_range)[0] : null,
+          lead_time_max: option.lead_time_range ? JSON.parse(option.lead_time_range)[1] : null,
+          prices: option.prices || {},
+          package_types: option.led_driver_ic_option_package_types[0]?.package_type_id || null
+        }))
+      }
+      form.reset(formData)
+    }
+  }
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
+    if (!selectedProduct) {
+      alert("수정할 제품을 선택해주세요.")
+      return
+    }
+
     try {
-      // 1. Product 테이블에 먼저 저장
+      // 1. Product 테이블 업데이트
       const { data: productData, error: productError } = await supabase
         .from('products')
-        .insert({
+        .update({
           name: data.name,
           part_number: data.part_number,
           manufacturer_id: data.manufacturer_id,
           division_id: data.division_id,
           description: data.description || null
         })
+        .eq('id', selectedProduct)
         .select()
         .single()
 
       if (productError) throw productError
 
-      // 이미지 데이터가 있다면 저장
+      // 이미지 데이터 업데이트
       if (data.images && data.images.length > 0) {
+        // 기존 이미지 삭제
+        await supabase
+          .from('images')
+          .delete()
+          .eq('product_id', productData.id)
+
+        // 새 이미지 추가
         const { error: imagesError } = await supabase
           .from('images')
           .insert(
@@ -254,8 +374,15 @@ export default function LEDDriverICForm() {
         if (imagesError) throw imagesError
       }
 
-      // 문서 데이터가 있다면 저장
+      // 문서 데이터 업데이트
       if (data.documents && data.documents.length > 0) {
+        // 기존 연결 삭제
+        await supabase
+          .from('product_documents')
+          .delete()
+          .eq('product_id', productData.id)
+
+        // 새 문서 추가
         const { data: documentsData, error: documentsError } = await supabase
           .from('documents')
           .insert(data.documents)
@@ -263,7 +390,7 @@ export default function LEDDriverICForm() {
 
         if (documentsError) throw documentsError
 
-        // product_documents 연결 테이블에 저장
+        // 새 연결 추가
         const { error: productDocumentsError } = await supabase
           .from('product_documents')
           .insert(
@@ -276,11 +403,10 @@ export default function LEDDriverICForm() {
         if (productDocumentsError) throw productDocumentsError
       }
 
-      // 2. LED Driver IC 테이블에 저장
-      const { data: ledDriverData, error: ledDriverError } = await supabase
+      // 2. LED Driver IC 테이블 업데이트
+      const { error: ledDriverError } = await supabase
         .from('led_driver_ic')
-        .insert({
-          product_id: productData.id,
+        .update({
           category_id: data.category_id,
           subtitle: data.subtitle || null,
           number_of_outputs: data.number_of_outputs,
@@ -302,18 +428,25 @@ export default function LEDDriverICForm() {
             `[${data.operating_temperature_min},${data.operating_temperature_max}]` : null,
           category_specific_attributes: data.category_specific_attributes || null
         })
-        .select()
-        .single()
+        .eq('id', selectedProduct)
 
       if (ledDriverError) throw ledDriverError
 
-      // M:M 관계 테이블들 저장
+      // M:M 관계 테이블들 업데이트
+      // 기존 데이터 삭제
+      await Promise.all([
+        supabase.from('led_driver_ic_certifications').delete().eq('led_driver_ic_id', selectedProduct),
+        supabase.from('led_driver_ic_features').delete().eq('led_driver_ic_id', selectedProduct),
+        supabase.from('led_driver_ic_applications').delete().eq('led_driver_ic_id', selectedProduct)
+      ])
+
+      // 새 데이터 추가
       if (data.certifications.length > 0) {
         const { error: certificationsError } = await supabase
           .from('led_driver_ic_certifications')
           .insert(
             data.certifications.map(certId => ({
-              led_driver_ic_id: ledDriverData.id,
+              led_driver_ic_id: selectedProduct,
               certification_id: certId
             }))
           )
@@ -326,7 +459,7 @@ export default function LEDDriverICForm() {
           .from('led_driver_ic_features')
           .insert(
             data.features.map(featureId => ({
-              led_driver_ic_id: ledDriverData.id,
+              led_driver_ic_id: selectedProduct,
               feature_id: featureId
             }))
           )
@@ -339,7 +472,7 @@ export default function LEDDriverICForm() {
           .from('led_driver_ic_applications')
           .insert(
             data.applications.map(appId => ({
-              led_driver_ic_id: ledDriverData.id,
+              led_driver_ic_id: selectedProduct,
               application_id: appId
             }))
           )
@@ -347,12 +480,19 @@ export default function LEDDriverICForm() {
         if (applicationsError) throw applicationsError
       }
 
-      // 3. LED Driver IC 옵션 테이블에 저장
+      // 3. LED Driver IC 옵션 테이블 업데이트
+      // 기존 옵션 삭제
+      await supabase
+        .from('led_driver_ic_options')
+        .delete()
+        .eq('product_id', selectedProduct)
+
+      // 새 옵션 추가
       for (const option of data.options) {
         const { data: optionData, error: optionError } = await supabase
           .from('led_driver_ic_options')
           .insert({
-            product_id: ledDriverData.id,
+            product_id: selectedProduct,
             option_name: option.option_name,
             package_detail: option.package_detail || null,
             mounting_style: option.mounting_style,
@@ -369,7 +509,7 @@ export default function LEDDriverICForm() {
 
         if (optionError) throw optionError
 
-        // 4. 패키지 타입 연결 테이블에 저장
+        // 4. 패키지 타입 연결 테이블 업데이트
         if (option.package_types !== null) {
           const { error: packageTypeError } = await supabase
             .from('led_driver_ic_option_package_types')
@@ -382,11 +522,11 @@ export default function LEDDriverICForm() {
         }
       }
 
-      form.reset()
-      alert("LED Driver IC 데이터가 저장되었습니다.")
+      alert("LED Driver IC 데이터가 수정되었습니다.")
+      router.push('/products')
     } catch (error) {
-      console.error("데이터 저장 오류:", error)
-      alert("저장 실패. 다시 시도하세요.")
+      console.error("데이터 수정 오류:", error)
+      alert("수정 실패. 다시 시도하세요.")
     }
   }
 
@@ -394,6 +534,25 @@ export default function LEDDriverICForm() {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-bold">제품 검색</h2>
+            <div className="flex gap-2">
+              <Input
+                placeholder="제품명을 입력하세요" 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-[300px]"
+              />
+              <Button 
+                type="button"
+                onClick={() => handleSearch(searchTerm)}
+                variant="outline"
+              >
+                검색
+              </Button>
+            </div>
+          </div>
+
           <h2 className="text-lg font-bold">제품 기본 정보</h2>
           
           {/* 제품 기본 정보 필드들 */}
