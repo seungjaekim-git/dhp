@@ -130,8 +130,7 @@ export default function LEDDriverICForm() {
   const [dimmingMethods, setDimmingMethods] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null)
-  const router = useRouter();
-    
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -239,23 +238,21 @@ export default function LEDDriverICForm() {
 
     // LED Driver IC 데이터 가져오기
     const { data: ledDriverData, error: ledDriverError } = await supabase
-      .from('led_driver_ic')
+      .from('products')
       .select(`
         *,
-        products (
+        led_driver_ic!inner (
           *,
-          images (*),
-          product_documents (
-            documents (*)
+          led_driver_ic_certifications (certification_id),
+          led_driver_ic_features (feature_id),
+          led_driver_ic_applications (application_id),
+          led_driver_ic_options (
+            *,
+            led_driver_ic_option_package_types (package_type_id)
           )
         ),
-        led_driver_ic_certifications (certification_id),
-        led_driver_ic_features (feature_id),
-        led_driver_ic_applications (application_id),
-        led_driver_ic_options (
-          *,
-          led_driver_ic_option_package_types (package_type_id)
-        )
+        images (*),
+        documents (*)
       `)
       .eq('id', productId)
       .single()
@@ -280,48 +277,60 @@ export default function LEDDriverICForm() {
 
     // 폼 데이터 설정
     if (ledDriverData) {
-      const product = ledDriverData.product
+      const parseRangeValue = (rangeStr: string | null) => {
+        if (!rangeStr) return [null, null]
+        try {
+          const parsed = JSON.parse(rangeStr)
+          return [
+            isNaN(parsed[0]) ? null : parsed[0],
+            isNaN(parsed[1]) ? null : parsed[1]
+          ]
+        } catch {
+          return [null, null]
+        }
+      }
+
       const formData = {
-        name: product.name,
-        part_number: product.part_number,
-        manufacturer_id: product.manufacturer_id,
-        division_id: product.division_id,
-        description: product.description || '',
-        images: product.images,
-        documents: product.product_documents.map(pd => pd.documents),
-        category_id: ledDriverData.category_id,
-        subtitle: ledDriverData.subtitle || '',
-        number_of_outputs: ledDriverData.number_of_outputs,
-        topologies: ledDriverData.topologies || [],
-        dimming_methods: ledDriverData.dimming_methods || [],
-        input_voltage_min: ledDriverData.input_voltage_range ? JSON.parse(ledDriverData.input_voltage_range)[0] : null,
-        input_voltage_max: ledDriverData.input_voltage_range ? JSON.parse(ledDriverData.input_voltage_range)[1] : null,
-        typical_input_voltage: ledDriverData.typical_input_voltage,
-        operating_frequency_min: ledDriverData.operating_frequency_range ? JSON.parse(ledDriverData.operating_frequency_range)[0] : null,
-        operating_frequency_max: ledDriverData.operating_frequency_range ? JSON.parse(ledDriverData.operating_frequency_range)[1] : null,
-        typical_operating_frequency: ledDriverData.typical_operating_frequency,
-        output_current_min: ledDriverData.output_current_range ? JSON.parse(ledDriverData.output_current_range)[0] : null,
-        output_current_max: ledDriverData.output_current_range ? JSON.parse(ledDriverData.output_current_range)[1] : null,
-        typical_output_current: ledDriverData.typical_output_current,
-        output_voltage_min: ledDriverData.output_voltage_range ? JSON.parse(ledDriverData.output_voltage_range)[0] : null,
-        output_voltage_max: ledDriverData.output_voltage_range ? JSON.parse(ledDriverData.output_voltage_range)[1] : null,
-        typical_output_voltage: ledDriverData.typical_output_voltage,
-        operating_temperature_min: ledDriverData.operating_temperature ? JSON.parse(ledDriverData.operating_temperature)[0] : null,
-        operating_temperature_max: ledDriverData.operating_temperature ? JSON.parse(ledDriverData.operating_temperature)[1] : null,
-        category_specific_attributes: ledDriverData.category_specific_attributes || {},
-        certifications: ledDriverData.led_driver_ic_certifications.map(c => c.certification_id),
-        features: ledDriverData.led_driver_ic_features.map(f => f.feature_id),
-        applications: ledDriverData.led_driver_ic_applications.map(a => a.application_id),
-        options: ledDriverData.led_driver_ic_options.map(option => ({
+        name: ledDriverData.name,
+        part_number: ledDriverData.part_number,
+        manufacturer_id: ledDriverData.manufacturer_id,
+        division_id: ledDriverData.division_id,
+        description: ledDriverData.description || '',
+        images: ledDriverData.images || [],
+        documents: ledDriverData.documents || [],
+        category_id: ledDriverData.led_driver_ic[0].category_id,
+        subtitle: ledDriverData.led_driver_ic[0].subtitle || '',
+        number_of_outputs: ledDriverData.led_driver_ic[0].number_of_outputs,
+        topologies: ledDriverData.led_driver_ic[0].topologies || [],
+        dimming_methods: ledDriverData.led_driver_ic[0].dimming_methods || [],
+        input_voltage_min: parseRangeValue(ledDriverData.led_driver_ic[0].input_voltage_range)[0],
+        input_voltage_max: parseRangeValue(ledDriverData.led_driver_ic[0].input_voltage_range)[1],
+        typical_input_voltage: isNaN(ledDriverData.led_driver_ic[0].typical_input_voltage) ? null : ledDriverData.led_driver_ic[0].typical_input_voltage,
+        operating_frequency_min: parseRangeValue(ledDriverData.led_driver_ic[0].operating_frequency_range)[0],
+        operating_frequency_max: parseRangeValue(ledDriverData.led_driver_ic[0].operating_frequency_range)[1],
+        typical_operating_frequency: isNaN(ledDriverData.led_driver_ic[0].typical_operating_frequency) ? null : ledDriverData.led_driver_ic[0].typical_operating_frequency,
+        output_current_min: parseRangeValue(ledDriverData.led_driver_ic[0].output_current_range)[0],
+        output_current_max: parseRangeValue(ledDriverData.led_driver_ic[0].output_current_range)[1],
+        typical_output_current: isNaN(ledDriverData.led_driver_ic[0].typical_output_current) ? null : ledDriverData.led_driver_ic[0].typical_output_current,
+        output_voltage_min: parseRangeValue(ledDriverData.led_driver_ic[0].output_voltage_range)[0],
+        output_voltage_max: parseRangeValue(ledDriverData.led_driver_ic[0].output_voltage_range)[1],
+        typical_output_voltage: isNaN(ledDriverData.led_driver_ic[0].typical_output_voltage) ? null : ledDriverData.led_driver_ic[0].typical_output_voltage,
+        operating_temperature_min: parseRangeValue(ledDriverData.led_driver_ic[0].operating_temperature)[0],
+        operating_temperature_max: parseRangeValue(ledDriverData.led_driver_ic[0].operating_temperature)[1],
+        category_specific_attributes: ledDriverData.led_driver_ic[0].category_specific_attributes || {},
+        certifications: ledDriverData.led_driver_ic[0].led_driver_ic_certifications.map((c: any) => c.certification_id),
+        features: ledDriverData.led_driver_ic[0].led_driver_ic_features.map((f: any) => f.feature_id),
+        applications: ledDriverData.led_driver_ic[0].led_driver_ic_applications.map((a: any) => a.application_id),
+        options: ledDriverData.led_driver_ic[0].led_driver_ic_options.map((option: any) => ({
           option_name: option.option_name,
           package_detail: option.package_detail || '',
           mounting_style: option.mounting_style,
           storage_type: option.storage_type || '',
           notes: option.notes || '',
-          moq_start: option.moq_start,
-          moq_step: option.moq_step,
-          lead_time_min: option.lead_time_range ? JSON.parse(option.lead_time_range)[0] : null,
-          lead_time_max: option.lead_time_range ? JSON.parse(option.lead_time_range)[1] : null,
+          moq_start: isNaN(option.moq_start) ? null : option.moq_start,
+          moq_step: isNaN(option.moq_step) ? null : option.moq_step,
+          lead_time_min: parseRangeValue(option.lead_time_range)[0],
+          lead_time_max: parseRangeValue(option.lead_time_range)[1],
           prices: option.prices || {},
           package_types: option.led_driver_ic_option_package_types[0]?.package_type_id || null
         }))
@@ -337,37 +346,64 @@ export default function LEDDriverICForm() {
     }
 
     try {
-      // 1. Product 테이블 업데이트
-      const { data: productData, error: productError } = await supabase
+      // 1. Product ID로 연관된 데이터 조회
+      const { data: existingProduct, error: productQueryError } = await supabase
+        .from('products')
+        .select(`
+          *,
+          led_driver_ic!inner (
+            id,
+            category_id,
+            led_driver_ic_certifications (certification_id),
+            led_driver_ic_features (feature_id), 
+            led_driver_ic_applications (application_id),
+            led_driver_ic_options (
+              id,
+              led_driver_ic_option_package_types (package_type_id)
+            )
+          ),
+          images (id),
+          documents (id)
+        `)
+        .eq('id', selectedProduct)
+        .single()
+
+      if (productQueryError) throw productQueryError
+
+      // 2. Product 테이블 업데이트  
+      const { error: productError } = await supabase
         .from('products')
         .update({
-          name: data.name,
-          part_number: data.part_number,
-          manufacturer_id: data.manufacturer_id,
-          division_id: data.division_id,
+          name: data.name || null,
+          part_number: data.part_number || null,
+          manufacturer_id: data.manufacturer_id || null,
+          division_id: data.division_id || null,
           description: data.description || null
         })
         .eq('id', selectedProduct)
-        .select()
-        .single()
 
       if (productError) throw productError
 
       // 이미지 데이터 업데이트
-      if (data.images && data.images.length > 0) {
-        // 기존 이미지 삭제
+      // 기존 이미지 ID 목록
+      const existingImageIds = existingProduct.images.map((img: any) => img.id)
+      
+      // 기존 이미지 삭제
+      if (existingImageIds.length > 0) {
         await supabase
           .from('images')
           .delete()
-          .eq('product_id', productData.id)
+          .in('id', existingImageIds)
+      }
 
-        // 새 이미지 추가
+      // 새 이미지 추가
+      if (data.images && data.images.length > 0) {
         const { error: imagesError } = await supabase
           .from('images')
           .insert(
             data.images.map(image => ({
               ...image,
-              product_id: productData.id
+              product_id: selectedProduct
             }))
           )
 
@@ -375,78 +411,76 @@ export default function LEDDriverICForm() {
       }
 
       // 문서 데이터 업데이트
-      if (data.documents && data.documents.length > 0) {
-        // 기존 연결 삭제
+      // 기존 문서 ID 목록
+      const existingDocumentIds = existingProduct.documents.map((doc: any) => doc.id)
+      
+      // 기존 문서 삭제
+      if (existingDocumentIds.length > 0) {
         await supabase
-          .from('product_documents')
-          .delete()
-          .eq('product_id', productData.id)
-
-        // 새 문서 추가
-        const { data: documentsData, error: documentsError } = await supabase
           .from('documents')
-          .insert(data.documents)
-          .select()
+          .delete()
+          .in('id', existingDocumentIds)
+      }
 
-        if (documentsError) throw documentsError
-
-        // 새 연결 추가
-        const { error: productDocumentsError } = await supabase
-          .from('product_documents')
+      // 새 문서 추가
+      if (data.documents && data.documents.length > 0) {
+        const { error: documentsError } = await supabase
+          .from('documents')
           .insert(
-            documentsData.map(doc => ({
-              product_id: productData.id,
-              document_id: doc.id
+            data.documents.map(doc => ({
+              ...doc,
+              product_id: selectedProduct
             }))
           )
 
-        if (productDocumentsError) throw productDocumentsError
+        if (documentsError) throw documentsError
       }
 
-      // 2. LED Driver IC 테이블 업데이트
+      // LED Driver IC 테이블 업데이트
+      const ledDriverIcId = existingProduct.led_driver_ic[0].id
       const { error: ledDriverError } = await supabase
         .from('led_driver_ic')
         .update({
-          category_id: data.category_id,
+          category_id: data.category_id || null,
           subtitle: data.subtitle || null,
-          number_of_outputs: data.number_of_outputs,
-          topologies: data.topologies,
-          dimming_methods: data.dimming_methods,
+          number_of_outputs: data.number_of_outputs || null,
+          topologies: data.topologies || null,
+          dimming_methods: data.dimming_methods || null,
           input_voltage_range: data.input_voltage_min !== null && data.input_voltage_max !== null ? 
             `[${data.input_voltage_min},${data.input_voltage_max}]` : null,
-          typical_input_voltage: data.typical_input_voltage,
+          typical_input_voltage: data.typical_input_voltage || null,
           operating_frequency_range: data.operating_frequency_min !== null && data.operating_frequency_max !== null ?
             `[${data.operating_frequency_min},${data.operating_frequency_max}]` : null,
-          typical_operating_frequency: data.typical_operating_frequency,
+          typical_operating_frequency: data.typical_operating_frequency || null,
           output_current_range: data.output_current_min !== null && data.output_current_max !== null ?
             `[${data.output_current_min},${data.output_current_max}]` : null,
-          typical_output_current: data.typical_output_current,
+          typical_output_current: data.typical_output_current || null,
           output_voltage_range: data.output_voltage_min !== null && data.output_voltage_max !== null ?
             `[${data.output_voltage_min},${data.output_voltage_max}]` : null,
-          typical_output_voltage: data.typical_output_voltage,
+          typical_output_voltage: data.typical_output_voltage || null,
           operating_temperature: data.operating_temperature_min !== null && data.operating_temperature_max !== null ?
             `[${data.operating_temperature_min},${data.operating_temperature_max}]` : null,
           category_specific_attributes: data.category_specific_attributes || null
         })
-        .eq('id', selectedProduct)
+        .eq('id', ledDriverIcId)
 
       if (ledDriverError) throw ledDriverError
 
       // M:M 관계 테이블들 업데이트
       // 기존 데이터 삭제
       await Promise.all([
-        supabase.from('led_driver_ic_certifications').delete().eq('led_driver_ic_id', selectedProduct),
-        supabase.from('led_driver_ic_features').delete().eq('led_driver_ic_id', selectedProduct),
-        supabase.from('led_driver_ic_applications').delete().eq('led_driver_ic_id', selectedProduct)
+        supabase.from('led_driver_ic_certifications').delete().eq('led_driver_ic_id', ledDriverIcId),
+        supabase.from('led_driver_ic_features').delete().eq('led_driver_ic_id', ledDriverIcId),
+        supabase.from('led_driver_ic_applications').delete().eq('led_driver_ic_id', ledDriverIcId)
       ])
 
       // 새 데이터 추가
-      if (data.certifications.length > 0) {
+      if (data.certifications && data.certifications.length > 0) {
         const { error: certificationsError } = await supabase
           .from('led_driver_ic_certifications')
           .insert(
             data.certifications.map(certId => ({
-              led_driver_ic_id: selectedProduct,
+              led_driver_ic_id: ledDriverIcId,
               certification_id: certId
             }))
           )
@@ -454,12 +488,12 @@ export default function LEDDriverICForm() {
         if (certificationsError) throw certificationsError
       }
 
-      if (data.features.length > 0) {
+      if (data.features && data.features.length > 0) {
         const { error: featuresError } = await supabase
           .from('led_driver_ic_features')
           .insert(
             data.features.map(featureId => ({
-              led_driver_ic_id: selectedProduct,
+              led_driver_ic_id: ledDriverIcId,
               feature_id: featureId
             }))
           )
@@ -467,12 +501,12 @@ export default function LEDDriverICForm() {
         if (featuresError) throw featuresError
       }
 
-      if (data.applications.length > 0) {
+      if (data.applications && data.applications.length > 0) {
         const { error: applicationsError } = await supabase
           .from('led_driver_ic_applications')
           .insert(
             data.applications.map(appId => ({
-              led_driver_ic_id: selectedProduct,
+              led_driver_ic_id: ledDriverIcId,
               application_id: appId
             }))
           )
@@ -480,50 +514,56 @@ export default function LEDDriverICForm() {
         if (applicationsError) throw applicationsError
       }
 
-      // 3. LED Driver IC 옵션 테이블 업데이트
+      // LED Driver IC 옵션 테이블 업데이트
+      const existingOptionIds = existingProduct.led_driver_ic[0].led_driver_ic_options.map((opt: any) => opt.id)
+      
       // 기존 옵션 삭제
-      await supabase
-        .from('led_driver_ic_options')
-        .delete()
-        .eq('product_id', selectedProduct)
+      if (existingOptionIds.length > 0) {
+        await supabase
+          .from('led_driver_ic_options')
+          .delete()
+          .in('id', existingOptionIds)
+      }
 
       // 새 옵션 추가
-      for (const option of data.options) {
-        const { data: optionData, error: optionError } = await supabase
-          .from('led_driver_ic_options')
-          .insert({
-            product_id: selectedProduct,
-            option_name: option.option_name,
-            package_detail: option.package_detail || null,
-            mounting_style: option.mounting_style,
-            storage_type: option.storage_type || null,
-            notes: option.notes || null,
-            moq_start: option.moq_start,
-            moq_step: option.moq_step,
-            lead_time_range: option.lead_time_min !== null && option.lead_time_max !== null ?
-              `[${option.lead_time_min},${option.lead_time_max}]` : null,
-            prices: option.prices || null
-          })
-          .select()
-          .single()
-
-        if (optionError) throw optionError
-
-        // 4. 패키지 타입 연결 테이블 업데이트
-        if (option.package_types !== null) {
-          const { error: packageTypeError } = await supabase
-            .from('led_driver_ic_option_package_types')
+      if (data.options) {
+        for (const option of data.options) {
+          const { data: optionData, error: optionError } = await supabase
+            .from('led_driver_ic_options')
             .insert({
-              option_id: optionData.id,
-              package_type_id: option.package_types
+              product_id: ledDriverIcId,
+              option_name: option.option_name || null,
+              package_detail: option.package_detail || null,
+              mounting_style: option.mounting_style || null,
+              storage_type: option.storage_type || null,
+              notes: option.notes || null,
+              moq_start: option.moq_start || null,
+              moq_step: option.moq_step || null,
+              lead_time_range: option.lead_time_min !== null && option.lead_time_max !== null ?
+                `[${option.lead_time_min},${option.lead_time_max}]` : null,
+              prices: option.prices || null
             })
+            .select()
+            .single()
 
-          if (packageTypeError) throw packageTypeError
+          if (optionError) throw optionError
+
+          // 패키지 타입 연결 테이블 업데이트
+          if (option.package_types !== null) {
+            const { error: packageTypeError } = await supabase
+              .from('led_driver_ic_option_package_types')
+              .insert({
+                option_id: optionData.id,
+                package_type_id: option.package_types
+              })
+
+            if (packageTypeError) throw packageTypeError
+          }
         }
       }
 
       alert("LED Driver IC 데이터가 수정되었습니다.")
-      router.push('/products')
+      window.location.href = '/'
     } catch (error) {
       console.error("데이터 수정 오류:", error)
       alert("수정 실패. 다시 시도하세요.")
@@ -975,7 +1015,7 @@ export default function LEDDriverICForm() {
                               key={category.id}
                               value={category.name}
                               onSelect={() => {
-                                form.setValue("category_id", category.id)
+                                form.setValue("category_id", category.id || null)
                               }}
                             >
                               <Check
@@ -1007,7 +1047,7 @@ export default function LEDDriverICForm() {
                     {field.value && <Check className="h-4 w-4 text-green-500" />}
                   </FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="부제목을 입력하세요" />
+                    <Input {...field} placeholder="부제목을 입력하세요" onChange={(e) => field.onChange(e.target.value || null)} />
                   </FormControl>
                 </FormItem>
               )}
@@ -1029,7 +1069,10 @@ export default function LEDDriverICForm() {
                     type="number"
                     min="1"
                     placeholder="출력 수를 입력하세요"
-                    onChange={e => field.onChange(Number(e.target.value))}
+                    onChange={e => {
+                      const val = Number(e.target.value)
+                      field.onChange(isNaN(val) || e.target.value === '' ? null : val)
+                    }}
                     value={field.value ?? ''} 
                   />
                 </FormControl>
@@ -1052,7 +1095,10 @@ export default function LEDDriverICForm() {
                       {...field} 
                       type="number" 
                       step="0.1"
-                      onChange={e => field.onChange(parseFloat(e.target.value))}
+                      onChange={e => {
+                        const val = parseFloat(e.target.value)
+                        field.onChange(isNaN(val) || e.target.value === '' ? null : val)
+                      }}
                       placeholder="최소 입력 전압을 입력하세요"
                       value={field.value ?? ''} 
                     />
@@ -1071,7 +1117,10 @@ export default function LEDDriverICForm() {
                     {field.value && <Check className="h-4 w-4 text-green-500" />}
                   </FormLabel>
                   <FormControl>
-                    <Input {...field} type="number" step="0.1" onChange={e => field.onChange(parseFloat(e.target.value))} placeholder="최대 입력 전압을 입력하세요" value={field.value ?? ''} />
+                    <Input {...field} type="number" step="0.1" onChange={e => {
+                      const val = parseFloat(e.target.value)
+                      field.onChange(isNaN(val) || e.target.value === '' ? null : val)
+                    }} placeholder="최대 입력 전압을 입력하세요" value={field.value ?? ''} />
                   </FormControl>
                 </FormItem>
               )}
@@ -1088,7 +1137,10 @@ export default function LEDDriverICForm() {
                   {field.value && <Check className="h-4 w-4 text-green-500" />}
                 </FormLabel>
                 <FormControl>
-                  <Input {...field} type="number" step="0.1" onChange={e => field.onChange(parseFloat(e.target.value))} placeholder="일반적인 입력 전압을 입력하세요" value={field.value ?? ''} />
+                  <Input {...field} type="number" step="0.1" onChange={e => {
+                    const val = parseFloat(e.target.value)
+                    field.onChange(isNaN(val) || e.target.value === '' ? null : val)
+                  }} placeholder="일반적인 입력 전압을 입력하세요" value={field.value ?? ''} />
                 </FormControl>
               </FormItem>
             )}
@@ -1105,7 +1157,10 @@ export default function LEDDriverICForm() {
                     {field.value && <Check className="h-4 w-4 text-green-500" />}
                   </FormLabel>
                   <FormControl>
-                    <Input {...field} type="number" step="0.1" onChange={e => field.onChange(parseFloat(e.target.value))} placeholder="최소 동작 주파수를 입력하세요" value={field.value ?? ''} />
+                    <Input {...field} type="number" step="0.1" onChange={e => {
+                      const val = parseFloat(e.target.value)
+                      field.onChange(isNaN(val) || e.target.value === '' ? null : val)
+                    }} placeholder="최소 동작 주파수를 입력하세요" value={field.value ?? ''} />
                   </FormControl>
                 </FormItem>
               )}
@@ -1121,7 +1176,10 @@ export default function LEDDriverICForm() {
                     {field.value && <Check className="h-4 w-4 text-green-500" />}
                   </FormLabel>
                   <FormControl>
-                    <Input {...field} type="number" step="0.1" onChange={e => field.onChange(parseFloat(e.target.value))} placeholder="최대 동작 주파수를 입력하세요" value={field.value ?? ''} />
+                    <Input {...field} type="number" step="0.1" onChange={e => {
+                      const val = parseFloat(e.target.value)
+                      field.onChange(isNaN(val) || e.target.value === '' ? null : val)
+                    }} placeholder="최대 동작 주파수를 입력하세요" value={field.value ?? ''} />
                   </FormControl>
                 </FormItem>
               )}
@@ -1138,7 +1196,10 @@ export default function LEDDriverICForm() {
                   {field.value && <Check className="h-4 w-4 text-green-500" />}
                 </FormLabel>
                 <FormControl>
-                  <Input {...field} type="number" step="0.1" onChange={e => field.onChange(parseFloat(e.target.value))} placeholder="일반적인 동작 주파수를 입력하세요" value={field.value ?? ''} />
+                  <Input {...field} type="number" step="0.1" onChange={e => {
+                    const val = parseFloat(e.target.value)
+                    field.onChange(isNaN(val) || e.target.value === '' ? null : val)
+                  }} placeholder="일반적인 동작 주파수를 입력하세요" value={field.value ?? ''} />
                 </FormControl>
               </FormItem>
             )}
@@ -1155,7 +1216,10 @@ export default function LEDDriverICForm() {
                     {field.value && <Check className="h-4 w-4 text-green-500" />}
                   </FormLabel>
                   <FormControl>
-                    <Input {...field} type="number" step="0.1" onChange={e => field.onChange(parseFloat(e.target.value))} placeholder="최소 출력 전류를 입력하세요" value={field.value ?? ''} />
+                    <Input {...field} type="number" step="0.1" onChange={e => {
+                      const val = parseFloat(e.target.value)
+                      field.onChange(isNaN(val) || e.target.value === '' ? null : val)
+                    }} placeholder="최소 출력 전류를 입력하세요" value={field.value ?? ''} />
                   </FormControl>
                 </FormItem>
               )}
@@ -1171,7 +1235,10 @@ export default function LEDDriverICForm() {
                     {field.value && <Check className="h-4 w-4 text-green-500" />}
                   </FormLabel>
                   <FormControl>
-                    <Input {...field} type="number" step="0.1" onChange={e => field.onChange(parseFloat(e.target.value))} placeholder="최대 출력 전류를 입력하세요" value={field.value ?? ''} />
+                    <Input {...field} type="number" step="0.1" onChange={e => {
+                      const val = parseFloat(e.target.value)
+                      field.onChange(isNaN(val) || e.target.value === '' ? null : val)
+                    }} placeholder="최대 출력 전류를 입력하세요" value={field.value ?? ''} />
                   </FormControl>
                 </FormItem>
               )}
@@ -1188,7 +1255,10 @@ export default function LEDDriverICForm() {
                   {field.value && <Check className="h-4 w-4 text-green-500" />}
                 </FormLabel>
                 <FormControl>
-                  <Input {...field} type="number" step="0.1" onChange={e => field.onChange(parseFloat(e.target.value))} placeholder="일반적인 출력 전류를 입력하세요" value={field.value ?? ''} />
+                  <Input {...field} type="number" step="0.1" onChange={e => {
+                    const val = parseFloat(e.target.value)
+                    field.onChange(isNaN(val) || e.target.value === '' ? null : val)
+                  }} placeholder="일반적인 출력 전류를 입력하세요" value={field.value ?? ''} />
                 </FormControl>
               </FormItem>
             )}
@@ -1205,7 +1275,10 @@ export default function LEDDriverICForm() {
                     {field.value && <Check className="h-4 w-4 text-green-500" />}
                   </FormLabel>
                   <FormControl>
-                    <Input {...field} type="number" step="0.1" onChange={e => field.onChange(parseFloat(e.target.value))} placeholder="최소 출력 전압을 입력하세요" value={field.value ?? ''} />
+                    <Input {...field} type="number" step="0.1" onChange={e => {
+                      const val = parseFloat(e.target.value)
+                      field.onChange(isNaN(val) || e.target.value === '' ? null : val)
+                    }} placeholder="최소 출력 전압을 입력하세요" value={field.value ?? ''} />
                   </FormControl>
                 </FormItem>
               )}
@@ -1221,7 +1294,10 @@ export default function LEDDriverICForm() {
                     {field.value && <Check className="h-4 w-4 text-green-500" />}
                   </FormLabel>
                   <FormControl>
-                    <Input {...field} type="number" step="0.1" onChange={e => field.onChange(parseFloat(e.target.value))} placeholder="최대 출력 전압을 입력하세요" value={field.value ?? ''} />
+                    <Input {...field} type="number" step="0.1" onChange={e => {
+                      const val = parseFloat(e.target.value)
+                      field.onChange(isNaN(val) || e.target.value === '' ? null : val)
+                    }} placeholder="최대 출력 전압을 입력하세요" value={field.value ?? ''} />
                   </FormControl>
                 </FormItem>
               )}
@@ -1238,7 +1314,10 @@ export default function LEDDriverICForm() {
                   {field.value && <Check className="h-4 w-4 text-green-500" />}
                 </FormLabel>
                 <FormControl>
-                  <Input {...field} type="number" step="0.1" onChange={e => field.onChange(parseFloat(e.target.value))} placeholder="일반적인 출력 전압을 입력하세요" value={field.value ?? ''} />
+                  <Input {...field} type="number" step="0.1" onChange={e => {
+                    const val = parseFloat(e.target.value)
+                    field.onChange(isNaN(val) || e.target.value === '' ? null : val)
+                  }} placeholder="일반적인 출력 전압을 입력하세요" value={field.value ?? ''} />
                 </FormControl>
               </FormItem>
             )}
@@ -1255,7 +1334,10 @@ export default function LEDDriverICForm() {
                     {field.value && <Check className="h-4 w-4 text-green-500" />}
                   </FormLabel>
                   <FormControl>
-                    <Input {...field} type="number" step="1" onChange={e => field.onChange(parseInt(e.target.value))} placeholder="최소 동작 온도를 입력하세요" value={field.value ?? ''} />
+                    <Input {...field} type="number" step="1" onChange={e => {
+                      const val = parseInt(e.target.value)
+                      field.onChange(isNaN(val) || e.target.value === '' ? null : val)
+                    }} placeholder="최소 동작 온도를 입력하세요" value={field.value ?? ''} />
                   </FormControl>
                 </FormItem>
               )}
@@ -1271,7 +1353,10 @@ export default function LEDDriverICForm() {
                     {field.value && <Check className="h-4 w-4 text-green-500" />}
                   </FormLabel>
                   <FormControl>
-                    <Input {...field} type="number" step="1" onChange={e => field.onChange(parseInt(e.target.value))} placeholder="최대 동작 온도를 입력하세요" value={field.value ?? ''} />
+                    <Input {...field} type="number" step="1" onChange={e => {
+                      const val = parseInt(e.target.value)
+                      field.onChange(isNaN(val) || e.target.value === '' ? null : val)
+                    }} placeholder="최대 동작 온도를 입력하세요" value={field.value ?? ''} />
                   </FormControl>
                 </FormItem>
               )}
@@ -1314,7 +1399,7 @@ export default function LEDDriverICForm() {
                                     const newValue = values.includes(topology)
                                       ? values.filter((v) => v !== topology)
                                       : [...values, topology]
-                                    field.onChange(newValue)
+                                    field.onChange(newValue.length ? newValue : null)
                                   }}
                                 >
                                   <Checkbox
@@ -1336,7 +1421,8 @@ export default function LEDDriverICForm() {
                           variant="secondary"
                           size="sm"
                           onClick={() => {
-                            field.onChange(field.value?.filter((v) => v !== topology))
+                            const newValue = field.value?.filter((v) => v !== topology)
+                            field.onChange(newValue.length ? newValue : null)
                           }}
                         >
                           {topology}
@@ -1384,7 +1470,7 @@ export default function LEDDriverICForm() {
                                     const newValue = values.includes(method)
                                       ? values.filter((v) => v !== method)
                                       : [...values, method]
-                                    field.onChange(newValue)
+                                    field.onChange(newValue.length ? newValue : null)
                                   }}
                                 >
                                   <Checkbox
@@ -1406,7 +1492,8 @@ export default function LEDDriverICForm() {
                           variant="secondary"
                           size="sm"
                           onClick={() => {
-                            field.onChange(field.value?.filter((v) => v !== method))
+                            const newValue = field.value?.filter((v) => v !== method)
+                            field.onChange(newValue.length ? newValue : null)
                           }}
                         >
                           {method}
@@ -1455,7 +1542,7 @@ export default function LEDDriverICForm() {
                                       const newValue = values.includes(cert.id)
                                         ? values.filter((v) => v !== cert.id)
                                         : [...values, cert.id]
-                                      field.onChange(newValue)
+                                      field.onChange(newValue.length ? newValue : null)
                                     }}
                                   >
                                     <Checkbox
@@ -1479,7 +1566,8 @@ export default function LEDDriverICForm() {
                               variant="secondary"
                               size="sm"
                               onClick={() => {
-                                field.onChange(field.value?.filter((v) => v !== certId))
+                                const newValue = field.value?.filter((v) => v !== certId)
+                                field.onChange(newValue.length ? newValue : null)
                               }}
                             >
                               {cert?.name}
@@ -1525,7 +1613,7 @@ export default function LEDDriverICForm() {
                                       const newValue = values.includes(feature.id)
                                         ? values.filter((v) => v !== feature.id)
                                         : [...values, feature.id]
-                                      field.onChange(newValue)
+                                      field.onChange(newValue.length ? newValue : null)
                                     }}
                                   >
                                     <Checkbox
@@ -1549,7 +1637,8 @@ export default function LEDDriverICForm() {
                               variant="secondary"
                               size="sm"
                               onClick={() => {
-                                field.onChange(field.value?.filter((v) => v !== featureId))
+                                const newValue = field.value?.filter((v) => v !== featureId)
+                                field.onChange(newValue.length ? newValue : null)
                               }}
                             >
                               {feature?.name}
@@ -1594,7 +1683,7 @@ export default function LEDDriverICForm() {
                                       const newValue = values.includes(app.id)
                                         ? values.filter((v) => v !== app.id)
                                         : [...values, app.id]
-                                      field.onChange(newValue)
+                                      field.onChange(newValue.length ? newValue : null)
                                     }}
                                   >
                                     <Checkbox
@@ -1618,7 +1707,8 @@ export default function LEDDriverICForm() {
                               variant="secondary"
                               size="sm"
                               onClick={() => {
-                                field.onChange(field.value?.filter((v) => v !== appId))
+                                const newValue = field.value?.filter((v) => v !== appId)
+                                field.onChange(newValue.length ? newValue : null)
                               }}
                             >
                               {app?.name}
@@ -1809,6 +1899,7 @@ export default function LEDDriverICForm() {
               )}
             />
           </div>
+              
 
         </div>
 
@@ -1987,7 +2078,11 @@ export default function LEDDriverICForm() {
                     <FormItem>
                       <FormLabel>최소 주문 수량</FormLabel>
                       <FormControl>
-                        <Input {...field} type="number" onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : null)} placeholder="최소 주문 수량을 입력하세요" value={field.value ?? ''} />
+                        <Input {...field} type="number" onChange={e => {
+                          const value = e.target.value;
+                          const parsed = parseInt(value);
+                          field.onChange(value === '' || isNaN(parsed) ? null : parsed);
+                        }} placeholder="최소 주문 수량을 입력하세요" value={field.value ?? ''} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -2000,7 +2095,11 @@ export default function LEDDriverICForm() {
                     <FormItem>
                       <FormLabel>주문 단위</FormLabel>
                       <FormControl>
-                        <Input {...field} type="number" onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : null)} placeholder="주문 단위를 입력하세요" value={field.value ?? ''} />
+                        <Input {...field} type="number" onChange={e => {
+                          const value = e.target.value;
+                          const parsed = parseInt(value);
+                          field.onChange(value === '' || isNaN(parsed) ? null : parsed);
+                        }} placeholder="주문 단위를 입력하세요" value={field.value ?? ''} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -2013,7 +2112,11 @@ export default function LEDDriverICForm() {
                     <FormItem>
                       <FormLabel>최소 리드타임 (일)</FormLabel>
                       <FormControl>
-                        <Input {...field} type="number" onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : null)} placeholder="최소 리드타임을 입력하세요" value={field.value ?? ''} />
+                        <Input {...field} type="number" onChange={e => {
+                          const value = e.target.value;
+                          const parsed = parseInt(value);
+                          field.onChange(value === '' || isNaN(parsed) ? null : parsed);
+                        }} placeholder="최소 리드타임을 입력하세요" value={field.value ?? ''} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -2026,7 +2129,11 @@ export default function LEDDriverICForm() {
                     <FormItem>
                       <FormLabel>최대 리드타임 (일)</FormLabel>
                       <FormControl>
-                        <Input {...field} type="number" onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : null)} placeholder="최대 리드타임을 입력하세요" value={field.value ?? ''} />
+                        <Input {...field} type="number" onChange={e => {
+                          const value = e.target.value;
+                          const parsed = parseInt(value);
+                          field.onChange(value === '' || isNaN(parsed) ? null : parsed);
+                        }} placeholder="최대 리드타임을 입력하세요" value={field.value ?? ''} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -2056,7 +2163,8 @@ export default function LEDDriverICForm() {
                       <Select
                         value={field.value?.toString()}
                         onValueChange={(value) => {
-                          field.onChange(parseInt(value))
+                          const parsed = parseInt(value);
+                          field.onChange(isNaN(parsed) ? null : parsed);
                         }}
                       >
                         <SelectTrigger>
@@ -2116,7 +2224,7 @@ export default function LEDDriverICForm() {
                                   const newPrices = { ...field.value };
                                   newPrices[typeKey] = {
                                     ...typeValue,
-                                    type: e.target.value
+                                    type: e.target.value || null
                                   };
                                   field.onChange(newPrices);
                                 }}
@@ -2133,7 +2241,7 @@ export default function LEDDriverICForm() {
                                     ...typeValue,
                                     ranges: {
                                       ...typeValue.ranges,
-                                      [`${Object.keys(typeValue.ranges || {}).length + 1}`]: ""
+                                      [`${Object.keys(typeValue.ranges || {}).length + 1}`]: null
                                     }
                                   };
                                   field.onChange(newPrices);
@@ -2165,11 +2273,15 @@ export default function LEDDriverICForm() {
                                   placeholder="수량"
                                   value={quantity}
                                   onChange={(e) => {
+                                    const value = e.target.value;
+                                    const parsed = parseInt(value);
+                                    if (value === '' || isNaN(parsed)) return;
+                                    
                                     const newPrices = { ...field.value };
                                     const oldPrice = typeValue.ranges[quantity];
                                     const newRanges = { ...typeValue.ranges };
                                     delete newRanges[quantity];
-                                    newRanges[parseInt(e.target.value)] = oldPrice;
+                                    newRanges[parsed] = oldPrice;
                                     newPrices[typeKey] = {
                                       ...typeValue,
                                       ranges: newRanges
@@ -2184,12 +2296,15 @@ export default function LEDDriverICForm() {
                                   placeholder="가격 (원)"
                                   value={price}
                                   onChange={(e) => {
+                                    const value = e.target.value;
+                                    const parsed = parseInt(value);
+                                    
                                     const newPrices = { ...field.value };
                                     newPrices[typeKey] = {
                                       ...typeValue,
                                       ranges: {
                                         ...typeValue.ranges,
-                                        [quantity]: parseInt(e.target.value)
+                                        [quantity]: value === '' || isNaN(parsed) ? null : parsed
                                       }
                                     };
                                     field.onChange(newPrices);

@@ -4,6 +4,8 @@ import "./globals.css";
 import Footer from "@/container/footer/footer"
 import TwoLayerNavigation from "@/container/navbar/navigationBar"
 import Script from "next/script";
+import { Toaster } from "@/components/ui/toaster"
+
 
 
 export const metadata: Metadata = {
@@ -31,6 +33,7 @@ export default function RootLayout({
         <TwoLayerNavigation />
         {/* <DynamicBreadcrumb /> */}
         {children}
+        <Toaster />
         <Footer />
         </div>
       </body>

@@ -1,14 +1,13 @@
 'use client'
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Check, ChevronsUpDown, Plus, Trash2, X } from "lucide-react"
+import { Check, ChevronsUpDown, Plus, Trash2, X, Folder, File, ChevronLeft, ChevronRight } from "lucide-react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { z } from "zod"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
-import { createClient } from "@supabase/supabase-js"
 import {
   Command,
   CommandEmpty,
@@ -30,23 +29,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Textarea } from "@/components/ui/textarea"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuCheckboxItem,
-} from "@/components/ui/dropdown-menu"
-
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import { supabase } from "@/lib/supabase-client"
+import { useToast } from "@/hooks/use-toast"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  { db: { schema: 'dhp' }}
-)
 
 const FormSchema = z.object({
   // Product 정보
@@ -127,6 +116,13 @@ export default function LEDDriverICForm() {
   const [storageTypes, setStorageTypes] = useState<string[]>([])
   const [topologies, setTopologies] = useState<string[]>([])
   const [dimmingMethods, setDimmingMethods] = useState<string[]>([])
+  const [newFeature, setNewFeature] = useState<string>('')
+  const [newCertification, setNewCertification] = useState<string>('')
+  const [newApplication, setNewApplication] = useState<string>('')
+  const [documentTypes, setDocumentTypes] = useState<string[]>([])
+  const [documents, setDocuments] = useState<any[]>([])
+
+  const { toast } = useToast()
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -206,6 +202,22 @@ export default function LEDDriverICForm() {
       const { data: dimmingMethodsData } = await supabase.rpc('get_enum_values', {
           enum_type_name: 'dimming_method',
         });
+      const { data: documentTypes } = await supabase.rpc('get_enum_values', {
+          enum_type_name: 'document_type',
+        });
+
+      // Storage의 Documents 버킷에서 모든 파일 가져오기
+      const { data: documentsData } = await supabase
+        .storage
+        .from('Documents')
+        .list('', {
+          sortBy: { column: 'name', order: 'asc' }
+        });
+
+      const processedDocs = documentsData?.map(doc => ({
+        ...doc,
+        fullPath: doc.name
+      })) || [];
 
       setManufacturers(manufacturersData || [])
       setDivisions(divisionsData || [])
@@ -218,11 +230,14 @@ export default function LEDDriverICForm() {
       setStorageTypes(storageTypesData || [])
       setTopologies(topologiesData || [])
       setDimmingMethods(dimmingMethodsData || [])
+      setDocumentTypes(documentTypes || [])
+      setDocuments(processedDocs)
     }
 
     fetchData()
   }, [])
 
+  
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     try {
       // 1. Product 테이블에 먼저 저장
@@ -394,180 +409,183 @@ export default function LEDDriverICForm() {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <div className="space-y-4">
-          <h2 className="text-lg font-bold">제품 기본 정보</h2>
-          
-          {/* 제품 기본 정보 필드들 */}
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2">
-                    제품명
-                    {field.value && <Check className="h-4 w-4 text-green-500" />}
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="제품명을 입력하세요" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+          <div className="p-6 rounded-lg border shadow-sm">
+            <h2 className="text-lg font-bold">제품 기본 정보</h2>
+            
+            {/* 제품 기본 정보 필드들 */}
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      제품명
+                      {field.value && <Check className="h-4 w-4 text-green-500" />}
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="제품명을 입력하세요" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="part_number"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      Part Number
+                      {field.value && <Check className="h-4 w-4 text-green-500" />}
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Part Number를 입력하세요" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* 제조사, 구분 선택 ComboBox */}
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="manufacturer_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      제조사
+                      {field.value && <Check className="h-4 w-4 text-green-500" />}
+                    </FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className={cn(
+                              "w-full justify-between",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value
+                              ? manufacturers.find(m => m.id === field.value)?.name
+                              : "제조사 선택"}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-full p-0">
+                        <Command>
+                          <CommandInput placeholder="제조사 검색..." />
+                          <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
+                          <CommandGroup>
+                            {manufacturers.map((manufacturer) => (
+                              <CommandItem
+                                key={manufacturer.id}
+                                value={manufacturer.name}
+                                onSelect={() => {
+                                  form.setValue("manufacturer_id", manufacturer.id)
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    manufacturer.id === field.value
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                                {manufacturer.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="division_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      구분
+                      {field.value && <Check className="h-4 w-4 text-green-500" />}
+                    </FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className={cn(
+                              "w-full justify-between",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value
+                              ? divisions.find(d => d.id === field.value)?.name
+                              : "구분 선택"}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-full p-0">
+                        <Command>
+                          <CommandInput placeholder="구분 검색..." />
+                          <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
+                          <CommandGroup>
+                            {divisions.map((division) => (
+                              <CommandItem
+                                key={division.id}
+                                value={division.name}
+                                onSelect={() => {
+                                  form.setValue("division_id", division.id)
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    division.id === field.value
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                                {division.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}
-              name="part_number"
+              name="description"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex items-center gap-2">
-                    Part Number
+                    설명
                     {field.value && <Check className="h-4 w-4 text-green-500" />}
                   </FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Part Number를 입력하세요" />
+                    <Textarea {...field} placeholder="제품 설명을 입력하세요" />
                   </FormControl>
                 </FormItem>
               )}
             />
           </div>
 
-          {/* 제조사, 구분 선택 ComboBox */}
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="manufacturer_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2">
-                    제조사
-                    {field.value && <Check className="h-4 w-4 text-green-500" />}
-                  </FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          className={cn(
-                            "w-full justify-between",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value
-                            ? manufacturers.find(m => m.id === field.value)?.name
-                            : "제조사 선택"}
-                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full p-0">
-                      <Command>
-                        <CommandInput placeholder="제조사 검색..." />
-                        <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
-                        <CommandGroup>
-                          {manufacturers.map((manufacturer) => (
-                            <CommandItem
-                              key={manufacturer.id}
-                              value={manufacturer.name}
-                              onSelect={() => {
-                                form.setValue("manufacturer_id", manufacturer.id)
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  manufacturer.id === field.value
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                )}
-                              />
-                              {manufacturer.name}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="division_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2">
-                    구분
-                    {field.value && <Check className="h-4 w-4 text-green-500" />}
-                  </FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          className={cn(
-                            "w-full justify-between",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value
-                            ? divisions.find(d => d.id === field.value)?.name
-                            : "구분 선택"}
-                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full p-0">
-                      <Command>
-                        <CommandInput placeholder="구분 검색..." />
-                        <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
-                        <CommandGroup>
-                          {divisions.map((division) => (
-                            <CommandItem
-                              key={division.id}
-                              value={division.name}
-                              onSelect={() => {
-                                form.setValue("division_id", division.id)
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  division.id === field.value
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                )}
-                              />
-                              {division.name}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="flex items-center gap-2">
-                  설명
-                  {field.value && <Check className="h-4 w-4 text-green-500" />}
-                </FormLabel>
-                <FormControl>
-                  <Textarea {...field} placeholder="제품 설명을 입력하세요" />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <div className="space-y-4">
+          <div className="p-6 rounded-lg border shadow-sm">
             <div className="flex justify-between items-center">
               <h2 className="text-lg font-bold">제품 이미지</h2>
               <Button
@@ -588,7 +606,7 @@ export default function LEDDriverICForm() {
             </div>
 
             {form.watch("images")?.map((_, index) => (
-              <div key={index} className="space-y-4 p-4 border rounded-lg">
+              <div key={index} className="space-y-4 p-4 border rounded-lg mt-4 bg-gray-50">
                 <div className="flex justify-between items-center">
                   <h3 className="font-semibold">이미지 {index + 1}</h3>
                   <Button
@@ -630,30 +648,63 @@ export default function LEDDriverICForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
-                          이미지 URL
+                          이미지 업로드
                           {field.value && <Check className="h-4 w-4 text-green-500" />}
                         </FormLabel>
                         <FormControl>
-                          <Input 
-                            {...field} 
-                            placeholder="이미지 URL을 입력하세요"
-                            onBlur={(e) => {
-                              field.onBlur();
-                              // URL이 유효한지 확인
-                              const img = new Image();
-                              img.onload = () => {
-                                console.log("이미지가 정상적으로 로드되었습니다.");
-                              };
-                              img.onerror = () => {
-                                console.error("이미지 URL이 유효하지 않습니다.");
-                                form.setError(`images.${index}.url`, {
-                                  type: "manual",
-                                  message: "유효하지 않은 이미지 URL입니다."
-                                });
-                              };
-                              img.src = e.target.value;
-                            }}
-                          />
+                          <div className="flex gap-2">
+                            <Input 
+                              type="file"
+                              accept="image/*"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+
+                                try {
+                                  // 파일 이름에서 확장자 추출
+                                  const fileExt = file.name.split('.').pop();
+                                  // 현재 시간을 기반으로 유니크한 경로 생성
+                                  const filePath = `${Date.now()}.${fileExt}`;
+
+                                  // Storage에 이미지 업로드
+                                  const { error: uploadError, data } = await supabase.storage
+                                    .from('Images/Macroblock')
+                                    .upload(filePath, file);
+
+                                  if (uploadError) {
+                                    throw uploadError;
+                                  }
+
+                                  // 업로드된 이미지의 공개 URL 가져오기
+                                  const { data: { publicUrl } } = supabase.storage
+                                    .from('Images/Macroblock')
+                                    .getPublicUrl(filePath);
+
+                                  // form 값 업데이트
+                                  field.onChange(publicUrl);
+                                  // 파일명을 이미지 제목으로 설정
+                                  form.setValue(`images.${index}.title`, file.name);
+                                  
+                                  toast({
+                                    title: "이미지가 성공적으로 업로드되었습니다.",
+                                  });
+                                } catch (error) {
+                                  console.error('이미지 업로드 중 오류:', error);
+                                  toast({
+                                    title: "이미지 업로드에 실패했습니다.",
+                                    variant: "destructive"
+                                  });
+                                }
+                              }}
+                            />
+                            {field.value && (
+                              <img 
+                                src={field.value} 
+                                alt="미리보기" 
+                                className="h-10 w-10 object-cover rounded"
+                              />
+                            )}
+                          </div>
                         </FormControl>
                       </FormItem>
                     )}
@@ -678,30 +729,144 @@ export default function LEDDriverICForm() {
               </div>
             ))}
           </div>
-
           {/* 문서 정보 */}
-          <div className="space-y-4">
+          <div className="p-6 rounded-lg border shadow-sm">
             <div className="flex justify-between items-center">
               <h2 className="text-lg font-bold">문서 정보</h2>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  const documents = form.getValues("documents") || []
-                  form.setValue("documents", [
-                    ...documents,
-                    { title: "", url: "", type: "" }
-                  ])
-                }}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                문서 추가
-              </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Plus className="mr-2 h-4 w-4" />
+                    문서 추가
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>문서 선택</DialogTitle>
+                  </DialogHeader>
+                  
+                  <div className="flex items-center gap-2 mb-4">
+                    {documents.length > 0 && documents[0].fullPath && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                          try {
+                            const pathParts = documents[0].fullPath.split('/');
+                            pathParts.pop(); // 현재 폴더/파일명 제거
+                            const parentPath = pathParts.slice(0, -1).join('/'); // 상위 폴더 경로
+                            
+                            const { data: parentFiles, error } = await supabase
+                              .storage
+                              .from('Documents')
+                              .list(parentPath || '');
+                              
+                            if (error) throw error;
+                            
+                            if (parentFiles) {
+                              setDocuments(parentFiles.map(file => ({
+                                ...file,
+                                fullPath: parentPath ? `${parentPath}/${file.name}` : file.name
+                              })));
+                            }
+                          } catch (error) {
+                            console.error('상위 폴더 이동 중 오류:', error);
+                            toast({
+                              title: "상위 폴더 이동에 실패했습니다.",
+                              variant: "destructive"
+                            });
+                          }
+                        }}
+                      >
+                        <ChevronLeft className="mr-2 h-4 w-4" />
+                        상위 폴더로
+                      </Button>
+                    )}
+                    <div className="text-sm text-muted-foreground">
+                      {documents[0]?.fullPath?.split('/').slice(0, -1).join('/')}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 max-h-[400px] overflow-y-auto">
+                    {documents?.map((doc) => (
+                      <Button
+                        key={doc.fullPath}
+                        variant="ghost"
+                        className="justify-start h-auto py-2 px-4"
+                        onClick={async () => {
+                          if (!doc.name.includes('.')) {
+                            try {
+                              const { data: folderFiles, error } = await supabase
+                                .storage
+                                .from('Documents')
+                                .list(`${doc.fullPath}`);
+
+                              if (error) throw error;
+
+                              if (folderFiles) {
+                                setDocuments(folderFiles.map(file => ({
+                                  ...file,
+                                  fullPath: `${doc.fullPath}/${file.name}`
+                                })));
+                              }
+                            } catch (error) {
+                              console.error('폴더 내용 로드 중 오류:', error);
+                              toast({
+                                title: "폴더 내용을 불러오는데 실패했습니다.",
+                                variant: "destructive"
+                              });
+                            }
+                          } else {
+                            try {
+                              const { data: { publicUrl } } = supabase
+                                .storage
+                                .from('Documents')
+                                .getPublicUrl(doc.fullPath);
+                                
+                              const currentDocs = form.getValues("documents") || [];
+                              form.setValue("documents", [
+                                ...currentDocs,
+                                { 
+                                  title: doc.name,
+                                  url: publicUrl,
+                                  type: "" 
+                                }
+                              ]);
+
+                              toast({
+                                title: "문서가 추가되었습니다."
+                              });
+                            } catch (error) {
+                              console.error('문서 URL 가져오기 중 오류:', error);
+                              toast({
+                                title: "문서 URL을 가져오는데 실패했습니다.",
+                                variant: "destructive"
+                              });
+                            }
+                          }
+                        }}
+                      >
+                        {!doc.name.includes('.') ? (
+                          <>
+                            <Folder className="mr-2 h-4 w-4" />
+                            {doc.name}
+                            <ChevronRight className="ml-auto h-4 w-4" />
+                          </>
+                        ) : (
+                          <>
+                            <File className="mr-2 h-4 w-4" />
+                            {doc.name}
+                          </>
+                        )}
+                      </Button>
+                    ))}
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
 
-            {form.watch("documents")?.map((_, index) => (
-              <div key={index} className="space-y-4 p-4 border rounded-lg">
+            {form.watch("documents")?.map((doc, index) => (
+              <div key={index} className="space-y-4 p-4 border rounded-lg mt-4 bg-gray-50">
                 <div className="flex justify-between items-center">
                   <h3 className="font-semibold">문서 {index + 1}</h3>
                   <Button
@@ -747,7 +912,7 @@ export default function LEDDriverICForm() {
                           {field.value && <Check className="h-4 w-4 text-green-500" />}
                         </FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="문서 URL을 입력하세요" />
+                          <Input {...field} readOnly />
                         </FormControl>
                       </FormItem>
                     )}
@@ -762,9 +927,23 @@ export default function LEDDriverICForm() {
                           문서 유형
                           {field.value && <Check className="h-4 w-4 text-green-500" />}
                         </FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="문서 유형을 입력하세요" />
-                        </FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="문서 유형을 선택하세요" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {documentTypes?.map((type) => (
+                              <SelectItem key={type} value={type}>
+                                {type}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </FormItem>
                     )}
                   />
@@ -1260,7 +1439,6 @@ export default function LEDDriverICForm() {
               )}
             />
           </div>
-
           <div className="space-y-4">
             <h2 className="text-lg font-bold">인증 및 특징</h2>
             <div className="grid grid-cols-2 gap-4">
@@ -1271,6 +1449,40 @@ export default function LEDDriverICForm() {
                   <FormItem>
                     <FormLabel>인증</FormLabel>
                     <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <Input 
+                          placeholder="새로운 인증을 입력하세요"
+                          value={newCertification}
+                          onChange={(e) => setNewCertification(e.target.value)}
+                        />
+                        <Button
+                          type="button"
+                          onClick={async () => {
+                            if (!newCertification) return
+                            
+                            const { data, error } = await supabase
+                              .from('certifications')
+                              .insert({ name: newCertification })
+                              .select()
+                              .single()
+                              
+                            if (error) {
+                              toast({
+                                title: '인증 추가에 실패했습니다',
+                              })
+                              return
+                            }
+                            
+                            setCertifications(prev => [...prev, data])
+                            setNewCertification('')
+                            toast({
+                              title: '새로운 인증이 추가되었습니다',
+                            })
+                          }}
+                        >
+                          추가
+                        </Button>
+                      </div>
                       <FormControl>
                         <Popover>
                           <PopoverTrigger asChild>
@@ -1341,6 +1553,40 @@ export default function LEDDriverICForm() {
                   <FormItem>
                     <FormLabel>특징</FormLabel>
                     <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <Input 
+                          placeholder="새로운 특징을 입력하세요"
+                          value={newFeature}
+                          onChange={(e) => setNewFeature(e.target.value)}
+                        />
+                        <Button
+                          type="button"
+                          onClick={async () => {
+                            if (!newFeature) return
+                            
+                            const { data, error } = await supabase
+                              .from('features')
+                              .insert({ name: newFeature })
+                              .select()
+                              .single()
+                              
+                            if (error) {
+                              toast({
+                                title: '특징 추가에 실패했습니다',
+                              })
+                              return
+                            }
+                            
+                            setFeatures(prev => [...prev, data])
+                            setNewFeature('')
+                            toast({
+                              title: '새로운 특징이 추가되었습니다',
+                            })
+                          }}
+                        >
+                          추가
+                        </Button>
+                      </div>
                       <FormControl>
                         <Popover>
                           <PopoverTrigger asChild>
@@ -1410,6 +1656,40 @@ export default function LEDDriverICForm() {
                   <FormItem>
                     <FormLabel>응용분야</FormLabel>
                     <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <Input 
+                          placeholder="새로운 응용분야를 입력하세요"
+                          value={newApplication}
+                          onChange={(e) => setNewApplication(e.target.value)}
+                        />
+                        <Button
+                          type="button"
+                          onClick={async () => {
+                            if (!newApplication) return
+                            
+                            const { data, error } = await supabase
+                              .from('applications')
+                              .insert({ name: newApplication })
+                              .select()
+                              .single()
+                              
+                            if (error) {
+                              toast({
+                                title: '응용분야 추가에 실패했습니다',
+                              })
+                              return
+                            }
+                            
+                            setApplications(prev => [...prev, data])
+                            setNewApplication('')
+                            toast({
+                              title: '새로운 응용분야가 추가되었습니다',
+                            })
+                          }}
+                        >
+                          추가
+                        </Button>
+                      </div>
                       <FormControl>
                         <Popover>
                           <PopoverTrigger asChild>
@@ -1473,6 +1753,7 @@ export default function LEDDriverICForm() {
                 )}
               />
             </div>
+          </div>
           </div>
           <div className="space-y-4">
             <h2 className="text-lg font-bold">추가 속성</h2>
@@ -1651,7 +1932,6 @@ export default function LEDDriverICForm() {
             />
           </div>
 
-        </div>
 
         {/* LED Driver IC 옵션 정보 */}
         <div className="space-y-4">
@@ -1828,7 +2108,10 @@ export default function LEDDriverICForm() {
                     <FormItem>
                       <FormLabel>최소 주문 수량</FormLabel>
                       <FormControl>
-                        <Input {...field} type="number" onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : null)} placeholder="최소 주문 수량을 입력하세요" value={field.value ?? ''} />
+                        <Input {...field} type="number" onChange={e => {
+                          const val = parseInt(e.target.value)
+                          field.onChange(isNaN(val) || e.target.value === '' ? null : val)
+                        }} placeholder="최소 주문 수량을 입력하세요" value={field.value ?? ''} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -1841,7 +2124,10 @@ export default function LEDDriverICForm() {
                     <FormItem>
                       <FormLabel>주문 단위</FormLabel>
                       <FormControl>
-                        <Input {...field} type="number" onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : null)} placeholder="주문 단위를 입력하세요" value={field.value ?? ''} />
+                        <Input {...field} type="number" onChange={e => {
+                          const val = parseInt(e.target.value)
+                          field.onChange(isNaN(val) || e.target.value === '' ? null : val)
+                        }} placeholder="주문 단위를 입력하세요" value={field.value ?? ''} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -1854,7 +2140,10 @@ export default function LEDDriverICForm() {
                     <FormItem>
                       <FormLabel>최소 리드타임 (일)</FormLabel>
                       <FormControl>
-                        <Input {...field} type="number" onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : null)} placeholder="최소 리드타임을 입력하세요" value={field.value ?? ''} />
+                        <Input {...field} type="number" onChange={e => {
+                          const val = parseInt(e.target.value)
+                          field.onChange(isNaN(val) || e.target.value === '' ? null : val)
+                        }} placeholder="최소 리드타임을 입력하세요" value={field.value ?? ''} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -1867,7 +2156,10 @@ export default function LEDDriverICForm() {
                     <FormItem>
                       <FormLabel>최대 리드타임 (일)</FormLabel>
                       <FormControl>
-                        <Input {...field} type="number" onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : null)} placeholder="최대 리드타임을 입력하세요" value={field.value ?? ''} />
+                        <Input {...field} type="number" onChange={e => {
+                          const val = parseInt(e.target.value)
+                          field.onChange(isNaN(val) || e.target.value === '' ? null : val)
+                        }} placeholder="최대 리드타임을 입력하세요" value={field.value ?? ''} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -1897,7 +2189,8 @@ export default function LEDDriverICForm() {
                       <Select
                         value={field.value?.toString()}
                         onValueChange={(value) => {
-                          field.onChange(parseInt(value))
+                          const val = parseInt(value)
+                          field.onChange(isNaN(val) ? null : val)
                         }}
                       >
                         <SelectTrigger>
@@ -2006,11 +2299,15 @@ export default function LEDDriverICForm() {
                                   placeholder="수량"
                                   value={quantity}
                                   onChange={(e) => {
+                                    const val = parseInt(e.target.value)
+                                    if (isNaN(val) || e.target.value === '') {
+                                      return
+                                    }
                                     const newPrices = { ...field.value };
                                     const oldPrice = typeValue.ranges[quantity];
                                     const newRanges = { ...typeValue.ranges };
                                     delete newRanges[quantity];
-                                    newRanges[parseInt(e.target.value)] = oldPrice;
+                                    newRanges[val] = oldPrice;
                                     newPrices[typeKey] = {
                                       ...typeValue,
                                       ranges: newRanges
@@ -2025,12 +2322,13 @@ export default function LEDDriverICForm() {
                                   placeholder="가격 (원)"
                                   value={price}
                                   onChange={(e) => {
+                                    const val = parseInt(e.target.value)
                                     const newPrices = { ...field.value };
                                     newPrices[typeKey] = {
                                       ...typeValue,
                                       ranges: {
                                         ...typeValue.ranges,
-                                        [quantity]: parseInt(e.target.value)
+                                        [quantity]: isNaN(val) || e.target.value === '' ? null : val
                                       }
                                     };
                                     field.onChange(newPrices);

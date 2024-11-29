@@ -143,10 +143,10 @@ export function DataTable<TData extends {
   }, [rowSelection, table]);
 
   return (
-    <div className="flex w-full h-full flex-col gap-3 sm:flex-row">
+    <div className="flex w-full h-full flex-col gap-3 md:flex-row">
       <div
         className={cn(
-          "w-full p-1 sm:min-w-52 sm:max-w-52 sm:self-start md:min-w-64 md:max-w-64",
+          "w-full p-1 md:min-w-52 md:max-w-52 md:self-start",
           !controlsOpen && "hidden"
         )}
       >
