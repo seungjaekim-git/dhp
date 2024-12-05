@@ -3,14 +3,22 @@
 import { columns } from "./columns";
 import { getData, getFilterFields } from "./constants";
 import { DataTable } from "./data-table";
-import { searchParamsCache } from "../search-params";
+import { searchParamsCache } from "./search-params";
 import { Skeleton } from "@/components/ui/skeleton";
 import * as React from "react";
-import type { LEDDriverICColumnSchema } from "./schema";
+import type { LEDDriverICColumnSchema, LEDDriverICFilterSchema } from "./schema";
 
 export default function LEDDriverICListPage() {
-  const searchParams = new URLSearchParams(window.location.search);
-  const search = searchParamsCache.parse(Object.fromEntries(searchParams));
+  const [search, setSearch] = React.useState({});
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      const parsedSearch = searchParamsCache.parse(Object.fromEntries(searchParams));
+      console.log("Parsed Search:", parsedSearch); // 디버깅용
+      setSearch(parsedSearch || {});
+    }
+  }, []);
 
   const [data, setData] = React.useState<LEDDriverICColumnSchema[]>([]);
   const [filterFields, setFilterFields] = React.useState<any[]>([]);

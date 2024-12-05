@@ -143,11 +143,7 @@ export const getData = async () => {
 
   return mergedData;
 };
-
 export const getFilterFields = async () => {
-  // 필터 필드들이 비동기로 가져와지지만,
-  // DataTable 컴포넌트에서는 동기적으로 filterFields를 받고 있습니다.
-  // 이로 인해 초기 렌더링 시 필터 필드가 비어있을 수 있습니다.
   const data = await getData();
 
   return [
@@ -163,6 +159,8 @@ export const getFilterFields = async () => {
       type: "slider",
       min: 1,
       max: 8,
+      step: 1,
+      defaultValue: [1, 8],
       options: data.map(({ number_of_outputs }) => ({ label: `${number_of_outputs}`, value: number_of_outputs })),
       defaultOpen: true,
     },
@@ -172,7 +170,12 @@ export const getFilterFields = async () => {
       type: "range",
       min: 0,
       max: 1000,
-      options: data.map(({ input_voltage_range }) => ({ label: `${input_voltage_range}`, value: input_voltage_range })),
+      step: 1,
+      defaultValue: [0, 1000],
+      options: data.map(({ input_voltage_range }) => {
+        const [min, max] = JSON.parse(input_voltage_range || "[0,0]");
+        return { label: `${min}V ~ ${max}V`, value: input_voltage_range };
+      }),
     },
     {
       label: "출력 전류 범위",
@@ -180,7 +183,12 @@ export const getFilterFields = async () => {
       type: "range", 
       min: 0,
       max: 5000,
-      options: data.map(({ output_current_range }) => ({ label: `${output_current_range}`, value: output_current_range })),
+      step: 1,
+      defaultValue: [0, 5000],
+      options: data.map(({ output_current_range }) => {
+        const [min, max] = JSON.parse(output_current_range || "[0,0]");
+        return { label: `${min}mA ~ ${max}mA`, value: output_current_range };
+      }),
     },
     {
       label: "동작 온도",
@@ -188,7 +196,12 @@ export const getFilterFields = async () => {
       type: "range",
       min: -55,
       max: 150,
-      options: data.map(({ operating_temperature }) => ({ label: `${operating_temperature}`, value: operating_temperature })),
+      step: 1,
+      defaultValue: [-55, 150],
+      options: data.map(({ operating_temperature }) => {
+        const [min, max] = JSON.parse(operating_temperature || "[0,0]");
+        return { label: `${min}°C ~ ${max}°C`, value: operating_temperature };
+      }),
     },
     {
       label: "실장 방식",

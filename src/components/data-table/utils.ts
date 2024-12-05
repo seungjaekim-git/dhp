@@ -24,19 +24,19 @@ export function deserialize<T extends z.AnyZodObject>(schema: T) {
   return (value: string) => castToSchema.safeParse(value);
 }
 
-// export function serialize<T extends z.AnyZodObject>(schema: T) {
-//   return (value: z.infer<T>) =>
-//     schema
-//       .transform((val) => {
-//         Object.keys(val).reduce((prev, curr) => {
-//           if (Array.isArray(val[curr])) {
-//             return `${prev}${curr}:${val[curr].join(",")} `;
-//           }
-//           return `${prev}${curr}:${val[curr]} `;
-//         }, "");
-//       })
-//       .safeParse(value);
-// }
+export function serialize<T extends z.AnyZodObject>(schema: T) {
+  return (value: z.infer<T>) =>
+    schema
+      .transform((val) => {
+        Object.keys(val).reduce((prev, curr) => {
+          if (Array.isArray(val[curr])) {
+            return `${prev}${curr}:${val[curr].join(",")} `;
+          }
+          return `${prev}${curr}:${val[curr]} `;
+        }, "");
+      })
+      .safeParse(value);
+}
 
 export function serializeColumFilters<TData>(
   columnFilters: ColumnFiltersState,

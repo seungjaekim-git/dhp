@@ -9,6 +9,30 @@ import {
 export const ledDriverICColumnSchema = z.object({
   id: z.number(),
   name: z.string(),
+  part_number: z.string(),
+  description: z.string(),
+  manufacturer: z.object({
+    id: z.number(),
+    name: z.string()
+  }),
+  division: z.object({
+    id: z.number(), 
+    name: z.string()
+  }),
+  images: z.array(z.object({
+    id: z.number(),
+    title: z.string(),
+    url: z.string(),
+    description: z.string().nullable()
+  })),
+  documents: z.array(z.object({
+    document: z.object({
+      id: z.number(),
+      title: z.string(),
+      url: z.string(),
+      type: z.string()
+    })
+  })),
   product_id: z.number(),
   category_id: z.number(),
   subtitle: z.string(),
@@ -26,16 +50,22 @@ export const ledDriverICColumnSchema = z.object({
   operating_temperature: z.string().nullable(),
   category_specific_attributes: z.record(z.string(), z.unknown()),
   category: z.object({
+    id: z.number(),
     name: z.string()
   }),
   certifications: z.array(z.object({
     certification: z.object({
+      id: z.number(),
       name: z.string()
     })
   })),
-  features: z.array(z.string()),
+  features: z.array(z.object({
+    id: z.number(),
+    name: z.string()
+  })),
   applications: z.array(z.object({
     application: z.object({
+      id: z.number(),
       name: z.string()
     })
   })),
@@ -50,6 +80,7 @@ export const ledDriverICColumnSchema = z.object({
     storage_type: z.string(),
     package_types: z.array(z.object({
       package_type: z.object({
+        id: z.number(),
         name: z.string()
       })
     })),
@@ -62,11 +93,10 @@ export const ledDriverICColumnSchema = z.object({
 export type LEDDriverICColumnSchema = z.infer<typeof ledDriverICColumnSchema>;
 
 // LED Driver IC 필터 스키마 
-export const ledDriverICFilterSchema = z.object({
+export const LEDDriverICFilterSchema = z.object({
   name: z.string().optional(),
   subtitle: z.string().optional(),
-  product_id: z.number().optional(),
-  category_id: z.number().optional(),
+  category: z.string().optional(),
   
   number_of_outputs: z
     .string()
@@ -85,19 +115,7 @@ export const ledDriverICFilterSchema = z.object({
     .transform((val) => val.split(SLIDER_DELIMITER))
     .pipe(z.coerce.number().array().max(2))
     .optional(),
-
-  output_voltage_range: z
-    .string()
-    .transform((val) => val.split(SLIDER_DELIMITER))
-    .pipe(z.coerce.number().array().max(2))
-    .optional(),
     
-  operating_frequency: z
-    .string()
-    .transform((val) => val.split(SLIDER_DELIMITER))
-    .pipe(z.coerce.number().array().max(2))
-    .optional(),
-
   operating_temperature: z
     .string()
     .transform((val) => val.split(SLIDER_DELIMITER))
@@ -116,11 +134,13 @@ export const ledDriverICFilterSchema = z.object({
     .pipe(z.string().array())
     .optional(),
     
-  package_types: z
+  package_type: z
     .string()
     .transform((val) => val.split(ARRAY_DELIMITER))
     .pipe(z.string().array())
     .optional(),
+    
+  options: z.string().optional(),
     
   topologies: z
     .string()
@@ -140,12 +160,6 @@ export const ledDriverICFilterSchema = z.object({
     .pipe(z.string().array())
     .optional(),
     
-  features: z
-    .string()
-    .transform((val) => val.split(ARRAY_DELIMITER))
-    .pipe(z.string().array())
-    .optional(),
-    
   applications: z
     .string()
     .transform((val) => val.split(ARRAY_DELIMITER))
@@ -153,4 +167,4 @@ export const ledDriverICFilterSchema = z.object({
     .optional()
 });
 
-export type LEDDriverICFilterSchema = z.infer<typeof ledDriverICFilterSchema>;
+export type LEDDriverICFilterSchema = z.infer<typeof LEDDriverICFilterSchema>;

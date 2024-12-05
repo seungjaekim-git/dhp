@@ -31,7 +31,6 @@ import {
 import { DataTableFilterControls } from "@/components/data-table/data-table-filter-controls";
 import { DataTablePagination } from "@/components/data-table/data-table-pagination";
 import { DataTableFilterCommand } from "@/components/data-table/data-table-filter-command";
-import { columnFilterSchema } from "../schema";
 import type { DataTableFilterField } from "@/components/data-table/types";
 import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
 import { cn } from "@/lib/utils";
@@ -41,17 +40,9 @@ import { searchParamsParser } from "./search-params";
 import { SheetDetailsContent } from "./sheet-details-content";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import type { LEDDriverICColumnSchema } from "./schema";
-import { getFilterFields } from "./constants";
+import { LEDDriverICFilterSchema } from "./schema";
 
-const debounce = (fn: (...args: any[]) => void, delay: number) => {
-  let timeout: NodeJS.Timeout;
-  return (...args: any[]) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => fn(...args), delay);
-  };
-};
-
-export interface DataTableProps<TData, TValue> {
+export interface DataTableProps<TData extends LEDDriverICColumnSchema, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   defaultColumnFilters?: ColumnFiltersState;
@@ -62,7 +53,7 @@ export function DataTable<TData extends LEDDriverICColumnSchema, TValue>({
   columns,
   data,
   defaultColumnFilters = [],
-  filterFields: propFilterFields,
+  filterFields = [],
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(defaultColumnFilters);
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -75,28 +66,16 @@ export function DataTable<TData extends LEDDriverICColumnSchema, TValue>({
   const [controlsOpen, setControlsOpen] = useLocalStorage("leddriveric-table-controls", true);
   const [_, setSearch] = useQueryStates(searchParamsParser);
   const [sheetOpen, setSheetOpen] = React.useState(false);
-  const [columnSizing, setColumnSizing] = React.useState({});
-
-  const debouncedSetColumnSizing = React.useMemo(
-    () => debounce((newSizing: Record<string, number>) => {
-      setColumnSizing(newSizing);
-    }, 50),
-    []
-  );
 
   const table = useReactTable({
     data,
-    columns: columns.map((col) => ({
-      ...col,
-      enableResizing: true,
-    })),
-    state: { columnFilters, sorting, columnVisibility, pagination, rowSelection, columnSizing },
+    columns,
+    state: { columnFilters, sorting, columnVisibility, pagination, rowSelection },
     onColumnVisibilityChange: setColumnVisibility,
     onColumnFiltersChange: setColumnFilters,
     onSortingChange: setSorting,
     onPaginationChange: setPagination,
     onRowSelectionChange: setRowSelection,
-    onColumnSizingChange: setColumnSizing,
     getSortedRowModel: getSortedRowModel(),
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -106,13 +85,13 @@ export function DataTable<TData extends LEDDriverICColumnSchema, TValue>({
   });
 
   React.useEffect(() => {
-    const columnFiltersWithNullable = propFilterFields?.map((field) => {
+    const columnFiltersWithNullable = filterFields.map((field) => {
       const filterValue = columnFilters.find(
         (filter) => filter.id === field.value
       );
       if (!filterValue) return { id: field.value, value: null };
       return { id: field.value, value: filterValue.value };
-    }) || [];
+    });
 
     const search = columnFiltersWithNullable.reduce((prev, curr) => {
       prev[curr.id as string] = curr.value;
@@ -120,7 +99,7 @@ export function DataTable<TData extends LEDDriverICColumnSchema, TValue>({
     }, {} as Record<string, unknown>);
 
     setSearch(search);
-  }, [columnFilters, propFilterFields, setSearch]);
+  }, [columnFilters, filterFields, setSearch]);
 
   const selectedRow = React.useMemo(() => {
     const selectedRowKey = Object.keys(rowSelection)?.[0];
@@ -141,15 +120,15 @@ export function DataTable<TData extends LEDDriverICColumnSchema, TValue>({
           <DataTableFilterControls
             table={table}
             columns={columns}
-            filterFields={propFilterFields}
+            filterFields={filterFields}
           />
         </div>
       </div>
       <div className="flex max-w-full flex-1 flex-col gap-4 overflow-hidden p-1">
         <DataTableFilterCommand
           table={table}
-          schema={columnFilterSchema}
-          filterFields={propFilterFields}
+          schema={LEDDriverICFilterSchema}
+          filterFields={filterFields}
         />
         <DataTableToolbar
           table={table}
@@ -162,61 +141,13 @@ export function DataTable<TData extends LEDDriverICColumnSchema, TValue>({
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id} className="hover:bg-transparent">
                   {headerGroup.headers.map((header) => (
-                    <TableHead 
-                      key={header.id} 
-                      className="whitespace-nowrap relative select-none"
-                      style={{
-                        width: header.getSize(),
-                        position: 'relative'
-                      }}
-                    >
+                    <TableHead key={header.id}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                      {header.column.getCanResize() && (
-                        <div
-                          onMouseDown={(e) => {
-                            const startX = e.clientX;
-                            const startWidth = header.getSize();
-                            let animationFrame: number;
-
-                            const onMouseMove = (e: MouseEvent) => {
-                              const delta = e.clientX - startX;
-                              const newSize = Math.max(startWidth + delta, 50);
-
-                              if (!animationFrame) {
-                                animationFrame = requestAnimationFrame(() => {
-                                  debouncedSetColumnSizing({
-                                    ...columnSizing,
-                                    [header.id]: newSize,
-                                  });
-                                  animationFrame = 0;
-                                });
-                              }
-                            };
-
-                            const onMouseUp = () => {
-                              if (animationFrame) {
-                                cancelAnimationFrame(animationFrame);
-                              }
-                              window.removeEventListener("mousemove", onMouseMove);
-                              window.removeEventListener("mouseup", onMouseUp);
-                            };
-
-                            window.addEventListener("mousemove", onMouseMove);
-                            window.addEventListener("mouseup", onMouseUp);
-                          }}
-                          className="absolute right-0 top-0 h-full w-1 cursor-col-resize select-none touch-none hover:bg-gray-300"
-                          style={{
-                            transform: header.column.getIsResizing() 
-                              ? `translateX(${header.column.getSize()}px)`
-                              : undefined,
-                          }}
-                        />
-                      )}
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
                     </TableHead>
                   ))}
                 </TableRow>
@@ -238,13 +169,7 @@ export function DataTable<TData extends LEDDriverICColumnSchema, TValue>({
                     }}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell 
-                        key={cell.id}
-                        style={{
-                          width: cell.column.getSize(),
-                          minWidth: cell.column.getSize()
-                        }}
-                      >
+                      <TableCell key={cell.id}>
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
@@ -272,6 +197,7 @@ export function DataTable<TData extends LEDDriverICColumnSchema, TValue>({
             {selectedRow && (
               <SheetDetailsContent
                 data={selectedRow.original}
+                filterRows={data.length}
                 className="mt-4"
               />
             )}
