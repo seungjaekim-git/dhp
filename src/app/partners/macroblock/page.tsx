@@ -1,115 +1,216 @@
-"use client"
+import React from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 
-import React, { useEffect, useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import BrandOverview from '@/app/partners/BrandOverview';
-import BrandProducts from '@/app/partners/BrandProducts';
-import BrandIntroduction from '@/app/partners/BrandIntroduction';
-import BrandNews from '@/app/partners/BrandNews';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis } from "@/components/ui/breadcrumb";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import {
+  Building2,
+  MapPin,
+  Users,
+  DollarSign,
+  TrendingUp,
+  Github,
+  Chrome,
+  Database,
+  Server,
+  Heart,
+  Share2,
+} from "lucide-react";
 
-import { Partner } from "@/types/partner"
-import { getpartnersList } from "@/lib/get-partners-list"
-import router from 'next/router';
+export const metadata = {
+  title: "Company Profile - Kakao",
+  description: "Profile of Kakao Corporation",
+};
 
+export default function CompanyProfile() {
+  // 정적 데이터 정의
+  const companyData = {
+    name: "Kakao",
+    description: "Internet Services",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Kakao_CI_yellow.svg/1200px-Kakao_CI_yellow.svg.png",
+    location: "Seoul, South Korea",
+    founded: 2010,
+    employees: "8,700+",
+    avgSalary: "$85,000",
+    revenue: "$5.3B",
+    year: "2022",
+    techStack: ["Git", "React", "MySQL", "AWS"],
+    industry: ["Internet Services", "Mobile", "Social Media", "E-commerce"],
+    companySize: "Enterprise (10,000+ employees)",
+    headquarters: "Pangyo, Seongnam, South Korea",
+    history: `Kakao began as "Kakao Talk", a messaging app, in 2010. The company has since expanded into various internet services, including gaming, entertainment, mobility, and fintech. In 2014, Kakao merged with Daum Communications, forming Daum Kakao (now simply Kakao).`,
+    overview: `Kakao operates South Korea's most popular messaging app, KakaoTalk, used by over 90% of the country's population. The company has diversified into various digital services including payments (KakaoPay), mobility (KakaoT), entertainment (Kakao Entertainment), and gaming (Kakao Games).`,
+  };
 
-export default function Page({ params }: { params: { partners_name: string } }) {
-  const [partnersList, setPartnersList] = useState<Partner[]>([]);
-
-  useEffect(() => {
-    async function loadData() {
-      const partners = await getpartnersList();
-      setPartnersList(partners);
-    }
-    loadData();
-  }, [params.partners_name]);
-
-  if (!partnersList) {
-    return <div>로딩 중...</div>;
-  }
+  const {
+    name,
+    description,
+    logo,
+    location,
+    founded,
+    employees,
+    avgSalary,
+    revenue,
+    year,
+    techStack,
+    industry,
+    companySize,
+    headquarters,
+    history,
+    overview,
+  } = companyData;
 
   return (
-    <div className="relative">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/">홈</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/partners">파트너스</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger>
-                <BreadcrumbEllipsis className="h-4 w-4" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                {partnersList.map((partner, index) => (
-                  <DropdownMenuItem key={index} onClick={() => router.push(`/partners/${partner.name}`)}>
-                    {partner.name}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{params.partners_name}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-      <Tabs defaultValue="overview" className="w-full">
-        <div className="sticky top-0 z-10 bg-white shadow-md">
-          <div className="container mx-auto">
-            <TabsList className="w-full flex justify-between bg-gray-100 p-1 rounded-lg">
-              <TabsTrigger value="overview" className="flex-1 py-2 px-4 rounded-md transition-all data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm">개요</TabsTrigger>
-              <TabsTrigger value="products" className="flex-1 py-2 px-4 rounded-md transition-all data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm">상품</TabsTrigger>
-              <TabsTrigger value="introduction" className="flex-1 py-2 px-4 rounded-md transition-all data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm">소개</TabsTrigger>
-              <TabsTrigger value="news" className="flex-1 py-2 px-4 rounded-md transition-all data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm">뉴스</TabsTrigger>
-            </TabsList>
-          </div>
-        </div>
-        
-        <div className="container mx-auto px-4 mt-6">
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* 브랜드 소개 카드 */}
-            <div className="w-full md:w-1/4">
-              <div className="bg-white shadow-lg rounded-lg p-6">
-                <h2 className="text-xl font-bold mb-4">아크롱스튜디오</h2>
-                <div className="flex items-center mb-4">
-                  <span className="text-blue-500 font-bold">4.8</span>
-                  <span className="text-gray-500 ml-2">· 리뷰 18</span>
-                </div>
-                <button className="bg-blue-500 text-white py-2 px-4 rounded-md w-full">상담신청</button>
-                <ul className="mt-4 space-y-2">
-                  <li>여자친구와 같이</li>
-                  <li>사진과 장소가 동일한지 확인</li>
-                  <li>친절한 상담</li>
-                </ul>
+    <div className="flex flex-col lg:flex-row w-full gap-6 p-6">
+      <div className="flex-1">
+        <header className="mb-6">
+          <div className="flex items-center gap-4 mb-4">
+            <img src={logo} alt={`${name} Logo`} className="w-16 h-16 rounded-lg" />
+            <div>
+              <h1 className="text-3xl font-bold">{name}</h1>
+              <div className="flex items-center gap-4 text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <Building2 className="w-4 h-4" />
+                  {description}
+                </span>
+                <span className="flex items-center gap-1">
+                  <MapPin className="w-4 h-4" />
+                  {location}
+                </span>
+                <span className="flex items-center gap-1">
+                  <div className="w-4 h-4" />
+                  Founded {founded}
+                </span>
               </div>
             </div>
-
-            {/* 메인 콘텐츠 영역 */}
-            <div className="w-full md:w-3/4">
-              <TabsContent value="overview">
-                <BrandOverview />
-              </TabsContent>
-              <TabsContent value="products">
-                <BrandProducts />
-              </TabsContent>
-              <TabsContent value="introduction">
-                <BrandIntroduction />
-              </TabsContent>
-              <TabsContent value="news">
-                <BrandNews />
-              </TabsContent>
-            </div>
           </div>
+        </header>
+
+        <div className="grid md:grid-cols-3 gap-4 mb-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Employees</CardTitle>
+              <Users className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{employees}</div>
+              <p className="text-xs text-muted-foreground">As of 2023</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Avg Salary</CardTitle>
+              <DollarSign className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{avgSalary}</div>
+              <p className="text-xs text-muted-foreground">USD/Year</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Revenue</CardTitle>
+              <TrendingUp className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{revenue}</div>
+              <p className="text-xs text-muted-foreground">{year}</p>
+            </CardContent>
+          </Card>
         </div>
-      </Tabs>
+
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Tech Stack</CardTitle>
+            <CardDescription>Technologies used at Kakao</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {techStack.map((tech, idx) => (
+                <div key={idx} className="flex flex-col items-center gap-2">
+                  <Github className="w-8 h-8" />
+                  <span className="text-sm">{tech}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Company Information</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[400px] pr-4">
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold mb-2">Industry Classification</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {industry.map((ind, idx) => (
+                      <Badge key={idx}>{ind}</Badge>
+                    ))}
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <h3 className="font-semibold mb-2">Company History</h3>
+                  <p className="text-sm text-muted-foreground">{history}</p>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <h3 className="font-semibold mb-2">Business Overview</h3>
+                  <p className="text-sm text-muted-foreground">{overview}</p>
+                </div>
+              </div>
+            </ScrollArea>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="lg:w-[240px]">
+        <div className="sticky top-6 space-y-4">
+          <Button className="w-full gap-2">
+            <Heart className="w-4 h-4" />
+            Follow
+          </Button>
+          <Button variant="outline" className="w-full gap-2">
+            <Share2 className="w-4 h-4" />
+            Share
+          </Button>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">Company Size</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-sm text-muted-foreground">{companySize}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">Headquarters</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-sm text-muted-foreground">{headquarters}</div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }
