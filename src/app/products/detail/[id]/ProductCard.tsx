@@ -20,13 +20,13 @@ import {
           <div className="flex items-center justify-between rounded-l-2xl rounded-r-lg hover:bg-slate-200">
             <div className="flex items-center gap-3">
               <img
-                src="https://randomuser.me/api/portraits/men/32.jpg"
+                src="/images/macroblock.png"
                 alt="Instructor"
                 className="h-12 w-12 rounded-full object-cover"
               />
               <div>
-                <h4 className="font-medium">John Smith</h4>
-                <p className="text-sm text-muted-foreground">Senior Developer</p>
+                <h4 className="font-medium">Macroblock</h4>
+                <p className="text-sm text-muted-foreground">Taiwan / LED Driver IC</p>
               </div>
             </div>
             <Button variant="outline" size="sm">

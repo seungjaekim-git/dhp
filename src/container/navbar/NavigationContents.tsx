@@ -7,207 +7,7 @@ import {
     NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
 
-
-const items = [
-    {
-      title: "LED Driver IC",
-      content: {
-        "LED Display ": [
-          { title: "mini/micro LED", icon: "tailwind" },
-          { title: "SRAM S-PWM", icon: "bootstrap" },
-          { title: "MOSFET", icon: "angular" },
-          { title: "S-PWM", icon: "react" },
-          { title: "Multi-Function", icon: "vue" },
-          { title: "Classic", icon: "react-native" },
-        ],
-        "Automotive Lighting and Display": [
-          { title: "Automotive Lighting", icon: "tailwind" },
-          { title: "Automotive FALD Backlight Display", icon: "bootstrap" },
-          { title: "Automotive Interactive LED Matrix Display", icon: "bootstrap" },
-        ],
-        "Full-Array Local Dimming": [
-          { title: "FALD Backlight", icon: "tailwind" },
-        ],
-        "RGB Lighting": [
-          { title: "RGB LED Driver", icon: "tailwind" },
-          { title: "AMUSE LED Driver", icon: "bootstrap" },
-        
-        ],
-        "DC/DC": [
-          { title: "DC/DC Converter", icon: "tailwind" },
-          { title: "DC/DC Controller", icon: "bootstrap" },
-        ],
-        "Linear Regulator": [
-          { title: "All-Ways-On™ LED Driver CSS", icon: "tailwind" },
-        ],
-      },
-    },
-    {
-      title: "전원관리 IC",
-      content: {
-        "DC DC ": [
-          { title: "Tailwind CSS", icon: "tailwind" },
-          { title: "Bootstrap", icon: "bootstrap" },
-          { title: "Angular", icon: "angular" },
-          { title: "React", icon: "react" },
-          { title: "Vuejs", icon: "vue" },
-          { title: "React Native", icon: "react-native" },
-          { title: "Svelte", icon: "svelte" },
-        ],
-      },
-    },
-    {
-      title: "다이오드",
-      content: {
-        "제너 다이오드": [
-          { title: "Tailwind CSS", icon: "tailwind" },
-        ],
-        "정류 다이오드": [
-          { title: "Tailwind CSS", icon: "tailwind" },
-          { title: "Bootstrap", icon: "bootstrap" },
-          { title: "Angular", icon: "angular" },
-          { title: "React", icon: "react" },
-          { title: "Vuejs", icon: "vue" },
-        ],
-        "쇼트키 다이오드": [
-          { title: "Tailwind CSS", icon: "tailwind" },
-          { title: "Bootstrap", icon: "bootstrap" },
-          { title: "Angular", icon: "angular" },
-          { title: "React", icon: "react" },
-  
-        ],
-  
-      },
-  
-    },
-    {
-      title: "센서",
-      content: {
-        "센서": [
-          { title: "Tailwind CSS", icon: "tailwind" },
-          { title: "Bootstrap", icon: "bootstrap" },
-          { title: "Angular", icon: "angular" },
-          { title: "React", icon: "react" },
-          { title: "Vuejs", icon: "vue" },
-          { title: "React Native", icon: "react-native" },
-          { title: "Svelte", icon: "svelte" },
-        ],
-      },
-    },{
-      title: "케이블",
-      content: {
-        "케이블": [
-          { title: "Tailwind CSS", icon: "tailwind" },
-          { title: "Bootstrap", icon: "bootstrap" },
-          { title: "Angular", icon: "angular" },
-          { title: "React", icon: "react" },
-          { title: "Vuejs", icon: "vue" },
-          { title: "React Native", icon: "react-native" },
-          { title: "Svelte", icon: "svelte" },
-        ],
-      }
-    },
-      {
-      title: "케이블",
-      content: {
-        "케이블": [
-          { title: "Tailwind CSS", icon: "tailwind" },
-          { title: "Bootstrap", icon: "bootstrap" },
-          { title: "Angular", icon: "angular" },
-          { title: "React", icon: "react" },
-          { title: "Vuejs", icon: "vue" },
-          { title: "React Native", icon: "react-native" },
-          { title: "Svelte", icon: "svelte" },
-        ],
-      },
-    },
-    // ... other menu items
-  ];
-  
-  
-  export const resourceItems = [
-    {
-      title: "Macroblock",
-      description: "Taiwan, LED Driver IC ",
-      icon: "next",
-      partnerStory: {
-        image: "/banners/macroblock_banner.jpg",
-        text: "Preline Docs have been a game-changer for our team's productivity.",
-        learnMoreLink: "/stories/docs-impact"
-      }
-    },
-    {
-      title: "Zowie",
-      description: "Diodie, Taiwan",
-      icon: "Puzzle",
-      partnerStory: {
-        image: "/banners/zowie_banner.jpg",
-        text: "Preline's integrations have streamlined our workflow significantly.",
-        learnMoreLink: "/stories/integration-success"
-      }
-    },
-    {
-      title: "XLSEMI",
-      description: "China, LED Driver IC",
-      icon: "Code",
-      partnerStory: {
-        image: "/banners/xlsemi_banner.jpg",
-        text: "Our custom solution built on Preline's API has transformed our business.",
-        learnMoreLink: "/stories/api-innovation"
-      }
-    },
-    {
-      title: "LLT",
-      description: "China, Cable",
-      icon: "HelpCircle",
-      partnerStory: {
-        image: "/banners/llt_banner.jpg",
-        text: "Preline's Help Center guided us through a seamless implementation.",
-        learnMoreLink: "/stories/help-center-experience"
-      }
-    },
-    {
-      title: "Kube Electronics AG",
-      description: "Swisis, Sensor",
-      icon: "Code2",
-      partnerStory: {
-        image: "/banners/kube_banner.jpg",
-        text: "The Developer Hub empowered us to create powerful custom features.",
-        learnMoreLink: "/stories/developer-success"
-      }
-    },
-    {
-      title: "Morethanall",
-      description: "China, Cable",
-      icon: "Users",
-      partnerStory: {
-        image: "/banners/morethanall_banner.png",
-        text: "The Preline community has been an invaluable resource for our team.",
-        learnMoreLink: "/stories/community-impact"
-      }
-    },
-    {
-      title: "Powtech",
-      description: "China, LED Driver IC",
-      icon: "Users",
-      partnerStory: {
-        image: "/banners/powtech_banner.jpg",
-        text: "The Preline community has been an invaluable resource for our team.",
-        learnMoreLink: "/stories/community-impact"
-      }
-    },
-    {
-      title: "GTM",
-      description: "Taiwan, MOSFET",
-      icon: "Users",
-      partnerStory: {
-        image: "/banners/gtm_banner.jpg",
-        text: "The Preline community has been an invaluable resource for our team.",
-        learnMoreLink: "/stories/community-impact"
-      }
-    },
-  ];
-
+import { items, resourceItems } from "./NavigationData";
 
 // Reusable components
 export const CategoryLink = ({ href, title, description }: { href: string, title: string, description: string }) => (
@@ -242,9 +42,9 @@ export const SupportLink = ({ title, description }: { title: string, description
 );
 
 export const CompanyIntroContent = () => (
-    <div className="flex w-full gap-4 p-4 justify-center overflow-y-auto max-h-[80vh]">
+    <div className="grid grid-cols-2 gap-4 p-4 justify-center items-center mx-auto overflow-y-auto max-h-[80vh]">
         <NavigationMenuLink asChild>
-            <a className="flex w-[250px] select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md" href="/">
+            <a className="flex select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md" href="/">
                 <div className="mb-2 mt-4 text-sm sm:text-base md:text-lg font-medium">(주)대한플러스전자</div>
                 <p className="text-xs sm:text-sm leading-tight text-muted-foreground">
                     Since 1997 <br />
@@ -262,50 +62,63 @@ export const CompanyIntroContent = () => (
     </div>
 );
 
-export const ProductContent = ({ activeCategory, setActiveCategory }: { activeCategory: string, setActiveCategory: (category: string) => void }) => (
-    <div className="flex overflow-y-auto mx-auto">
-        <div className="w-1/5 lg:w-1/4 bg-gray-100">
-            {items.map((item) => (
-                <div key={item.title} className="p-4 cursor-pointer hover:bg-gray-200 text-xs sm:text-sm md:text-base" onMouseEnter={() => setActiveCategory(item.title)}>
-                    {item.title}
-                </div>
-            ))}
-        </div>
-        <div className="w-4/5 lg:w-4/5 bg-white p-4">
-            {activeCategory && (
-                <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
-                    {Object.entries(items.find(item => item.title === activeCategory)?.content || []).map(([category, subItems]) => (
-                        <div key={category} className="space-y-4">
-                            <h2 className="text-xs sm:text-sm font-bold">{category}</h2>
-                            <div className="space-y-2">
-                                {subItems.map((subItem: any) => (
-                                    <Link key={subItem.title} href={`#${subItem.title.toLowerCase().replace(' ', '-')}`} className="flex items-center space-x-2 rounded-md p-2 hover:bg-gray-100">
-                                        <span className="h-6 w-6 sm:w-1  flex-shrink-0 text-gray-400"></span>
-                                        <span className="text-xs">{subItem.title}</span>
-                                    </Link>
-                                ))}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
-    </div>
-);
+export const ProductContent = () => {
+    const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null);
 
-export const PartnerContent = ({ activeStory, setActiveStory }: { activeStory: any, setActiveStory: (story: any) => void }) => (
+    return (
+        <div className="flex overflow-y-auto mx-auto">
+            <div className="w-1/5 lg:w-1/4 rounded-lg bg-gradient-to-b from-gray-200 to-gray-100 shadow-md">
+                {items.map((item) => (
+                    <div
+                        key={item.title}
+                        onMouseEnter={() => setSelectedCategory(item.title)}
+                        className={`p-4 cursor-pointer hover:bg-gradient-to-r from-pink-500 to-yellow-500 text-xs sm:text-sm md:text-base font-semibold text-gray-800 hover:text-white transition-all duration-300 ${
+                            selectedCategory === item.title ? "bg-gradient-to-r from-pink-500 to-yellow-500 text-white" : ""
+                        }`}
+                    >
+                        {item.title}
+                    </div>
+                ))}
+            </div>
+            <div className="w-4/5 lg:w-4/5 bg-white p-4 shadow-lg rounded-lg">
+                <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
+                    {items
+                        .filter((item) => item.title === selectedCategory)
+                        .flatMap((item) =>
+                            item.content.map((contentItem) => (
+                                <div key={contentItem.title} className="space-y-4">
+                                    <Link href={contentItem.link}>
+                                        <h2 className="text-xs sm:text-sm font-bold hover:text-pink-500 transition-colors duration-300">{contentItem.title}</h2>
+                                    </Link>
+                                    <div className="space-y-2">
+                                        {contentItem.children.map((child) => (
+                                            <Link key={child.title} href={child.link} className="flex items-center space-x-2 rounded-md p-2 hover:bg-pink-100 transition-colors duration-300">
+                                                <span className="h-6 w-6 sm:w-1 flex-shrink-0 text-pink-400"></span>
+                                                <span className="text-xs text-gray-700">{child.title}</span>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export const PartnerContent = () => (
     <div className="grid grid-cols-3 gap-6 overflow-y-auto max-h-[80vh]">
         <div className="col-span-2 grid grid-cols-2 gap-6">
             {resourceItems.map((item) => (
-                <ResourceLink key={item.title} item={item} onMouseEnter={() => setActiveStory(item.partnerStory)} />
+                <ResourceLink key={item.title} item={item} onMouseEnter={() => {}} />
             ))}
         </div>
         <div className="col-span-1">
             <h3 className="text-xs sm:text-sm font-semibold text-gray-900 mb-4">파트너사 개요</h3>
             <div className="bg-gray-100 rounded-lg p-4">
-                <img src={activeStory.image} alt="Customer" className="w-full h-32 object-cover rounded-lg mb-4" />
-                <p className="text-xs sm:text-sm text-gray-600 mb-2">{activeStory.text}</p>
-                <Link href={activeStory.learnMoreLink} className="text-xs sm:text-sm text-blue-500 hover:underline">
+                <p className="text-xs sm:text-sm text-gray-600 mb-2">파트너사와 함께 성장하는 대한플러스전자입니다.</p>
+                <Link href="#" className="text-xs sm:text-sm text-blue-500 hover:underline">
                     Learn more →
                 </Link>
             </div>

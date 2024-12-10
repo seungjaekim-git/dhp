@@ -49,8 +49,8 @@ import { ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 // 메모이제이션된 스타일 클래스
-const baseMenuClass = "z-10 flex min-w-2xl w-screen flex-1 items-center justify-center sm:px-4 md:px-6"
-const baseListClass = "group flex w-max flex-1 list-none items-center justify-center space-x-2 sm:space-x-4 md:space-x-6 lg:space-x-8"
+const baseMenuClass = "z-10 flex flex-1 items-center justify-center sm:px-4 md:px-6"
+const baseListClass = "group flex w-max flex-1 list-none items-center justify-center md:space-x-2 lg:space-x-4"
 const baseViewportClass = "absolute left-0 top-full flex justify-center w-full origin-top-center"
 const baseIndicatorClass = "top-full z-[1] flex h-1.5 items-end justify-center overflow-hidden data-[state=visible]:animate-in data-[state=hidden]:animate-out data-[state=hidden]:fade-out data-[state=visible]:fade-in"
 

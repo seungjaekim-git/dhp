@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import ProductCard from "./ProductCard";
+import { Settings, FileText, MessageSquare, File } from "lucide-react";
+
 
 interface ProductProps {
   id: number;
@@ -108,53 +110,56 @@ export default function ProductDetailPage({
           </div>
 
           {/* Tabs Section */}
-          <div className="bg-white p-6 rounded-lg shadow">
-            <Tabs defaultValue="specs" className="w-full">
-              {/* Instagram-style Tabs */}
-              <TabsList className="flex justify-center space-x-6 border-b border-gray-200">
+            <Tabs defaultValue="specs">
+              {/* Styled Tabs */}
+              <TabsList className="w-full h-auto grid grid-cols-4 justify-stretch border-gray-200">
                 <TabsTrigger
                   value="specs"
-                  className="pb-2 text-gray-600 hover:text-gray-900 border-b-2 border-transparent hover:border-black transition"
+                  className="flex items-center gap-4 py-4 text-gray-600 hover:text-gray-900 border-b-2 border-transparent hover:border-black transition text-md md:text-sm"
                 >
+                  <Settings size={24} className="hidden md:block text-gray-600" />
                   기술사양
                 </TabsTrigger>
                 <TabsTrigger
                   value="docs"
-                  className="pb-2 text-gray-600 hover:text-gray-900 border-b-2 border-transparent hover:border-black transition"
+                  className="flex items-center gap-4 py-4 text-gray-600 hover:text-gray-900 border-b-2 border-transparent hover:border-black transition text-md md:text-sm"
                 >
+                  <FileText size={24} className="hidden md:block text-gray-600" />
                   문서
                 </TabsTrigger>
                 <TabsTrigger
                   value="reviews"
-                  className="pb-2 text-gray-600 hover:text-gray-900 border-b-2 border-transparent hover:border-black transition"
+                  className="flex items-center gap-4 py-4 text-gray-600 hover:text-gray-900 border-b-2 border-transparent hover:border-black transition text-md md:text-sm"
                 >
+                  <MessageSquare size={24} className="hidden md:block text-gray-600" />
                   리뷰/Q&A
                 </TabsTrigger>
                 <TabsTrigger
                   value="blogs"
-                  className="pb-2 text-gray-600 hover:text-gray-900 border-b-2 border-transparent hover:border-black transition"
+                  className="flex items-center gap-4 py-4 text-gray-600 hover:text-gray-900 border-b-2 border-transparent hover:border-black transition text-md md:text-sm"
                 >
+                  <File size={24} className="hidden md:block text-gray-600" />
                   관련 블로그
                 </TabsTrigger>
               </TabsList>
 
               {/* Specifications Tab */}
               <TabsContent value="specs">
-                <div className="space-y-6 mt-4">
+                <div className="space-y-8 mt-6">
                   {product.led_driver_ic.map((ic, icIndex) => (
-                    <div key={icIndex} className="space-y-2">
-                      <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                    <div key={icIndex} className="space-y-4">
+                      <h3 className="text-xl md:text-2xl font-semibold text-gray-700 mb-4">
                         LED Driver IC #{icIndex + 1}
                       </h3>
                       {Object.entries(ic).map(([key, value]) => (
                         <div
                           key={key}
-                          className="flex justify-between items-center p-4 bg-gray-100 rounded-lg shadow-sm hover:bg-gray-200 transition"
+                          className="flex justify-between items-center p-6 bg-gray-50 rounded-lg shadow-md hover:bg-gray-100 transition"
                         >
-                          <span className="text-gray-600 font-medium capitalize">
+                          <span className="text-gray-600 font-medium capitalize text-lg md:text-xl">
                             {key.replace(/_/g, " ")}
                           </span>
-                          <span className="text-gray-800 text-sm">
+                          <span className="text-gray-800 text-base md:text-lg">
                             {Array.isArray(value)
                               ? value.join(", ")
                               : value !== null
@@ -170,15 +175,15 @@ export default function ProductDetailPage({
 
               {/* Documents Tab */}
               <TabsContent value="docs">
-                <div className="mt-4 space-y-4">
-                  <h3 className="text-lg font-semibold">제품 관련 문서</h3>
-                  <div className="grid grid-cols-1 gap-4">
+                <div className="mt-6 space-y-6">
+                  <h3 className="text-xl md:text-2xl font-semibold">제품 관련 문서</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {product.documents.map((doc) => (
                       <div
                         key={doc.id}
-                        className="flex items-center justify-between p-4 border rounded-lg"
+                        className="flex items-center justify-between p-6 border rounded-lg hover:shadow-lg transition"
                       >
-                        <span>{doc.title}</span>
+                        <span className="font-medium text-lg md:text-xl">{doc.title}</span>
                         <Button variant="outline">
                           <a href={doc.url} target="_blank" rel="noopener noreferrer">
                             다운로드
@@ -190,25 +195,23 @@ export default function ProductDetailPage({
                 </div>
               </TabsContent>
 
-              {/* Placeholder for Reviews */}
+              {/* Reviews Tab */}
               <TabsContent value="reviews">
-                <div className="mt-4 space-y-6">
-                  <h3 className="text-lg font-semibold">리뷰</h3>
-                  <p>아직 리뷰가 없습니다.</p>
+                <div className="mt-6 space-y-6">
+                  <h3 className="text-xl md:text-2xl font-semibold">리뷰</h3>
+                  <p className="text-lg md:text-xl">아직 리뷰가 없습니다.</p>
                 </div>
               </TabsContent>
 
-              {/* Placeholder for Blogs */}
+              {/* Blogs Tab */}
               <TabsContent value="blogs">
-                <div className="mt-4 space-y-6">
-                  <h3 className="text-lg font-semibold">관련 블로그 포스트</h3>
-                  <p>블로그 내용이 없습니다.</p>
+                <div className="mt-6 space-y-6">
+                  <h3 className="text-xl md:text-2xl font-semibold">관련 블로그 포스트</h3>
+                  <p className="text-lg md:text-xl">블로그 내용이 없습니다.</p>
                 </div>
               </TabsContent>
             </Tabs>
           </div>
-        </div>
-
         {/* Right Section: Sticky Product Info Card */}
         <div className="w-[400px] rounded-2xl border border-gray-200 bg-white shadow-sm">
           <ProductCard />
