@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Search, Menu } from "lucide-react";
+import { Search, Menu, X } from "lucide-react";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -23,7 +23,7 @@ import {
   SelectGroup,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
 import { CompanyIntroContent, ProductContent, PartnerContent, SupportContent } from "./NavigationContents";
 import { items, resourceItems } from "./NavigationData";
 
@@ -54,14 +54,18 @@ export default function Navigation() {
           <div className="flex flex-col space-y-2">
             {items.map((category) => (
               <div key={category.title} className="mb-4">
-                <h4 className="font-bold mb-2">{category.title}</h4>
+                <Link href={category.link} className="block text-md font-bold mb-2 p-2 rounded-md hover:bg-gray-100 hover:text-blue-500">
+                  {category.title}
+                </Link>
                 <div className="ml-4">
                   {category.content.map((subcategory) => (
-                    <div key={subcategory.title} className="mb-2">
-                      <p className="text-sm text-gray-600 font-bold">{subcategory.title}</p>
+                    <div key={subcategory.title} className="mb-1">
+                      <Link href={subcategory.link} className="block rounded-md text-sm text-gray-600 hover:text-blue-500 font-bold p-2 hover:bg-gray-100">
+                        {subcategory.title}
+                      </Link>
                       <div className="ml-4">
                         {subcategory.children.map((item) => (
-                          <Link key={item.title} href={item.link} className="block py-1 text-sm hover:bg-gray-100 font-bold">
+                          <Link key={item.title} href={item.link} className="block p-1 text-sm rounded-md hover:bg-gray-100 font-bold hover:text-blue-500">
                             {item.title}
                           </Link>
                         ))}
@@ -98,7 +102,7 @@ export default function Navigation() {
         {/* 로고 */}
         <Link href="/" className="flex items-center space-x-2">
           <Image src="/svgs/vercel.svg" alt="Logo" width={40} height={40} />
-          <span className="font-bold text-xl">YourCompany</span>
+          <span className="font-bold text-xl">대한플러스전자(주)</span>
         </Link>
 
         {/* 데스크톱 메뉴 */}
@@ -130,7 +134,7 @@ export default function Navigation() {
           {/* 언어 선택 */}
           <div className="hidden md:block">
             <Select>
-              <SelectTrigger className="w-[100px]">
+              <SelectTrigger className="w-[120px]">
                 <SelectValue placeholder="Language" />
               </SelectTrigger>
               <SelectContent position="popper">
@@ -152,25 +156,46 @@ export default function Navigation() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-screen md:hidden">
-              <SheetHeader className="px-4 py-3 border-b bg-white">
-                <SheetTitle className="text-lg font-semibold">메뉴</SheetTitle>
+              <SheetHeader className="container border-b bg-white flex flex-row justify-between m-auto">
+                <SheetTitle className="text-lg font-semibold m-4">대한플러스전자</SheetTitle>
+                <SheetClose asChild className="flex justify-center items-center">
+                  <Button variant="ghost" size="icon">
+                    <X className="h-6 w-6" />
+                  </Button>
+                </SheetClose>
               </SheetHeader>
-              <div className="flex h-[calc(100%-4rem)]">
+              <div className="flex h-full">
                 {/* 왼쪽 메인 메뉴 */}
-                <div className="w-1/3 border-r bg-white">
-                  <div className="flex flex-col">
-                    {["회사소개", "제품", "파트너사", "견적요청", "고객 지원"].map((menu) => (
+                <div className="flex flex-col justify-between w-1/3 min-w-[150px] border-r bg-white overflow-y-auto">
+                    <div className="flex flex-col">
+                    {["회사소개", "제품", "파트너사", "고객 지원", "견적요청"].map((menu) => (
                       <button
                         key={menu}
                         onMouseEnter={() => setSelectedMenu(menu)}
                         onClick={() => setSelectedMenu(menu)}
-                        className={`text-left px-4 py-3.5 transition-all ${
-                          selectedMenu === menu ? "bg-gray-100 font-medium" : "hover:bg-gray-50"
-                        }`}
+                        className={` rounded-md text-left px-4 py-3.5 transition-all ${selectedMenu === menu ? "bg-gray-100 font-bold" : "hover:bg-gray-50"
+                          }`}
                       >
                         {menu}
                       </button>
                     ))}
+
+                    </div>
+                    
+                  {/* 언어 선택 */}
+                  <div className="flex w-full justify-center mb-10"> {/* 중앙 정렬을 위한 div 추가 */}
+                    <Select> {/* Select의 넓이를 지정 */}
+                      <SelectTrigger className="flex bg-white border-0 ring-0">
+                        <SelectValue placeholder="Language" />
+                      </SelectTrigger>
+                      <SelectContent position="popper">
+                        <SelectGroup>
+                          <SelectLabel>Language</SelectLabel>
+                          <SelectItem value="en">English</SelectItem>
+                          <SelectItem value="ko">한국어</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 

@@ -28,9 +28,10 @@ export default function RootLayout({
         src={`https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${process.env.NEXT_PUBLIC_NAVER_ID}&submodules=geocoder`}
       />
       </head>
-      <body className="flex flex-col min-h-screen container mx-auto">
+      <body className="flex flex-col min-h-screen">
+      <TwoLayerNavigation />
+
         <div className="flex-grow w-full h-full items-center justify-center">
-        <TwoLayerNavigation />
         {/* <DynamicBreadcrumb /> */}
         {children}
         <Toaster />
