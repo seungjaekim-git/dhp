@@ -48,11 +48,18 @@ import { cva } from "class-variance-authority"
 import { ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-// 메모이제이션된 스타일 클래스
-const baseMenuClass = "z-10 flex flex-1 items-center justify-center sm:px-4 md:px-6"
-const baseListClass = "group flex w-max flex-1 list-none items-center justify-center md:space-x-2 lg:space-x-4"
-const baseViewportClass = "absolute left-0 top-full flex justify-center w-full origin-top-center"
-const baseIndicatorClass = "top-full z-[1] flex h-1.5 items-end justify-center overflow-hidden data-[state=visible]:animate-in data-[state=hidden]:animate-out data-[state=hidden]:fade-out data-[state=visible]:fade-in"
+// 메모이제이션된 스타일 클래스 - useMemo로 최적화
+const baseStyles = {
+  menuClass: "z-10 flex flex-1 items-center justify-center sm:px-4 md:px-6",
+  listClass: "group flex w-max flex-1 list-none items-center justify-center md:space-x-2 lg:space-x-4",
+  viewportClass: "absolute left-0 top-full flex justify-center w-full origin-top-center",
+  indicatorClass: "top-full z-[1] flex h-1.5 items-end justify-center overflow-hidden data-[state=visible]:animate-in data-[state=hidden]:animate-out data-[state=hidden]:fade-out data-[state=visible]:fade-in"
+}
+
+// 메모이제이션된 트리거 스타일
+const navigationMenuTriggerStyle = cva(
+  "group inline-flex h-10 w-auto items-center justify-center rounded-md bg-background px-3 py-2 text-sm sm:h-12 sm:px-4 sm:py-3 sm:text-base font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+)
 
 // 메모이제이션된 컴포넌트들
 const NavigationMenu = React.memo(React.forwardRef<
@@ -61,7 +68,7 @@ const NavigationMenu = React.memo(React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <NavigationMenuPrimitive.Root
     ref={ref}
-    className={cn(baseMenuClass, className)}
+    className={cn(baseStyles.menuClass, className)}
     {...props}
   >
     {children}
@@ -76,7 +83,7 @@ const NavigationMenuList = React.memo(React.forwardRef<
 >(({ className, ...props }, ref) => (
   <NavigationMenuPrimitive.List
     ref={ref}
-    className={cn(baseListClass, className)}
+    className={cn(baseStyles.listClass, className)}
     {...props}
   />
 )))
@@ -84,41 +91,46 @@ NavigationMenuList.displayName = NavigationMenuPrimitive.List.displayName
 
 const NavigationMenuItem = React.memo(NavigationMenuPrimitive.Item)
 
-const navigationMenuTriggerStyle = cva(
-  "group inline-flex h-10 w-auto items-center justify-center rounded-md bg-background px-3 py-2 text-sm sm:h-12 sm:px-4 sm:py-3 sm:text-base font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
-)
-
 const NavigationMenuTrigger = React.memo(React.forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Trigger>
->(({ className, children, ...props }, ref) => (
-  <NavigationMenuPrimitive.Trigger
-    ref={ref}
-    className={cn(navigationMenuTriggerStyle(), "group", className)}
-    {...props}
-  >
-    {children}{" "}
-    <ChevronDown
-      className="relative top-[1px] ml-1 h-3 w-3 sm:ml-2 sm:h-4 sm:w-4 transition duration-200 group-data-[state=open]:rotate-180"
-      aria-hidden="true"
-    />
-  </NavigationMenuPrimitive.Trigger>
-)))
+>(({ className, children, ...props }, ref) => {
+  const triggerClasses = React.useMemo(() => cn(navigationMenuTriggerStyle(), "group", className), [className])
+  const chevronClasses = React.useMemo(() => "relative top-[1px] ml-1 h-3 w-3 sm:ml-2 sm:h-4 sm:w-4 transition duration-200 group-data-[state=open]:rotate-180", [])
+  
+  return (
+    <NavigationMenuPrimitive.Trigger
+      ref={ref}
+      className={triggerClasses}
+      {...props}
+    >
+      {children}{" "}
+      <ChevronDown
+        className={chevronClasses}
+        aria-hidden="true"
+      />
+    </NavigationMenuPrimitive.Trigger>
+  )
+}))
 NavigationMenuTrigger.displayName = NavigationMenuPrimitive.Trigger.displayName
 
 const NavigationMenuContent = React.memo(React.forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Content>
->(({ className, ...props }, ref) => (
-  <NavigationMenuPrimitive.Content
-    ref={ref}
-    className={cn(
-      "w-screen p-4 sm:p-6 md:p-8 data-[motion^=from-]:fade-in data-[motion^=to-]:fade-out ",
-      className
-    )}
-    {...props}
-  />
-)))
+>(({ className, ...props }, ref) => {
+  const contentClasses = React.useMemo(() => cn(
+    "w-screen p-4 sm:p-6 md:p-8 data-[motion^=from-]:fade-in data-[motion^=to-]:fade-out",
+    className
+  ), [className])
+
+  return (
+    <NavigationMenuPrimitive.Content
+      ref={ref}
+      className={contentClasses}
+      {...props}
+    />
+  )
+}))
 NavigationMenuContent.displayName = NavigationMenuPrimitive.Content.displayName
 
 const NavigationMenuLink = React.memo(NavigationMenuPrimitive.Link)
@@ -126,18 +138,22 @@ const NavigationMenuLink = React.memo(NavigationMenuPrimitive.Link)
 const NavigationMenuViewport = React.memo(React.forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.Viewport>,
   React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Viewport>
->(({ className, ...props }, ref) => (
-  <div className={cn(baseViewportClass)}>
-    <NavigationMenuPrimitive.Viewport
-      className={cn(
-        "origin-top-center relative h-[var(--radix-navigation-menu-viewport-height)] w-full rounded-md border bg-popover text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 md:w-[var(--radix-navigation-menu-viewport-width)]",
-        className
-      )}
-      ref={ref}
-      {...props}
-    />
-  </div>
-)))
+>(({ className, ...props }, ref) => {
+  const viewportClasses = React.useMemo(() => cn(
+    "origin-top-center relative h-[var(--radix-navigation-menu-viewport-height)] w-full rounded-md border bg-popover text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 md:w-[var(--radix-navigation-menu-viewport-width)]",
+    className
+  ), [className])
+
+  return (
+    <div className={baseStyles.viewportClass}>
+      <NavigationMenuPrimitive.Viewport
+        className={viewportClasses}
+        ref={ref}
+        {...props}
+      />
+    </div>
+  )
+}))
 NavigationMenuViewport.displayName = NavigationMenuPrimitive.Viewport.displayName
 
 const NavigationMenuIndicator = React.memo(React.forwardRef<
@@ -146,7 +162,7 @@ const NavigationMenuIndicator = React.memo(React.forwardRef<
 >(({ className, ...props }, ref) => (
   <NavigationMenuPrimitive.Indicator
     ref={ref}
-    className={cn(baseIndicatorClass, className)}
+    className={cn(baseStyles.indicatorClass, className)}
     {...props}
   >
     <div className="relative top-[60%] h-2 w-2 rotate-45 rounded-tl-sm bg-border shadow-md" />

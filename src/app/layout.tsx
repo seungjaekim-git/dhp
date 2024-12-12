@@ -5,6 +5,8 @@ import Footer from "@/container/footer/footer"
 import TwoLayerNavigation from "@/container/navbar/navigationBar"
 import Script from "next/script";
 import { Toaster } from "@/components/ui/toaster"
+import { LoadingProvider } from "@/lib/LoadingProvider";
+import LoadingOverlay from "@/components/LoadingOverlay";
 
 
 
@@ -30,13 +32,17 @@ export default function RootLayout({
       </head>
       <body className="flex flex-col min-h-screen">
       <TwoLayerNavigation />
-
+      <LoadingProvider>
+      <LoadingOverlay />
         <div className="flex-grow w-full h-full items-center justify-center">
         {/* <DynamicBreadcrumb /> */}
         {children}
         <Toaster />
-        <Footer />
         </div>
+        <Footer />
+        
+      </LoadingProvider>
+
       </body>
     </html>
   );
