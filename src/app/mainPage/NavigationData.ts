@@ -1,4 +1,4 @@
-export const items = [
+export const productCategoryItems = [
     // LED Driver IC
     {
         title: "LED Driver IC",
@@ -243,11 +243,11 @@ export const items = [
 
 
 
-export const resourceItems = [
+export const partnersItems = [
     {
         title: "Macroblock",
         description: "Taiwan, LED Driver IC ",
-        icon: "next",
+        icon: "/logos/macroblock-logo.png",
         partnerStory: {
             image: "/banners/macroblock_banner.jpg",
             text: "Preline Docs have been a game-changer for our team's productivity.",
@@ -257,7 +257,7 @@ export const resourceItems = [
     {
         title: "Zowie",
         description: "Diodie, Taiwan",
-        icon: "Puzzle",
+        icon: "/logos/zowie-logo.png",
         partnerStory: {
             image: "/banners/zowie_banner.jpg",
             text: "Preline's integrations have streamlined our workflow significantly.",
@@ -267,7 +267,7 @@ export const resourceItems = [
     {
         title: "XLSEMI",
         description: "China, LED Driver IC",
-        icon: "Code",
+        icon: "/logos/xlsemi-logo.png",
         partnerStory: {
             image: "/banners/xlsemi_banner.jpg",
             text: "Our custom solution built on Preline's API has transformed our business.",
@@ -277,7 +277,7 @@ export const resourceItems = [
     {
         title: "LLT",
         description: "China, Cable",
-        icon: "HelpCircle",
+        icon: "/logos/llt-logo.png",
         partnerStory: {
             image: "/banners/llt_banner.jpg",
             text: "Preline's Help Center guided us through a seamless implementation.",
@@ -287,7 +287,7 @@ export const resourceItems = [
     {
         title: "Kube Electronics AG",
         description: "Swisis, Sensor",
-        icon: "Code2",
+        icon: "/logos/kube-logo.png",
         partnerStory: {
             image: "/banners/kube_banner.jpg",
             text: "The Developer Hub empowered us to create powerful custom features.",
@@ -297,7 +297,7 @@ export const resourceItems = [
     {
         title: "Morethanall",
         description: "China, Cable",
-        icon: "Users",
+        icon: "/logos/morethanall-logo.png",
         partnerStory: {
             image: "/banners/morethanall_banner.png",
             text: "The Preline community has been an invaluable resource for our team.",
@@ -307,7 +307,7 @@ export const resourceItems = [
     {
         title: "Powtech",
         description: "China, LED Driver IC",
-        icon: "Users",
+        icon: "/logos/powtech-logo.png",
         partnerStory: {
             image: "/banners/powtech_banner.jpg",
             text: "The Preline community has been an invaluable resource for our team.",
@@ -317,7 +317,7 @@ export const resourceItems = [
     {
         title: "GTM",
         description: "Taiwan, MOSFET",
-        icon: "Users",
+        icon: "/logos/gtm-logo.png",
         partnerStory: {
             image: "/banners/gtm_banner.jpg",
             text: "The Preline community has been an invaluable resource for our team.",

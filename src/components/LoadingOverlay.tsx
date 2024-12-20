@@ -1,18 +1,9 @@
-"use client";
-
-import React from "react";
-import { useLoading } from "@/lib/LoadingProvider";
-
-const LoadingOverlay: React.FC = () => {
-  const { loading } = useLoading();
-
-  if (!loading) return null;
+export default function LoadingOverlay() {
+  if (process.env.NODE_ENV === "development") return null; // 개발 모드에서는 로딩 숨김
 
   return (
-    <div className="fixed top-0 left-0 w-full h-full bg-gray-200 z-50 flex items-center justify-center">
-      <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div className="animate-spin h-16 w-16 border-4 border-t-4 border-white rounded-full"></div>
     </div>
   );
-};
-
-export default LoadingOverlay;
+}
