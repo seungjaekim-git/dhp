@@ -3,6 +3,7 @@ import { ArrowRightIcon } from "@radix-ui/react-icons";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const BentoGrid = ({
   children,
@@ -31,6 +32,7 @@ const BentoCard = ({
   description,
   href,
   cta,
+  enableGroupHover = false,
 }: {
   name: string;
   className: string;
@@ -39,16 +41,20 @@ const BentoCard = ({
   description: string;
   href: string;
   cta: string;
+  enableGroupHover: boolean;
 }) => (
-  <div
+  <Link
     key={name}
+    href={enableGroupHover ? href : ''}
     className={cn(
       "group relative col-span-3 flex flex-col justify-between overflow-hidden rounded-xl",
+      enableGroupHover ? "cursor-pointer" : "",
       // light styles
       "bg-white [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]",
       // dark styles
       "transform-gpu dark:bg-black dark:[border:1px_solid_rgba(255,255,255,.1)] dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset]",
       className,
+      enableGroupHover ? "hover:bg-neutral-100" : "",
     )}
   >
     <div>{background}</div>
@@ -66,14 +72,14 @@ const BentoCard = ({
       )}
     >
       <Button variant="ghost" asChild size="sm" className="pointer-events-auto">
-        <a href={href}>
+        <span>
           {cta}
           <ArrowRightIcon className="ml-2 h-4 w-4" />
-        </a>
+        </span>
       </Button>
     </div>
     <div className="pointer-events-none absolute inset-0 transform-gpu transition-all duration-300 group-hover:bg-black/[.03] group-hover:dark:bg-neutral-800/10" />
-  </div>
+  </Link>
 );
 
 export { BentoCard, BentoGrid };

@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { History } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import TimelineDetailed from "./TimelineDetailed";
-import TimelineSimple from "./TimelineSimple";
+import TimelineDetailed from "../../about/history/TimelineDetailed";
+import TimelineSimple from "../../about/history/TimelineSimple";
 import DropdownFilters from "./DropdownFilters";
 import * as XLSX from "xlsx";
 
