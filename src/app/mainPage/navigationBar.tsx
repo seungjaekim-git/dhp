@@ -105,6 +105,28 @@ const Navigation = () => {
   const [selectedCategory, setSelectedCategory] = React.useState<string>(productCategoryItems[0]?.title || '');
   const [selectedMenu, setSelectedMenu] = React.useState<string>('');
   const [selectedPartner, setSelectedPartner] = React.useState(partnersItems[0]);
+  const [isVisible, setIsVisible] = React.useState(true);
+  const [lastScrollY, setLastScrollY] = React.useState(0);
+
+  React.useEffect(() => {
+    const controlNavbar = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY) { // 스크롤 다운
+        setIsVisible(false);
+      } else { // 스크롤 업
+        setIsVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', controlNavbar);
+
+    return () => {
+      window.removeEventListener('scroll', controlNavbar);
+    };
+  }, [lastScrollY]);
 
   const debouncedSetSelectedMenu = React.useCallback(
     debounce((value: string) => setSelectedMenu(value), 100),
@@ -197,7 +219,7 @@ const Navigation = () => {
   }, [selectedMenu]);
 
   return (
-    <div className="sticky top-0 z-50 w-full bg-white border-b">
+    <div className={`sticky top-0 z-50 w-full bg-white border-b transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
       <div className="container mx-auto flex justify-between h-16">
         {/* 로고 */}
         <Link href="/" className="flex items-center space-x-2">

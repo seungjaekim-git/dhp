@@ -1,8 +1,10 @@
 'use client'
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Building2, UserRound, History, Briefcase, MapPin, Building } from "lucide-react";
 import { throttle } from "lodash";
+import { usePathname } from "next/navigation";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface BreadcrumbItem {
   label: string;
@@ -34,37 +36,45 @@ export default function AboutLayout({
   badges = [],
 }: AboutLayoutProps) {
   const [isScrolled, setIsScrolled] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
-    // 스크롤 상태 업데이트 함수
     const handleScroll = throttle(() => {
-      const scrolled = window.scrollY > 0;
+      const currentScrollY = window.scrollY;
+      const scrolled = currentScrollY > 0;
+      
       if (scrolled !== isScrolled) {
         setIsScrolled(scrolled);
       }
     }, 200);
 
-    // 이벤트 리스너 추가
     window.addEventListener("scroll", handleScroll);
 
     return () => {
-      // 클린업: 이벤트 리스너 제거 및 throttle 해제
       window.removeEventListener("scroll", handleScroll);
-      handleScroll.cancel(); // lodash throttle의 클린업 메서드
+      handleScroll.cancel();
     };
   }, [isScrolled]);
 
+  const navigationItems = [
+    { label: "회사 소개", href: "/about", icon: <Building className="w-4 h-4" /> },
+    { label: "CEO 인사말", href: "/about/greeting", icon: <UserRound className="w-4 h-4" /> },
+    { label: "회사 연혁", href: "/about/history", icon: <History className="w-4 h-4" /> },
+    { label: "사업 소개", href: "/about/business", icon: <Briefcase className="w-4 h-4" /> },
+    { label: "찾아오시는 길", href: "/about/location", icon: <MapPin className="w-4 h-4" /> },
+  ];
+
   return (
     <div className="container mx-auto px-4 py-6">
-      {/* 클라이언트 전용 헤더 */}
+      {/* Header */}
       <div
-        className={`sticky top-[64px] z-40 transition-all duration-300 ease-in-out rounded-2xl grid grid-cols-5 gap-4 min-h-80px ${
+        className={`sticky top-[4px] z-40 transition-all duration-300 ease-in-out rounded-2xl ${
           isScrolled
             ? "bg-white shadow-md border border-gray-200 p-4 m-2"
             : "bg-gradient-to-r from-sky-50 to-blue-50 border border-sky-100 p-4"
         }`}
       >
-        <div className="flex flex-col md:col-span-5 col-span-4">
+        <div className="flex flex-col">
           <div
             className={`flex items-center gap-2 text-sm text-gray-600 mb-4 ${
               isScrolled ? "hidden" : ""
@@ -132,18 +142,42 @@ export default function AboutLayout({
             </div>
           </div>
 
-          <p
-            className={`mt-4 text-gray-600 text-sm leading-relaxed ${
-              isScrolled ? "hidden" : ""
-            }`}
-          >
-            {description}
-          </p>
+          {/* Navigation */}
+          <div className={`mt-4 ${isScrolled ? "hidden" : ""}`}>
+            <div className="flex gap-4">
+              <TooltipProvider delayDuration={100}>
+                {navigationItems.map((item) => (
+                  <div key={item.href}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Link
+                          href={item.href}
+                          className={`
+                            flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all
+                            ${pathname === item.href 
+                              ? "bg-blue-500 text-white" 
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                            }
+                          `}
+                        >
+                          {item.icon}
+                          <span className="hidden md:inline">{item.label}</span>
+                        </Link>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="md:hidden">
+                        {item.label}
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                ))}
+              </TooltipProvider>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* 메인 콘텐츠 영역 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
         <div className="col-span-1 md:col-span-2">
           <div className="bg-white rounded-2xl border border-gray-100 p-8">
             {children}
