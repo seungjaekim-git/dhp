@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, Home, Search, Plus, Minus, Zap, Cable, Eye, Battery, ArrowRight, Cpu, Building2, Users, Globe, Check } from 'lucide-react';
+import { ChevronRight, Home, Search, Plus, Minus, ArrowRight, Cpu, Building2, Users, Globe, Check } from 'lucide-react';
 import {
   Command,
   CommandEmpty,
@@ -46,7 +46,7 @@ export const SearchInput = ({ searchTerm, setSearchTerm }: { searchTerm: string,
   </div>
 );
 
-// 정렬 필터 컴포넌트
+// 정렬 필터 컴포넌트 
 export const SortFilter = ({ open, setOpen, selectedFilters, setSelectedFilters }: { open: boolean, setOpen: (value: boolean) => void, selectedFilters: { sortBy: string }, setSelectedFilters: (value: { sortBy: string }) => void }) => (
   <Popover open={open} onOpenChange={setOpen}>
     <PopoverTrigger asChild>
@@ -54,7 +54,7 @@ export const SortFilter = ({ open, setOpen, selectedFilters, setSelectedFilters 
         variant="outline"
         role="combobox"
         aria-expanded={open}
-        className="w-full sm:w-[200px] h-9 justify-between"
+        className="w-full sm:w-[200px] h-9 justify-between bg-gradient-to-br from-white to-gray-50/50 border-blue-100 hover:border-blue-200"
       >
         {selectedFilters.sortBy === 'popularity' && "인기순"}
         {selectedFilters.sortBy === 'recent' && "최신순"}
@@ -99,19 +99,65 @@ export const ManufacturerCard = ({ manufacturer }: { manufacturer: string }) => 
     <HoverCardTrigger asChild>
       <Link
         href={`/manufacturers/${manufacturer.toLowerCase()}`}
-        className="inline-flex items-center px-2 sm:px-3 py-1 rounded-lg border border-muted hover:border-primary text-xs sm:text-sm hover:text-primary transition-all"
+        className="inline-flex items-center px-3 py-2 rounded-lg border border-blue-100 hover:border-blue-200 text-sm hover:text-primary transition-all hover:shadow-lg hover:-translate-y-0.5"
       >
-        <Building2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
+        <Building2 className="h-4 w-4 mr-2" />
         <span>{manufacturer}</span>
       </Link>
     </HoverCardTrigger>
-    <HoverCardContent className="w-[280px] sm:w-80">
-      <div className="space-y-4">
+    <HoverCardContent className="w-80">
+      <div className="flex flex-col space-y-4">
         <div className="flex items-center space-x-2">
           <Building2 className="h-5 w-5 text-primary" />
           <h4 className="text-sm font-semibold">{manufacturer}</h4>
         </div>
-        {/* 제조사 상세 정보 */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-3">
+            <div className="flex items-center text-sm">
+              <Users className="h-4 w-4 mr-2 text-muted-foreground" />
+              <span>2,500명+</span>
+            </div>
+            <div className="flex items-center text-sm">
+              <Globe className="h-4 w-4 mr-2 text-muted-foreground" />
+              <span>대한민국</span>
+            </div>
+          </div>
+          <div className="space-y-3">
+            <div className="text-sm">
+              <span className="text-muted-foreground">설립연도</span>
+              <p>1990년</p>
+            </div>
+            <div className="text-sm">
+              <span className="text-muted-foreground">매출액</span>
+              <p>2조 5천억</p>
+            </div>
+          </div>
+        </div>
+        <Separator />
+        <div className="space-y-2">
+          <h5 className="font-medium text-sm">주요 제품군</h5>
+          <div className="flex flex-wrap gap-1">
+            {["반도체", "센서", "전자부품"].map((item, i) => (
+              <Badge key={i} variant="secondary" className="text-xs">
+                {item}
+              </Badge>
+            ))}
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" className="w-full group" asChild>
+            <Link href={`/manufacturers/${manufacturer.toLowerCase()}`}>
+              자세히 보기
+              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </Button>
+          <Button variant="outline" size="sm" className="w-full group" asChild>
+            <Link href={`/products/manufacturer/${manufacturer.toLowerCase()}`}>
+              제품 보기
+              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </Button>
+        </div>
       </div>
     </HoverCardContent>
   </HoverCard>
@@ -119,21 +165,21 @@ export const ManufacturerCard = ({ manufacturer }: { manufacturer: string }) => 
 
 // 서브카테고리 아이템 컴포넌트
 export const SubcategoryItem = ({ category, subcat }: { category: any, subcat: any }) => (
-  <div className="space-y-2 sm:space-y-3">
+  <div className="space-y-3">
     <Button
       variant="ghost"
-      className="flex items-center space-x-2 text-xs sm:text-sm font-semibold text-muted-foreground hover:text-primary group"
+      className="flex items-center space-x-2 text-sm font-semibold text-muted-foreground hover:text-primary group"
       onClick={() => window.location.href = `/products/list/${category.id}/${subcat.name}`}
     >
-      <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 group-hover:translate-x-1 transition-transform" />
+      <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
       <span>{subcat.name}</span>
     </Button>
-    <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 pl-4 sm:pl-6">
+    <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 pl-6">
       {subcat.items.map((item, itemIndex) => (
         <Button
           key={itemIndex}
           variant="outline"
-          className="w-full h-auto py-2 sm:py-2.5 px-2 sm:px-3 text-xs font-medium text-center whitespace-normal hover:bg-secondary/80 hover:text-primary hover:scale-105 active:scale-95 transition-all duration-200"
+          className="w-full h-auto py-2.5 px-3 text-sm font-medium text-center whitespace-normal bg-gradient-to-br from-white to-gray-50/50 border-blue-100 hover:border-blue-200 hover:text-primary hover:scale-105 active:scale-95 transition-all duration-200"
           onClick={() => window.location.href = `/products/list/${category.id}/${subcat.name}/${item}`}
         >
           {item}
@@ -187,7 +233,7 @@ export const ProductCategoryPage = () => {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-xl border bg-gradient-to-br from-card to-secondary/10 p-6 shadow-lg backdrop-blur-sm sticky top-20"
+            className="rounded-xl border bg-gradient-to-br from-white to-gray-50/50 border-blue-100 p-6 shadow-lg backdrop-blur-sm sticky top-20"
           >
             <div className="mb-6">
               <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
@@ -201,7 +247,7 @@ export const ProductCategoryPage = () => {
                     setSelectedCategory(null);
                     setExpandedCategories([]);
                   }}
-                  className="flex items-center justify-between w-full text-left"
+                  className="flex items-center justify-between w-full text-left hover:text-primary transition-colors"
                 >
                   <span className="font-medium">전체 카테고리</span>
                 </button>
@@ -218,7 +264,7 @@ export const ProductCategoryPage = () => {
                       );
                       setSelectedCategory(category.id);
                     }}
-                    className="flex items-center justify-between w-full text-left"
+                    className="flex items-center justify-between w-full text-left hover:text-primary transition-colors"
                   >
                     <span className="font-medium">{category.name}</span>
                     {expandedCategories.includes(category.id) ? (
@@ -248,7 +294,7 @@ export const ProductCategoryPage = () => {
                                       : [...prev, subcategory.id]
                                   );
                                 }}
-                                className="flex items-center justify-between w-full text-left text-sm text-muted-foreground hover:text-primary"
+                                className="flex items-center justify-between w-full text-left text-sm text-muted-foreground hover:text-primary transition-colors"
                               >
                                 <span>{subcategory.name}</span>
                                 {expandedSubcategories.includes(subcategory.id) ? (
@@ -272,7 +318,7 @@ export const ProductCategoryPage = () => {
                                         <Link
                                           key={index}
                                           href="#"
-                                          className="block text-xs text-muted-foreground hover:text-primary"
+                                          className="block text-xs text-muted-foreground hover:text-primary transition-colors"
                                         >
                                           {item}
                                         </Link>
@@ -296,83 +342,21 @@ export const ProductCategoryPage = () => {
        {/* 메인 컨텐츠 영역 */}
        <div className="lg:col-span-3 w-full">
           <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h2 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight">
+            <h2 className="text-2xl font-bold tracking-tight">
               {selectedCategory 
                 ? categoryData.find(c => c.id === selectedCategory)?.name
                 : '전체 카테고리'}
             </h2>
-            <Popover open={open} onOpenChange={setOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={open}
-                  className="w-full sm:w-[200px] h-9 justify-between"
-                >
-                  {selectedFilters.sortBy === 'popularity' && "인기순"}
-                  {selectedFilters.sortBy === 'recent' && "최신순"}
-                  {selectedFilters.sortBy === 'price-low' && "가격 낮은순"}
-                  {selectedFilters.sortBy === 'price-high' && "가격 높은순"}
-                  <ChevronRight className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[200px] p-0">
-                <Command>
-                  <CommandInput placeholder="정렬 기준 검색..." />
-                  <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
-                  <CommandGroup>
-                    <CommandItem
-                      onSelect={() => {
-                        setSelectedFilters({...selectedFilters, sortBy: 'popularity'});
-                        setOpen(false);
-                      }}
-                    >
-                      <Check
-                        className={`mr-2 h-4 w-4 ${selectedFilters.sortBy === 'popularity' ? "opacity-100" : "opacity-0"}`}
-                      />
-                      인기순
-                    </CommandItem>
-                    <CommandItem
-                      onSelect={() => {
-                        setSelectedFilters({...selectedFilters, sortBy: 'recent'});
-                        setOpen(false);
-                      }}
-                    >
-                      <Check
-                        className={`mr-2 h-4 w-4 ${selectedFilters.sortBy === 'recent' ? "opacity-100" : "opacity-0"}`}
-                      />
-                      최신순
-                    </CommandItem>
-                    <CommandItem
-                      onSelect={() => {
-                        setSelectedFilters({...selectedFilters, sortBy: 'price-low'});
-                        setOpen(false);
-                      }}
-                    >
-                      <Check
-                        className={`mr-2 h-4 w-4 ${selectedFilters.sortBy === 'price-low' ? "opacity-100" : "opacity-0"}`}
-                      />
-                      가격 낮은순
-                    </CommandItem>
-                    <CommandItem
-                      onSelect={() => {
-                        setSelectedFilters({...selectedFilters, sortBy: 'price-high'});
-                        setOpen(false);
-                      }}
-                    >
-                      <Check
-                        className={`mr-2 h-4 w-4 ${selectedFilters.sortBy === 'price-high' ? "opacity-100" : "opacity-0"}`}
-                      />
-                      가격 높은순
-                    </CommandItem>
-                  </CommandGroup>
-                </Command>
-              </PopoverContent>
-            </Popover>
+            <SortFilter 
+              open={open}
+              setOpen={setOpen}
+              selectedFilters={selectedFilters}
+              setSelectedFilters={setSelectedFilters}
+            />
           </div>
 
           <AnimatePresence>
-            <div className="grid gap-4 sm:gap-6">
+            <div className="grid gap-6">
               {(selectedCategory 
                 ? filteredCategories.filter(c => c?.id === selectedCategory)
                 : filteredCategories
@@ -386,110 +370,37 @@ export const ProductCategoryPage = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.3 }}
-                    className="p-4 sm:p-6 rounded-xl border bg-card hover:border-primary hover:shadow-xl transition-all duration-300"
+                    className="p-6 rounded-xl border bg-gradient-to-br from-white to-gray-50/50 border-blue-100 hover:border-blue-200 hover:shadow-xl transition-all duration-300"
                   >
                     <div className="flex flex-col space-y-4">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <Button
                           variant="ghost"
-                          className="flex items-center space-x-2 hover:border hover:border-primary"
+                          className="flex items-center space-x-2 group"
                           onClick={() => window.location.href = `/products/list/${category.id}`}
                         >
-                          <Cpu className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                          <h3 className="text-sm sm:text-base font-bold tracking-tight">{category.name}</h3>
-                          <Badge variant="secondary" className="ml-2 px-2 py-0.5 text-xs">{category.count}</Badge>
+                          <Cpu className="h-5 w-5 text-primary" />
+                          <h3 className="text-lg font-bold tracking-tight">{category.name}</h3>
+                          <Badge variant="secondary" className="ml-2 px-2 py-0.5">{category.count}</Badge>
+                          <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                         </Button>
                         <div className="flex flex-col items-start sm:items-end gap-2">
                           <div className="flex items-center w-full sm:w-auto">
-                            <div className="h-[1px] flex-grow bg-border w-8 sm:w-12 mr-2" />
-                            <span className="text-xs text-muted-foreground whitespace-nowrap">제조사 모음</span>
-                            <div className="h-[1px] flex-grow bg-border w-8 sm:w-12 ml-2" />
+                            <div className="h-[1px] flex-grow bg-blue-100 w-12 mr-2" />
+                            <span className="text-sm text-muted-foreground whitespace-nowrap">제조사 모음</span>
+                            <div className="h-[1px] flex-grow bg-blue-100 w-12 ml-2" />
                           </div>
                           <div className="flex flex-wrap gap-2">
                             {category.manufacturers?.map((manufacturer, idx) => (
-                              <HoverCard key={idx}>
-                                <HoverCardTrigger asChild>
-                                  <Link
-                                    href={`/manufacturers/${manufacturer.toLowerCase()}`}
-                                    className="inline-flex items-center px-2 sm:px-3 py-1 rounded-lg border border-muted hover:border-primary text-xs sm:text-sm hover:text-primary transition-all"
-                                  >
-                                    <Building2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
-                                    <span>{manufacturer}</span>
-                                  </Link>
-                                </HoverCardTrigger>
-                                <HoverCardContent className="w-[280px] sm:w-80">
-                                  <div className="space-y-4">
-                                    <div className="flex items-center space-x-2">
-                                      <Building2 className="h-5 w-5 text-primary" />
-                                      <h4 className="text-sm font-semibold">{manufacturer}</h4>
-                                    </div>
-                                    <div className="space-y-2">
-                                      <div className="flex items-center text-xs sm:text-sm">
-                                        <Users className="h-4 w-4 mr-2" />
-                                        <span>직원수: 2,500명+</span>
-                                      </div>
-                                      <div className="flex items-center text-xs sm:text-sm">
-                                        <Globe className="h-4 w-4 mr-2" />
-                                        <span>본사: 대한민국</span>
-                                      </div>
-                                      <div className="text-xs sm:text-sm">
-                                        <h5 className="font-medium mb-1">주요 생산품</h5>
-                                        <p className="text-muted-foreground">반도체, 전자부품, 센서류</p>
-                                      </div>
-                                      <div className="text-xs sm:text-sm">
-                                        <h5 className="font-medium mb-1">주요 연혁</h5>
-                                        <ul className="text-muted-foreground space-y-1">
-                                          <li>2020: 글로벌 혁신상 수상</li>
-                                          <li>2018: ISO 9001 인증</li>
-                                        </ul>
-                                      </div>
-                                      <div className="flex space-x-2 pt-2">
-                                        <Button variant="outline" size="sm" className="w-full text-xs sm:text-sm" asChild>
-                                          <Link href="/company-website" target="_blank">
-                                            <Globe className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                                            웹사이트
-                                          </Link>
-                                        </Button>
-                                        <Button variant="outline" size="sm" className="w-full text-xs sm:text-sm" asChild>
-                                          <Link href="/partners">
-                                            <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                                            파트너사
-                                          </Link>
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </HoverCardContent>
-                              </HoverCard>
+                              <ManufacturerCard key={idx} manufacturer={manufacturer} />
                             ))}
                           </div>
                         </div>
                       </div>
-                      <Separator className="bg-muted/60" />
-                      <div className="space-y-4 sm:space-y-6">
+                      <Separator className="bg-blue-100" />
+                      <div className="space-y-6">
                         {category.subcategories.map((subcat, index) => (
-                          <div key={index} className="space-y-2 sm:space-y-3">
-                            <Button
-                              variant="ghost"
-                              className="flex items-center space-x-2 text-xs sm:text-sm font-semibold text-muted-foreground hover:text-primary group"
-                              onClick={() => window.location.href = `/products/list/${category.id}/${subcat.name}`}
-                            >
-                              <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 group-hover:translate-x-1 transition-transform" />
-                              <span>{subcat.name}</span>
-                            </Button>
-                            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 pl-4 sm:pl-6">
-                              {subcat.items.map((item, itemIndex) => (
-                                <Button
-                                  key={itemIndex}
-                                  variant="outline"
-                                  className="w-full h-auto py-2 sm:py-2.5 px-2 sm:px-3 text-xs font-medium text-center whitespace-normal hover:bg-secondary/80 hover:text-primary hover:scale-105 active:scale-95 transition-all duration-200"
-                                  onClick={() => window.location.href = `/products/list/${category.id}/${subcat.name}/${item}`}
-                                >
-                                  {item}
-                                </Button>
-                              ))}
-                            </div>
-                          </div>
+                          <SubcategoryItem key={index} category={category} subcat={subcat} />
                         ))}
                       </div>
                     </div>

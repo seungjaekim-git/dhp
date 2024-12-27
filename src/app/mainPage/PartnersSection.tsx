@@ -83,6 +83,17 @@ const PARTNER_DATA = [
         subtitle: "전원관리 IC 및 전장용 부품 전문 기업",
         description: ["자동차 전장 전문", "글로벌 인증 보유", "품질 관리 시스템", "기술 지원"],
         href: "/partners/powtech"
+    },
+    {
+        id: "gtm",
+        title: "GTM",
+        categories: ["전원관리 IC" ],
+        logo: "/logos/gtm-logo.png",
+        country: "한국",
+        type: "대기업",
+        subtitle: "전원관리 IC 및 전장용 부품 전문 기업",
+        description: ["전원관리 IC 및 전장용 부품 전문 기업", "글로벌 인증 보유", "LDO 및 MOSFET 전문 제조사"],
+        href: "/partners/gtm"
     }
 ];
 

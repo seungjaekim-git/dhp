@@ -144,7 +144,7 @@ export default function AboutLayout({
 
           {/* Navigation */}
           <div className={`mt-4 ${isScrolled ? "hidden" : ""}`}>
-            <div className="flex gap-4">
+            <div className="flex gap-2">
               <TooltipProvider delayDuration={100}>
                 {navigationItems.map((item) => (
                   <div key={item.href}>
@@ -153,7 +153,7 @@ export default function AboutLayout({
                         <Link
                           href={item.href}
                           className={`
-                            flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all
+                            flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium transition-all
                             ${pathname === item.href 
                               ? "bg-blue-500 text-white" 
                               : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -161,7 +161,7 @@ export default function AboutLayout({
                           `}
                         >
                           {item.icon}
-                          <span className="hidden md:inline">{item.label}</span>
+                          <span className={`${pathname !== item.href ? "hidden" : "inline "} md:inline` }>{item.label}</span>
                         </Link>
                       </TooltipTrigger>
                       <TooltipContent side="bottom" className="md:hidden">
@@ -179,7 +179,7 @@ export default function AboutLayout({
       {/* 메인 콘텐츠 영역 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
         <div className="col-span-1 md:col-span-2">
-          <div className="bg-white rounded-2xl border border-gray-100 p-8">
+          <div className="bg-white rounded-2xl border border-gray-100 p-4">
             {children}
           </div>
         </div>

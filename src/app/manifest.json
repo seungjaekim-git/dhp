@@ -1,0 +1,26 @@
+{
+  "name": "대한플러스전자(주) | 반도체 전문 기업",
+  "short_name": "대한플러스전자",
+  "description": "LED Driver IC, 다이오드, 전원관리 IC 등을 공급하는 반도체 전문 기업입니다.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/logos/dhp-logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logos/dhp-logo.png", 
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "orientation": "portrait",
+  "lang": "ko-KR",
+  "categories": ["business", "electronics", "technology"],
+  "screenshots": [],
+  "prefer_related_applications": false
+}

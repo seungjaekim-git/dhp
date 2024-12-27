@@ -49,7 +49,7 @@
   }
 
   const LogoColumn: React.FC<LogoColumnProps> = React.memo(
-    ({ logos, index, currentTime }) => {
+    function LogoColumn({ logos, index, currentTime }) {
       const cycleInterval = 2000
       const columnDelay = index * 200
       const adjustedTime = (currentTime + columnDelay) % (cycleInterval * logos.length)
@@ -96,7 +96,7 @@
                 },
               }}
             >
-              <CurrentLogo className="h-20 w-20 max-h-[80%] max-w-[80%] object-contain md:h-32 md:w-32" />
+              <img src={CurrentLogo} alt={logos[currentIndex].name} className="h-20 w-20 max-h-[80%] max-w-[80%] object-contain md:h-32 md:w-32" />
             </motion.div>
           </AnimatePresence>
         </motion.div>

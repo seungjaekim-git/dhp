@@ -53,6 +53,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({
                 className="w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-lg border border-gray-200"
                 width={80}
                 height={80}
+                quality={80}
               />
               <div>
                 <div className="flex items-center space-x-2">

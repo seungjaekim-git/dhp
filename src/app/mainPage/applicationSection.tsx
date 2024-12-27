@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 // ApplicationsSection 컴포넌트
-export default function ApplicationsSection({ applications }) {
+export default function ApplicationsSection({ applications }: { applications: any[] }) {
     return (
         <div className="container py-12 lg:py-12">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
@@ -27,6 +27,7 @@ export default function ApplicationsSection({ applications }) {
                                                 width={160}
                                                 height={120}
                                                 className="rounded-lg shadow-md group-hover:shadow-lg"
+                                                quality={80}
                                             />
                                             <div className="flex flex-col gap-2">
                                                 {application.badges?.map((badge, i) => (

@@ -2,7 +2,9 @@
 
 import Link from 'next/link';
 import { CircleHelpIcon, ChevronRightIcon, BookOpenIcon, FileSearchIcon, UserPlusIcon, MapPinIcon, ArrowRightIcon, PhoneIcon, MailIcon } from 'lucide-react';
-import { SiKakao, SiYoutube, SiNaver } from 'react-icons/si';
+import { RiKakaoTalkFill } from '@react-icons/all-files/ri/RiKakaoTalkFill';
+import { RiYoutubeFill } from '@react-icons/all-files/ri/RiYoutubeFill';
+
 import { useState } from 'react';
 import {
   Tooltip,
@@ -442,21 +444,21 @@ export default function ContactSection() {
                 href={contactInfo.social.kakao}
                 className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 p-2 rounded-lg hover:text-gray-900"
               >
-                <SiKakao size={20} color="#FFEB00" />
+                <RiKakaoTalkFill size={20} color="#FFEB00" />
                 <span className="text-xs whitespace-nowrap overflow-hidden text-ellipsis">카카오톡 채널</span>
               </Link>
               <Link 
                 href={contactInfo.social.blog}
                 className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg"
               >
-                <SiNaver size={20} color="#03C75A" />
+                <svg xmlns="http://www.w3.org/2000/svg" width={20} height={20} viewBox="0 0 24 24"><path fill="currentColor" d="M16.273 12.845L7.376 0H0v24h7.726V11.156L16.624 24H24V0h-7.727z"></path></svg>
                 <span className="text-xs whitespace-nowrap overflow-hidden text-ellipsis">네이버 블로그</span>
               </Link>
               <Link 
                 href={contactInfo.social.youtube}
                 className="flex items-center gap-2 text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg"
               >
-                <SiYoutube size={20} color="#FF0000" />
+                <RiYoutubeFill size={20} color="#FF0000" />
                 <span className="text-xs whitespace-nowrap overflow-hidden text-ellipsis">유튜브 채널</span>
               </Link>
             </div>

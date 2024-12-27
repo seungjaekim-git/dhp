@@ -4,53 +4,47 @@ import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { LinkedinIcon } from 'lucide-react'
-
+import { navigationConfig } from "@/config/navigation"
 
 const footerSections = [
   {
-    title: "회사소개",
-    items: [
-      { name: "인사말", href: "/ceo" },
-      { name: "회사 연혁", href: "/history" },
-      { name: "사업 소개", href: "/business" },
-      { name: "찾아오시는 길", href: "/location" },
-    ],
+    title: navigationConfig.company.title,
+    items: navigationConfig.company.items.map(item => ({
+      name: item.title,
+      href: item.link
+    }))
   },
   {
-    title: "제품",
-    items: [
-      { name: "LED DRIVER IC", href: "/products/led-driver-ic" },
-      { name: "기타 전원관리 IC", href: "/products/other-power-management-ic" },
-      { name: "다이오드", href: "/products/diode" },
-      { name: "센서", href: "/products/sensor" },
-      { name: "케이블&커넥터", href: "/products/cable&connector" },
-    ],
+    title: navigationConfig.products.title,
+    items: navigationConfig.products.categories.map(category => ({
+      name: category.title,
+      href: category.link
+    }))
   },
   {
     title: "파트너사",
-    items: [
-      { name: "Macroblock", href: "#", icon: <Image src="/logos/macroblock-logo.png" alt="Macroblock" width={20} height={20} /> },
-      { name: "Zowie", href: "#", icon: <Image src="/logos/zowie-logo.png" alt="Zowie" width={20} height={20} /> },
-      { name: "XLSEMI", href: "#", icon: <Image src="/logos/xlsemi-logo.png" alt="XLSEMI" width={20} height={20} /> },
-      { name: "LLT", href: "#", icon: <Image src="/logos/llt-logo.png" alt="LLT" width={20} height={20} /> },
-      { name: "Kube Electronics AG", href: "#", icon: <Image src="/logos/kube-logo.png" alt="Kube" width={20} height={20} /> },
-      { name: "Morethanall", href: "#", icon: <Image src="/logos/morethanall-logo.png" alt="Morethanall" width={20} height={20} /> },
-      { name: "Powtech", href: "#", icon: <Image src="/logos/powtech-logo.png" alt="Powtech" width={20} height={20} /> },
-      { name: "GTM", href: "#", icon: <Image src="/logos/gtm-logo.png" alt="GTM" width={20} height={20} /> },
-
-    ],
+    items: navigationConfig.partners.items.map(partner => ({
+      name: partner.title,
+      href: partner.link,
+      icon: <Image src={partner.icon} alt={partner.title} width={20} height={20} />
+    }))
   },
   {
-    title: "고객지원",
+    title: navigationConfig.support.title,
     items: [
-      { name: "FAQ", href: "#" },
-      { name: "제품 지원 문의", href: "#" },
-      { name: "전화 및 이메일", href: "#" },
-      { name: "오시는 길", href: "#" },
-      { name: "데이터 시트", href: "#" },
-      { name: "제품 선택 가이드", href: "#" },
-    ],
+      ...navigationConfig.support.inquiry.items.map(item => ({
+        name: item.title,
+        href: item.link
+      })),
+      ...navigationConfig.support.contact.items.map(item => ({
+        name: item.title,
+        href: item.link
+      })),
+      ...navigationConfig.support.resources.items.map(item => ({
+        name: item.title,
+        href: item.link
+      }))
+    ]
   },
   {
     title: "견적요청",

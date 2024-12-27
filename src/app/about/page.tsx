@@ -356,15 +356,15 @@ export default function AboutPage() {
             </Accordion>
           </div>
 
-          {/* 대기업 협력 */}
+          {/* 다양한 어플리케이션 적용 */}
           <div className="p-6 md:p-8 bg-white rounded-2xl border border-gray-100 shadow-md">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
               <div className="space-y-4">
                 <h3 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                  대기업 고객사와의 협력
+                  S사와 L사와의 성공적인 적용
                 </h3>
                 <p className="text-gray-600 max-w-2xl">
-                  국내 주요 대기업들과의 장기적인 파트너십을 통해 안정적인 공급망을 구축하고 있습니다.
+                  가전제품(에어컨, 공기청정기, CCTV, 냉장고, 정수기), 전광판, 디스플레이 등 다양한 어플리케이션에 성공적으로 적용되고 있습니다.
                 </p>
                 <div className="h-1 w-20 bg-gradient-to-r from-blue-600 to-blue-400 rounded-full" />
               </div>
@@ -381,43 +381,43 @@ export default function AboutPage() {
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="details">
                 <AccordionTrigger className="text-lg font-semibold">
-                  협력 현황 및 성과
+                  적용 현황 및 성과
                 </AccordionTrigger>
                 <AccordionContent>
                   <div className="space-y-8">
                     <p className="text-gray-600">
-                      삼성전자, LG전자, 현대자동차 등 국내 대표 기업들과 10년 이상의 거래 관계를 유지하며, 연간 99.9% 이상의 납기 준수율과 불량률 0.001% 미만의 품질 신뢰성을 달성하고 있습니다.
+                      가전제품, 전광판, 디스플레이 분야에서 S사와 L사와의 협력을 통해 성공적인 적용을 이루었으며, 높은 품질과 신뢰성을 바탕으로 지속적인 성과를 달성하고 있습니다.
                     </p>
 
                     <div className="grid sm:grid-cols-1 md:grid-cols-3 gap-6">
                       <Card className="border-2">
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2">
-                            <Badge variant="secondary">적기 납품</Badge>
+                            <Badge variant="secondary">가전제품</Badge>
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-sm text-gray-600">실시간 재고 관리 시스템을 통한 99.9% 이상의 납기 준수율 달성 및 24시간 이내 긴급 공급 체계 구축.</p>
+                          <p className="text-sm text-gray-600">에어컨, 공기청정기, CCTV, 냉장고, 정수기 등 다양한 가전제품에 성공적으로 적용되어 높은 신뢰성을 확보하였습니다.</p>
                         </CardContent>
                       </Card>
                       <Card className="border-2">
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2">
-                            <Badge variant="secondary">품질 보증</Badge>
+                            <Badge variant="secondary">전광판</Badge>
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-sm text-gray-600">ISO 9001 인증 기반의 품질관리 시스템 운영 및 전수 검사를 통한 불량률 0.001% 미만 유지.</p>
+                          <p className="text-sm text-gray-600">전광판 분야에서의 혁신적인 기술 적용으로 에너지 효율성을 극대화하였습니다.</p>
                         </CardContent>
                       </Card>
                       <Card className="border-2">
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2">
-                            <Badge variant="secondary">스마트 물류</Badge>
+                            <Badge variant="secondary">디스플레이</Badge>
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-sm text-gray-600">IoT 기반 스마트 창고 시스템 도입으로 실시간 재고 추적 및 최적화된 공급망 관리 실현.</p>
+                          <p className="text-sm text-gray-600">디스플레이 기술의 발전을 통해 다양한 산업에 걸쳐 적용 범위를 확장하고 있습니다.</p>
                         </CardContent>
                       </Card>
                     </div>
@@ -438,54 +438,54 @@ export default function AboutPage() {
       <div className="h-1 w-20 bg-gradient-to-r from-blue-600 to-blue-400 rounded-full" />
     </div>
   </div>
-  <div className="relative overflow-hidden">
+  <div className="flex justify-center overflow-hidden">
     <LogoCarousel
       columnCount={3}
 logos={[
   {
     name: "Macroblock",
     id: 1,
-    img: "/images/logos/macroblock-logo.png"
+    img: "/logos/macroblock-logo.png"
   },
   {
     name: "XLSEMI",
     id: 2,
-    img: "/images/logos/xlsemi-logo.png"
+    img: "/logos/xlsemi-logo.png"
   },
   {
     name: "DHP",
     id: 3,
-    img: "/images/logos/dhp-logo.png"
+    img: "/logos/dhp-logo.png"
   },
   {
     name: "GTM",
     id: 4,
-    img: "/images/logos/GTM-logo.png"
+    img: "/logos/GTM-logo.png"
   },
   {
     name: "Kube",
     id: 5,
-    img: "/images/logos/kube-logo.png"
+    img: "/logos/kube-logo.png"
   },
   {
     name: "LLT",
     id: 6,
-    img: "/images/logos/llt-logo.png"
+    img: "/logos/llt-logo.png"
   },
   {
     name: "MoreThanAll",
     id: 7,
-    img: "/images/logos/morethanall-logo.png"
+    img: "/logos/morethanall-logo.png"
   },
   {
     name: "Powtech",
     id: 8,
-    img: "/images/logos/powtech-logo.png"
+    img: "/logos/powtech-logo.png"
   },
   {
     name: "Zowie",
     id: 9,
-    img: "/images/logos/zowie-logo.png"
+    img: "/logos/zowie-logo.png"
   }
 ]}
     />

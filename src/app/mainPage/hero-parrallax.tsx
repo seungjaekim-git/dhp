@@ -11,15 +11,13 @@ import { FlipWords } from "@/components/ui/flip-words";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  BriefcaseIcon,
-  FlowerIcon,
-  HeartIcon,
-  LightbulbIcon,
-  MountainSnow,
-  SearchIcon,
-  SettingsIcon,
-} from "lucide-react";
+import BriefcaseIcon from "lucide-react/dist/esm/icons/briefcase";
+import FlowerIcon from "lucide-react/dist/esm/icons/flower";
+import HeartIcon from "lucide-react/dist/esm/icons/heart";
+import LightbulbIcon from "lucide-react/dist/esm/icons/lightbulb";
+import MountainSnow from "lucide-react/dist/esm/icons/mountain-snow";
+import SearchIcon from "lucide-react/dist/esm/icons/search";
+import SettingsIcon from "lucide-react/dist/esm/icons/settings";
 
 import { InfiniteMovingProductCards } from "./infinite-moving-product-cards";
 
@@ -57,24 +55,16 @@ React.useEffect(() => {
   }
 }, []);
 
-// 기본 값 설정 (서버 사이드에서는 null 값 처리)
-const responsiveValue = (small: number, medium: number, large: number) => {
-  if (windowWidth === null) return large;
-  if (windowWidth < 640) return small;
-  if (windowWidth < 1024) return medium;
-  return large;
-};
-
 const translateX = useSpring(
-  useTransform(scrollYProgress, [0, 1], [0, responsiveValue(300, 600, 1000)]),
+  useTransform(scrollYProgress, [0, 1], [0, 600]),
   springConfig
 );
 const translateXReverse = useSpring(
-  useTransform(scrollYProgress, [0, 1], [0, responsiveValue(-300, -600, -1000)]),
+  useTransform(scrollYProgress, [0, 1], [0, -600]),
   springConfig
 );
 const rotateX = useSpring(
-  useTransform(scrollYProgress, [0, 0.2], [responsiveValue(5, 10, 15), 0]),
+  useTransform(scrollYProgress, [0, 0.2], [10, 0]),
   springConfig
 );
 const opacity = useSpring(
@@ -82,11 +72,11 @@ const opacity = useSpring(
   springConfig
 );
 const rotateZ = useSpring(
-  useTransform(scrollYProgress, [0, 0.2], [responsiveValue(10, 15, 20), 0]),
+  useTransform(scrollYProgress, [0, 0.2], [15, 0]),
   springConfig
 );
 const translateY = useSpring(
-  useTransform(scrollYProgress, [0, 0.2], [responsiveValue(-500, -600, -700), 100]),
+  useTransform(scrollYProgress, [0, 0.2], [-500,0]),
   springConfig
 );
 
@@ -94,7 +84,7 @@ const translateY = useSpring(
 };
 
 const Header: React.FC = () => (
-  <div className="max-w-7xl overflow-hidden relative mx-auto md:py-10 px-4 w-full left-0 top-0">
+  <div className="max-w-7xl overflow-hidden relative mx-auto md:py-4 px-4 w-full left-0 top-0">
     <div className="container">
       <div className="text-center">
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
@@ -113,7 +103,7 @@ const Header: React.FC = () => (
 const SearchForm: React.FC = () => (
   <div className="mt-7 sm:mt-12 mx-auto max-w-xl relative">
     <form>
-      <div className="relative z-10 flex space-x-3 p-3 border bg-background rounded-lg">
+      <div className="relative z-10 flex space-x-3 p-2 border bg-background rounded-lg">
         <div className="flex-[1_0_0%]">
           <Label htmlFor="article" className="sr-only">
             Search 
@@ -132,9 +122,7 @@ const SearchForm: React.FC = () => (
         </div>
       </div>
     </form>
-    {/* SVG Elements */}
-    <svg className="hidden md:block absolute top-0 end-0 -translate-y-12 translate-x-20 w-16 h-auto text-orange-500" /* ... */ />
-    <svg className="hidden md:block absolute bottom-0 start-0 translate-y-10 -translate-x-32 w-40 h-auto text-cyan-500" /* ... */ />
+   
   </div>
 );
 
@@ -159,7 +147,7 @@ const CategoryButton: React.FC<{ icon: React.ReactNode; text: string }> = ({ ico
   </Button>
 );
 
-export const HeroParallax: React.FC<{ products: Product[] }> = ({ products }) => {
+export default function HeroParallax({ products }: { products: Product[] }) {
   const { ref, rotateX, rotateZ, translateY, opacity } = useScrollAnimation();
 
   const rows = [
@@ -169,7 +157,7 @@ export const HeroParallax: React.FC<{ products: Product[] }> = ({ products }) =>
   ];
 
   return (
-    <div ref={ref} className="h-[200%] py-20 overflow-hidden antialiased relative flex flex-col self-auto [perspective:1000px] [transform-style:preserve-3d]">
+    <div ref={ref} className="h-[200%] items-center justify-center overflow-hidden antialiased relative flex flex-col self-auto [perspective:1000px] [transform-style:preserve-3d]">
       <Header />
       <motion.div style={{ rotateX, rotateZ, translateY, opacity }}>
         <InfiniteMovingProductCards

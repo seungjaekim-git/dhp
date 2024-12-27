@@ -1,9 +1,5 @@
 import React from "react";
-import { HeroParallax } from "@/app/mainPage/hero-parrallax";
-import Feature from "@/app/mainPage/featureSection";
-import PartnersSection from "@/app/mainPage/PartnersSection";
-import ContactSection from "@/app/mainPage/contactSection";
-import ApplicationsSection from "@/app/mainPage/applicationSection";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 export default function Home() {
 
@@ -13,44 +9,44 @@ export default function Home() {
       title: "LED Driver IC",
       link: "/products/led-driver-ic",
       thumbnail:
-        "/images/led-driver-ic-category-banner.png",
+        "/images/led-driver-ic-category-banner.webp",
     },
     {
       title: "다이오드",
       link: "/products/diodes",
       thumbnail:
-        "/images/diodes-category-banner.png",
+        "/images/diodes-category-banner.webp",
     },
     {
       title: "수동 소자",
       link: "/products/passive-components",
-      thumbnail: "/images/passive-components-category-banner.png",
+      thumbnail: "/images/passive-components-category-banner.webp",
     },
    
     {
       title: "전원관리 IC",
       link: "/products/power-management-ic",
       thumbnail:
-        "/images/power-management-ic-category-banner.png",
+        "/images/power-management-ic-category-banner.webp",
     },
     {
       title: "자동차 전자부품",
       link: "/products/automotive-electronic-components",
       thumbnail:
-        "/images/automotive-category-banner.png",
+        "/images/automotive-category-banner.webp",
     },
     {
       title: "센서",
       link: "/products/sensors",
       thumbnail:
-        "/images/sensor-category-banner.png",
+        "/images/sensor-category-banner.webp",
     },
    
     {
       title: "커넥터&케이블",
       link: "/products/connectors-cables",
       thumbnail:
-        "/images/connectors-cables-category-banner.png",
+        "/images/connectors-cables-category-banner.webp",
     },
 
     // 파트너사
@@ -58,50 +54,50 @@ export default function Home() {
       title: "Macroblock",
       link: "/partners/macroblock",
       thumbnail:
-        "/images/thumbnail-macroblock.png",
+        "/images/thumbnail-macroblock.webp",
     },
     {
       title: "Zowie",
       link: "/partners/zowie",
       thumbnail:
-        "/images/thumbnail-zowie.png",
+        "/images/thumbnail-zowie.webp",
     },
     {
       title: "Morethanall",
       link: "/partners/morethanall",
       thumbnail:
-        "/images/thumbnail-morethanall.png",
+        "/images/thumbnail-morethanall.webp",
     },
     {
       title: "LLT",
       link: "/partners/llt",
       thumbnail:
-        "/images/thumbnail-llt.png",
+        "/images/thumbnail-llt.webp",
     },
    
     {
       title: "Kube Electronics AG",
       link: "/partners/kube",
       thumbnail:
-        "/images/thumbnail-kube.png",
+        "/images/thumbnail-kube.webp",
     },
     {
       title: "XLSEMI",
       link: "/partners/xlsemi",
       thumbnail:
-        "/images/thumbnail-xlsemi.png",
+        "/images/thumbnail-xlsemi.webp",
     },
     {
       title: "GTM",
       link: "/partners/gtm",
       thumbnail:
-        "/images/thumbnail-gtm.png",
+        "/images/thumbnail-gtm.webp",
     },
     {
       title: "Powtech",
       link: "/partners/powtech",
       thumbnail:
-        "/images/thumbnail-powtech.png",
+        "/images/thumbnail-powtech.webp",
     },
   ];
 
@@ -162,28 +158,42 @@ export default function Home() {
     }
   ];
 
+  const LazyHeroParallax = React.lazy(() => import('./mainPage/hero-parrallax'));
+  const LazyFeature = React.lazy(() => import('./mainPage/featureSection'));
+  const LazyApplicationsSection = React.lazy(() => import('./mainPage/applicationSection'));
+  const LazyPartnersSection = React.lazy(() => import('./mainPage/PartnersSection')); 
+  const LazyContactSection = React.lazy(() => import('./mainPage/contactSection'));
+
   return (
     <div className="flex flex-col">
-      <section id="hero" className="w-full bg-gray-50 py-16 lg:py-24">
-        <div className="container">
-          <HeroParallax products={heroParallaxBanner}/>
-        </div>
+      <section id="hero" className="w-full bg-gray-50 py-4 lg:py-8">
+        <React.Suspense fallback={<LoadingSpinner />}>
+          <LazyHeroParallax products={heroParallaxBanner}/>
+        </React.Suspense>
       </section>
 
       <section id="features" className="w-full bg-gray-100 py-16 lg:py-24">
-        <Feature />
+        <React.Suspense fallback={<LoadingSpinner />}>
+          <LazyFeature />
+        </React.Suspense>
       </section>
 
       <section id="applications" className="w-full bg-gray-50 py-16 lg:py-24">
-        <ApplicationsSection applications={applications} />
+        <React.Suspense fallback={<LoadingSpinner />}>
+          <LazyApplicationsSection applications={applications} />
+        </React.Suspense>
       </section>
 
       <section id="partners" className="w-full bg-gray-100 py-16 lg:py-24">
-        <PartnersSection />
+        <React.Suspense fallback={<LoadingSpinner />}>
+          <LazyPartnersSection />
+        </React.Suspense>
       </section>
 
       <section id="contact" className="w-full bg-gray-50 py-16 lg:py-24">
-        <ContactSection />
+        <React.Suspense fallback={<LoadingSpinner />}>
+          <LazyContactSection />
+        </React.Suspense>
       </section>
     </div>
   );
