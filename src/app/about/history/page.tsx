@@ -1,11 +1,12 @@
-import HistoryLayout from "./HistoryLayout";
+import TimelinePage from "./TimelinePage";
 import { CalendarDays } from "lucide-react";
+import AboutLayout from "../AboutLayout";
 
 export default function HistoryPage() {
   const timelineData = [
     {
       title: "대한플러스전자 창립",
-      date: "1997년 11월",
+      date: "1997년 11월", 
       content: {
         description: "대한플러스전자 회사 설립",
       },
@@ -21,7 +22,7 @@ export default function HistoryPage() {
       content: {
         description: "한국 대리점 체결",
       },
-      eventType: "Partnership",
+      eventType: "Partnership", 
       badges: [
         { text: "대리점", bgColor: "bg-green-100", textColor: "text-green-600" }
       ],
@@ -209,7 +210,36 @@ export default function HistoryPage() {
     }
   ];
 
+  const breadcrumb = [
+    { label: "홈", href: "/" },
+    { label: "회사소개", href: "/about" },
+    { label: "회사연혁", href: "/about/history" },
+  ];
+
+  const badges = [
+    {
+      text: "연혁",
+      bgColor: "bg-blue-100",
+      textColor: "text-blue-600",
+      hoverColor: "hover:bg-blue-100"
+    },
+    {
+      text: "회사소개",
+      bgColor: "bg-sky-100",
+      textColor: "text-sky-600",
+      hoverColor: "hover:bg-sky-100"
+    }
+  ];
+
   return (
-    <HistoryLayout timelineData={timelineData} />
+    <AboutLayout
+      title="회사 연혁"
+      icon={<CalendarDays className="w-6 h-6" />}
+      breadcrumb={breadcrumb}
+      description="대한플러스전자(주)의 회사 연혁을 소개합니다."
+      badges={badges}
+    >
+      <TimelinePage timelineData={timelineData} />
+    </AboutLayout>
   );
 }

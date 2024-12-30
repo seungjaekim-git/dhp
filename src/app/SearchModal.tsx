@@ -7,6 +7,7 @@ import { Search, ArrowRight } from 'lucide-react';
 import { useSearchStore } from '@/store/SearchStore';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase-client';
+import { PARTNER_DATA } from './partners/PartnerData';
 
 export function SearchModal() {
   const router = useRouter();
@@ -14,27 +15,10 @@ export function SearchModal() {
   const [selectedItem, setSelectedItem] = useState<number | null>(null);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<string>('전체');
-  const [viewportHeight, setViewportHeight] = useState<number>(window.innerHeight);
 
   useEffect(() => {
     useSearchStore.persist.rehydrate();
 
-    const down = (e: KeyboardEvent) => {
-      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        setIsOpen(true);
-      }
-    };
-
-    const updateViewportHeight = () => setViewportHeight(window.innerHeight);
-
-    document.addEventListener('keydown', down);
-    window.addEventListener('resize', updateViewportHeight);
-
-    return () => {
-      document.removeEventListener('keydown', down);
-      window.removeEventListener('resize', updateViewportHeight);
-    };
   }, [setIsOpen]);
 
   useEffect(() => {
@@ -57,11 +41,11 @@ export function SearchModal() {
       ];
 
       // 임시 제조사 데이터
-      const mockManufacturers = [
-        { id: 1, name: 'Silicon Labs', description: '고성능 반도체 제조사' },
-        { id: 2, name: 'Texas Instruments', description: '아날로그 및 임베디드 프로세싱 전문 기업' },
-        { id: 3, name: 'STMicroelectronics', description: '유럽 최대의 반도체 제조사' }
-      ];
+      const mockManufacturers = PARTNER_DATA.map((partner, index) => ({
+        id: index + 1,
+        name: partner.name,
+        description: partner.main_product_categories.join(', ')
+      }));
 
       // 임시 제품 용도 데이터
       const mockApplications = [

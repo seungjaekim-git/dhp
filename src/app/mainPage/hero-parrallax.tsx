@@ -20,6 +20,7 @@ import SearchIcon from "lucide-react/dist/esm/icons/search";
 import SettingsIcon from "lucide-react/dist/esm/icons/settings";
 
 import { InfiniteMovingProductCards } from "./infinite-moving-product-cards";
+import { useSearchStore } from "@/store/SearchStore";
 
 // Constants
 const WORDS = ["전자부품", "LED 드라이버 IC", "다이오드", "전원관리 IC", "커넥터·케이블", "센서"];
@@ -41,19 +42,6 @@ const useScrollAnimation = () => {
   });
 
   const springConfig = createSpringConfig();
-
-// React state를 사용하여 반응형 설정
-const [windowWidth, setWindowWidth] = React.useState<number | null>(null);
-
-React.useEffect(() => {
-  // 브라우저 환경에서만 windowWidth를 설정
-  if (typeof window !== "undefined") {
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    handleResize(); // 초기값 설정
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }
-}, []);
 
 const translateX = useSpring(
   useTransform(scrollYProgress, [0, 1], [0, 600]),
@@ -84,7 +72,7 @@ const translateY = useSpring(
 };
 
 const Header: React.FC = () => (
-  <div className="max-w-7xl overflow-hidden relative mx-auto md:py-4 px-4 w-full left-0 top-0">
+  <div className="max-w-7xl overflow-hidden relative mx-auto py-12 md:py-24 px-4 w-full left-0 top-0">
     <div className="container">
       <div className="text-center">
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
@@ -100,31 +88,23 @@ const Header: React.FC = () => (
   </div>
 );
 
-const SearchForm: React.FC = () => (
-  <div className="mt-7 sm:mt-12 mx-auto max-w-xl relative">
-    <form>
-      <div className="relative z-10 flex space-x-3 p-2 border bg-background rounded-lg">
-        <div className="flex-[1_0_0%]">
-          <Label htmlFor="article" className="sr-only">
-            Search 
-          </Label>
-          <Input
-            name="article"
-            className="h-full"
-            id="article"
-            placeholder="Search article"
-          />
-        </div>
-        <div className="flex-[0_0_auto]">
-          <Button size={"icon"}>
-            <SearchIcon />
-          </Button>
-        </div>
+const SearchForm: React.FC = () => {
+  const setIsOpen = useSearchStore((state) => state.setIsOpen);
+
+  return (
+    <div
+      onClick={() => setIsOpen(true)}
+      className="mt-7 sm:mt-12 mx-auto max-w-lg z-10 relative flex items-center bg-gray-100 dark:bg-gray-800 rounded-full border-4 border-gray-300 dark:border-gray-600 shadow-md hover:shadow-lg transition-shadow cursor-pointer hover:border-blue-100 hover:text-white"
+    >
+      <div className="absolute inset-y-0 left-4 flex items-center">
+        <SearchIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
       </div>
-    </form>
-   
-  </div>
-);
+      <div className="pl-12 pr-4 py-3 text-sm text-gray-900 dark:text-white">
+        검색어를 입력하세요. 
+      </div>
+    </div>
+  );
+};
 
 const CategoryButtons: React.FC = () => (
   <div className="block bg-white z-20 m-4">

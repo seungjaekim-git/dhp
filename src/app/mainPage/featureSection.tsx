@@ -7,21 +7,22 @@ import {
     TargetIcon
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 const features = [
     {
         icon: <BuildingIcon className="w-8 h-8" />,
-        title: "여러분과 함께하고 싶습니다.",
+        title: "고객 여러분들과 함께 성장하고 싶습니다.",
         description: "대한플러스전자(주)는 고객사와의 신뢰를 바탕으로 함께 성장하는 동반자가 되고자 합니다. 여러분의 성공을 위해 최선을 다하겠습니다.",
-        link: "/about/introduction",
+        link: "/about/greeting",
         linkText: "CEO 인사말 바로가기",
     },
     {
         icon: <HandshakeIcon className="w-8 h-8" />,
         title: "성장 동반 협력 체계",
         description: "대한플러스전자(주)는 기업과 고객에게 성장기회가 될 수 있게 최적의 전자제품 솔루션을 제공하고 공유하는 비즈니스 협약을 구축하여 고객과 함께 성장해왔습니다.",
-        link: "/about/history", 
-        linkText: "회사 연혁 바로가기",
+        link: "/partners", 
+        linkText: "파트너사 바로가기",
     },
     {
         icon: <CircuitBoardIcon className="w-8 h-8" />,
@@ -49,6 +50,7 @@ export default function FeatureSection() {
                         <div className="space-y-8 p-8 bg-gradient-to-br from-gray-50/80 to-white rounded-3xl border border-gray-100/80 transition-all duration-300 ease-in-out hover:[transform:rotate3d(0.5,1,0,8deg)]">
                             <div className="space-y-8">
                                 <div className="space-y-4 hover:-translate-y-1 transition-transform duration-200">
+                                    <Image src="/logos/dhp-logo.png" alt="대한플러스전자(주)" width={100} height={100} className="w-full h-full object-cover"  />
                                     <h1 className="scroll-m-20 text-3xl font-extrabold tracking-tight lg:text-4xl bg-gradient-to-r from-gray-900 via-gray-700 to-gray-800 bg-clip-text text-transparent">
                                         대한플러스전자(주)
                                     </h1>
@@ -59,7 +61,7 @@ export default function FeatureSection() {
                                 </div>
                                 <div className="space-y-6">
                                     <p className="text-base leading-relaxed text-gray-600 hover:-translate-y-1 transition-transform duration-200">
-                                        <strong className="text-gray-900 font-semibold">대한플러스전자(주)</strong>는 고객의 신뢰와 만족을 위해 항상 노력하는 LED 드라이버 IC 전문 유통기업입니다.
+                                        <strong className="text-gray-900 font-semibold">대한플러스전자(주)</strong>는 고객의 신뢰와 만족을 위해 항상 노력하는 <strong className="text-gray-900 font-semibold underline underline-offset-4">LED 드라이버 IC 전문 유통기업</strong>입니다.
                                     </p>
                                     <ul className="space-y-3 text-xs text-gray-600">
                                         <li className="flex items-center gap-3 hover:-translate-y-1 transition-transform duration-200">

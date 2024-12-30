@@ -7,7 +7,7 @@ import Link from "next/link";
 // ApplicationsSection 컴포넌트
 export default function ApplicationsSection({ applications }: { applications: any[] }) {
     return (
-        <div className="container py-12 lg:py-12">
+        <div className="container py-12 lg:py-12 mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
                 {/* 왼쪽 컬럼 */}
                 <div className="order-2 lg:order-1 lg:col-span-8">

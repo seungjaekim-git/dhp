@@ -176,7 +176,7 @@ export default function ContactSection() {
     };
   
     return (
-      <div className="container py-12 lg:py-12">
+      <div className="container py-12 lg:py-12 mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           {/* 오른쪽 컬럼 */}
           <div className="order-2 lg:order-1 lg:col-span-8 grid gap-4 grid-cols-1">

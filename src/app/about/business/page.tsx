@@ -2,6 +2,8 @@ import { Building2, PackageCheck, Handshake, Cpu } from "lucide-react";
 import AboutLayout from "../AboutLayout";
 import { BusinessAccordion } from "./BusinessAccordion";
 import { ApplicationsTabs } from "./ApplicationsTabs";
+import Link from "next/link";
+import Image from "next/image";
 
 export default function BusinessPage() {
   const businessAreas = [
@@ -128,7 +130,15 @@ export default function BusinessPage() {
       <div className="space-y-12 max-w-7xl mx-auto px-4">
         {/* 비즈니스 소개 섹션 */}
         <section className="relative h-[50vh] flex items-center justify-center overflow-hidden rounded-2xl">
-          {/* ... Hero section */}
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-500 to-blue-300 opacity-50"></div>
+        <div className="relative z-10 text-center text-white">
+          <h1 className="text-4xl md:text-6xl font-extrabold bg-gradient-to-r from-blue-500 to-blue-700 bg-clip-text text-transparent">
+            LED Driver IC 전문 유통기업
+          </h1>
+          <p className="mt-4 text-lg md:text-xl">
+            대한플러스전자(주)의 사업 영역과 현재까지의 성과를 소개합니다.
+          </p>
+        </div>
         </section>
 
         <div className="grid md:grid-cols-2 gap-6">

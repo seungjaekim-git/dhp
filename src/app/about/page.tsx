@@ -189,7 +189,7 @@ export default function AboutPage() {
               
               <div className="md:w-2/3 md:pl-8 space-y-4 ">
                 <p className="text-gray-600">
-                  <strong className="text-gray-900">대한플러스전자(주)</strong>는 1997년 11월 설립된 LED 드라이버 IC 및 반도체 부품 유통 전문기업입니다. 서울특별시 구로구 중앙유통단지에 본사를 두고 있으며, Macroblock, XLSEMI 등 글로벌 기업들과의 파트너십을 통해 국내 시장을 선도하고 있습니다.
+                  <strong className="text-gray-900">대한플러스전자(주)</strong>는 1997년 11월 설립된 LED 드라이버 IC 및 반도체 부품 유통 전문기업입니다. 서울특별시 구로구 중앙유통단지에 본사를 두고 있으며, Macroblock, Zowie 등 글로벌 기업들과의 파트너십을 통해 국내 시장을 선도하고 있습니다.
                 </p>
                 
                 <ul className="space-y-3 text-sm text-gray-600">
@@ -243,7 +243,7 @@ export default function AboutPage() {
                 <AccordionContent>
                   <div className="space-y-6">
                     <p className="text-gray-600">
-                      대한플러스전자(주)는 25년 이상의 신뢰를 바탕으로 Macroblock, XLSEMI 등 글로벌 제조사들과 독점 유통 계약을 체결하여 국내 시장에 프리미엄 LED 드라이버 IC와 반도체 부품을 공급하고 있습니다.
+                      대한플러스전자(주)는 25년 이상의 신뢰를 바탕으로 Macroblock, Zowie 등 글로벌 제조사들과 독점 유통 계약을 체결하여 국내 시장에 프리미엄 LED 드라이버 IC와 반도체 부품을 공급하고 있습니다.
                     </p>
                     <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-6">
                       <Card className="border-2">

@@ -271,7 +271,7 @@ const Navigation = () => {
                             </div>
                             <span className="text-sm text-neutral-600 items-center gap-1 flex">
                               <ArrowLeft className="w-4 h-4" />
-                              자세히 보기
+                              회사 소개
                             </span>
                           </div>
                         </a>

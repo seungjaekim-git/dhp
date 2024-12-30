@@ -178,7 +178,7 @@ export default function PartnersSection() {
     }, [selectedTab]);
 
     return (
-        <div className="container py-12 lg:py-12">
+        <div className="container py-12 lg:py-12 mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
                 {/* 왼쪽 컬럼 - 고정 위치 */}
                 <div className="lg:col-span-4 lg:sticky lg:top-24 h-fit">
