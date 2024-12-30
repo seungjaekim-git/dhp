@@ -24,15 +24,6 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/h
 import Link from 'next/link';
 import categoryData from './productCategory';
 
-// 네비게이션 컴포넌트
-export const Navigation = () => (
-  <nav className="flex items-center space-x-3 mb-8">
-    <Home className="h-4 w-4 text-primary" />
-    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-    <span className="text-base font-medium">카테고리</span>
-  </nav>
-);
-
 // 검색 입력 컴포넌트
 export const SearchInput = ({ searchTerm, setSearchTerm }: { searchTerm: string, setSearchTerm: (value: string) => void }) => (
   <div className="relative">
@@ -44,53 +35,6 @@ export const SearchInput = ({ searchTerm, setSearchTerm }: { searchTerm: string,
       onChange={(e) => setSearchTerm(e.target.value)}
     />
   </div>
-);
-
-// 정렬 필터 컴포넌트 
-export const SortFilter = ({ open, setOpen, selectedFilters, setSelectedFilters }: { open: boolean, setOpen: (value: boolean) => void, selectedFilters: { sortBy: string }, setSelectedFilters: (value: { sortBy: string }) => void }) => (
-  <Popover open={open} onOpenChange={setOpen}>
-    <PopoverTrigger asChild>
-      <Button
-        variant="outline"
-        role="combobox"
-        aria-expanded={open}
-        className="w-full sm:w-[200px] h-9 justify-between bg-gradient-to-br from-white to-gray-50/50 border-blue-100 hover:border-blue-200"
-      >
-        {selectedFilters.sortBy === 'popularity' && "인기순"}
-        {selectedFilters.sortBy === 'recent' && "최신순"}
-        {selectedFilters.sortBy === 'price-low' && "가격 낮은순"}
-        {selectedFilters.sortBy === 'price-high' && "가격 높은순"}
-        <ChevronRight className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-      </Button>
-    </PopoverTrigger>
-    <PopoverContent className="w-[200px] p-0">
-      <Command>
-        <CommandInput placeholder="정렬 기준 검색..." />
-        <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
-        <CommandGroup>
-          {[
-            { value: 'popularity', label: '인기순' },
-            { value: 'recent', label: '최신순' },
-            { value: 'price-low', label: '가격 낮은순' },
-            { value: 'price-high', label: '가격 높은순' }
-          ].map(option => (
-            <CommandItem
-              key={option.value}
-              onSelect={() => {
-                setSelectedFilters({...selectedFilters, sortBy: option.value});
-                setOpen(false);
-              }}
-            >
-              <Check
-                className={`mr-2 h-4 w-4 ${selectedFilters.sortBy === option.value ? "opacity-100" : "opacity-0"}`}
-              />
-              {option.label}
-            </CommandItem>
-          ))}
-        </CommandGroup>
-      </Command>
-    </PopoverContent>
-  </Popover>
 );
 
 // 제조사 카드 컴포넌트
@@ -226,7 +170,6 @@ export const ProductCategoryPage = () => {
 
   return (
     <div className="max-w-[1400px] mx-auto px-6 py-10">
-      <Navigation />
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* 사이드바 */}
         <div className="lg:col-span-1">
@@ -347,12 +290,6 @@ export const ProductCategoryPage = () => {
                 ? categoryData.find(c => c.id === selectedCategory)?.name
                 : '전체 카테고리'}
             </h2>
-            <SortFilter 
-              open={open}
-              setOpen={setOpen}
-              selectedFilters={selectedFilters}
-              setSelectedFilters={setSelectedFilters}
-            />
           </div>
 
           <AnimatePresence>

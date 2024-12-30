@@ -5,6 +5,7 @@ import Footer from "@/app/mainPage/footer";
 import TwoLayerNavigation from "@/app/mainPage/navigationBar";
 import Script from "next/script";
 import { Toaster } from "@/components/ui/toaster";
+import { SearchModal } from "@/app/SearchModal";
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.dhes.co.kr'),
@@ -102,6 +103,7 @@ export default function RootLayout({
           <TwoLayerNavigation />
         </header>
         <main className="flex-grow w-full h-full items-center justify-center">
+          <SearchModal />
           {children}
           <Toaster />
         </main>

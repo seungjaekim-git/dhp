@@ -47,7 +47,7 @@ export default function GreetingPage() {
           </div>
           <div className="md:w-2/3 space-y-8">
             <h2 className="text-3xl font-bold text-gray-900">
-              "변화에 앞서고, 신뢰를 더하다 – 고객과 함께 성장하는 대한플러스전자(주)"
+              변화에 앞서고, 신뢰를 더하다 – 고객과 함께 성장하는 대한플러스전자(주)
             </h2>
             <div className="space-y-6 text-gray-600 leading-relaxed">
               <p>

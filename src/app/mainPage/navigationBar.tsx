@@ -28,6 +28,7 @@ import { productCategoryItems, partnersItems } from "@/app/mainPage/NavigationDa
 import { debounce } from "lodash";
 import { navigationConfig } from "@/config/navigation";
 import { useCallback } from "react";
+import { useSearchStore } from "@/store/SearchStore"; // Import search store
 
 // Reusable components with React.memo for performance optimization
 const CategoryLink = React.memo(({ href, title, description }: { href: string, title: string, description: string }) => (
@@ -109,6 +110,9 @@ const Navigation = () => {
   const [selectedPartner, setSelectedPartner] = React.useState(partnersItems[0]);
   const [isVisible, setIsVisible] = React.useState(true);
   const [lastScrollY, setLastScrollY] = React.useState(0);
+  
+  // Use search store instead of local state
+  const { setIsOpen, isOpen } = useSearchStore();
 
   React.useEffect(() => {
     const controlNavbar = () => {
@@ -286,13 +290,14 @@ const Navigation = () => {
                   <div className="flex overflow-y-auto mx-auto">
                     <div className="w-1/5 lg:w-1/4 rounded-lg bg-gradient-to-b from-neutral-200 to-neutral-100 shadow-md">
                       {navigationConfig.products.categories.map((category) => (
-                        <div
+                        <Link
+                          href={category.link}
                           key={category.title}
                           onMouseEnter={() => setSelectedCategory(category.title)}
                           className={`p-4 cursor-pointer hover:bg-gradient-to-r from-neutral-500 to-neutral-500 text-xs sm:text-sm md:text-base font-semibold text-neutral-800 hover:text-white transition-all duration-300 ${selectedCategory === category.title ? "bg-gradient-to-r from-neutral-500 to-neutral-500 text-white" : ""}`}
                         >
                           {category.title}
-                        </div>
+                        </Link>
                       ))}
                     </div>
                     <div className="w-4/5 lg:w-4/5 bg-white p-4 shadow-lg rounded-lg">
@@ -402,7 +407,10 @@ const Navigation = () => {
 
         {/* 검색 및 모바일 메뉴 */}
         <div className="flex items-center space-x-4">
-          <button className="p-2 hover:bg-neutral-100 rounded-full">
+          <button 
+            className="p-2 hover:bg-neutral-100 rounded-full"
+            onClick={() => setIsOpen(!isOpen)} // Use zustand store action
+          >
             <Search className="h-5 w-5 text-neutral-600" />
           </button>
 
