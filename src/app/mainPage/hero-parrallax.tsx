@@ -64,7 +64,7 @@ const rotateZ = useSpring(
   springConfig
 );
 const translateY = useSpring(
-  useTransform(scrollYProgress, [0, 0.2], [-500,0]),
+  useTransform(scrollYProgress, [0, 0.2], [-600,0]),
   springConfig
 );
 

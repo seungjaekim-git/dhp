@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
-import { productCategoryItems, partnersItems } from "@/app/mainPage/NavigationData";
 import { debounce } from "lodash";
 import { navigationConfig } from "@/config/navigation";
 import { useCallback } from "react";
@@ -61,7 +60,7 @@ const ResourceLink = React.memo(({ item }: { item: {
   }
 } }) => (
   <Link 
-    href="#" 
+    href={item.partnerStory.learnMoreLink} 
     className="group block p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:bg-gradient-to-r hover:from-neutral-50 hover:to-neutral-100 active:scale-95 active:bg-neutral-200" 
   >
     <div className="flex items-center">
@@ -105,9 +104,9 @@ const SupportLink = React.memo(({ title, description }: { title: string, descrip
 SupportLink.displayName = "SupportLink";
 
 const Navigation = () => {
-  const [selectedCategory, setSelectedCategory] = React.useState<string>(productCategoryItems[0]?.title || '');
+  const [selectedCategory, setSelectedCategory] = React.useState<string>(navigationConfig.products.categories[0]?.title || '');
   const [selectedMenu, setSelectedMenu] = React.useState<string>('');
-  const [selectedPartner, setSelectedPartner] = React.useState(partnersItems[0]);
+  const [selectedPartner, setSelectedPartner] = React.useState(navigationConfig.partners.items[0]);
   const [isVisible, setIsVisible] = React.useState(true);
   const [lastScrollY, setLastScrollY] = React.useState(0);
   
@@ -356,13 +355,7 @@ const Navigation = () => {
                           <p className="text-xs sm:text-sm text-neutral-600 mb-2">
                             {selectedPartner?.partnerStory.text || navigationConfig.partners.items[0].partnerStory.text}
                           </p>
-                          <Link 
-                            href={selectedPartner?.partnerStory.learnMoreLink || navigationConfig.partners.items[0].partnerStory.learnMoreLink} 
-                            className="text-xs sm:text-sm text-neutral-500 hover:underline inline-flex items-center"
-                          >
-                            자세히 보기
-                            <ArrowRight className="ml-1 h-3 w-3" />
-                          </Link>
+                    
                         </div>
                       </div>
                     </div>

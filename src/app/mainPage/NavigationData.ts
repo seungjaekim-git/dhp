@@ -1,3 +1,4 @@
+//TODO : 정보만 따로 NavigationConfig.ts에 넣기
 export const productCategoryItems = [
     // LED Driver IC
     {

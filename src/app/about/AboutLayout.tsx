@@ -65,18 +65,18 @@ export default function AboutLayout({
   ];
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container max-w-6xl mx-auto px-6 py-4">
       {/* Header */}
       <div
-        className={`sticky top-[4px] z-40 transition-all duration-300 ease-in-out rounded-2xl ${
+        className={`sticky top-[4px] z-40 transition-all duration-300 ease-in-out rounded-xl ${
           isScrolled
-            ? "bg-white shadow-md border border-gray-200 p-4 m-2"
-            : "bg-gradient-to-r from-sky-50 to-blue-50 border border-sky-100 p-4"
+            ? "bg-white shadow-sm border border-gray-200 p-3"
+            : "bg-gradient-to-r from-sky-50 to-blue-50 border border-sky-100 p-3"
         }`}
       >
-        <div className="flex flex-col">
+        <div className="flex flex-col space-y-3">
           <div
-            className={`flex items-center gap-2 text-sm text-gray-600 mb-4 ${
+            className={`flex items-center gap-1.5 text-sm text-gray-600 ${
               isScrolled ? "hidden" : ""
             }`}
           >
@@ -97,54 +97,52 @@ export default function AboutLayout({
                   </span>
                 )}
                 {index < breadcrumb.length - 1 && (
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-3.5 h-3.5" />
                 )}
               </React.Fragment>
             ))}
           </div>
 
-          <div className="grid grid-cols-1 gap-6">
-            <div className="flex items-start gap-4">
-              <div
-                className={`transition-all duration-300 ${
-                  isScrolled
-                    ? "w-6 h-6 bg-gray-100 text-gray-600"
-                    : "w-8 md:w-10 h-8 md:h-10 bg-gradient-to-br from-blue-500 to-sky-400 text-white"
-                } rounded-xl flex items-center justify-center`}
-              >
-                {icon}
-              </div>
+          <div className="flex items-start gap-3">
+            <div
+              className={`transition-all duration-300 ${
+                isScrolled
+                  ? "w-6 h-6 bg-gray-100 text-gray-600"
+                  : "w-8 h-8 bg-gradient-to-br from-blue-500 to-sky-400 text-white"
+              } rounded-lg flex items-center justify-center`}
+            >
+              {icon}
+            </div>
 
-              <div className="flex-1">
-                <div className="flex items-center gap-4">
-                  <h1
-                    className={`transition-all duration-300 ${
-                      isScrolled
-                        ? "text-sm md:text-base font-medium"
-                        : "text-lg md:text-xl font-bold"
-                    } text-gray-900`}
-                  >
-                    {title}
-                  </h1>
+            <div className="flex-1">
+              <div className="flex items-center gap-3">
+                <h1
+                  className={`transition-all duration-300 ${
+                    isScrolled
+                      ? "text-sm font-medium"
+                      : "text-base font-bold"
+                  } text-gray-900`}
+                >
+                  {title}
+                </h1>
 
-                  <div className="flex gap-2 ml-2">
-                    {badges.map((badge, index) => (
-                      <span
-                        key={index}
-                        className={`px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[10px] md:text-xs font-medium ${badge.bgColor} ${badge.textColor} ${badge.hoverColor}`}
-                      >
-                        {badge.text}
-                      </span>
-                    ))}
-                  </div>
+                <div className="flex gap-1.5">
+                  {badges.map((badge, index) => (
+                    <span
+                      key={index}
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${badge.bgColor} ${badge.textColor} ${badge.hoverColor}`}
+                    >
+                      {badge.text}
+                    </span>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
 
           {/* Navigation */}
-          <div className={`mt-4 ${isScrolled ? "hidden" : ""}`}>
-            <div className="flex gap-2">
+          <div className={`${isScrolled ? "hidden" : ""}`}>
+            <div className="flex gap-1.5">
               <TooltipProvider delayDuration={100}>
                 {navigationItems.map((item) => (
                   <div key={item.href}>
@@ -153,7 +151,7 @@ export default function AboutLayout({
                         <Link
                           href={item.href}
                           className={`
-                            flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium transition-all
+                            flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all
                             ${pathname === item.href 
                               ? "bg-blue-500 text-white" 
                               : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -177,14 +175,9 @@ export default function AboutLayout({
       </div>
 
       {/* 메인 콘텐츠 영역 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-        <div className="col-span-1 md:col-span-2">
-          <div className="bg-white rounded-2xl border border-gray-100 p-4">
-            {children}
-          </div>
-        </div>
-        <div className="col-span-1">
-          {/* 추가적인 컨텐츠를 위한 공간 */}
+      <div className="mt-6">
+        <div className="bg-white rounded-xl border border-gray-100 p-4">
+          {children}
         </div>
       </div>
     </div>

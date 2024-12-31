@@ -658,7 +658,7 @@ export const navigationConfig: NavigationConfig = {
           keywords: ["매크로블록", "LED드라이버", "전장부품"]
         },
         partnerStory: {
-          image: "/images/thumbnail-macroblock.png",
+          image: "/images/thumbnail-macroblock.webp",
           text: "LED Driver IC 부문 세계 1위 기업으로서 디스플레이, 조명, 자동차 전장용 제품을 제공합니다",
           learnMoreLink: "/partners/macroblock"
         }
@@ -679,7 +679,7 @@ export const navigationConfig: NavigationConfig = {
           keywords: ["조위", "다이오드", "정류기"]
         },
         partnerStory: {
-          image: "/images/thumbnail-zowie.png",
+          image: "/images/thumbnail-zowie.webp",
           text: "고성능 정류 다이오드 전문 기업으로서 자동차 인증 보유 제품을 제공합니다",
           learnMoreLink: "/partners/zowie"
         }
@@ -700,7 +700,7 @@ export const navigationConfig: NavigationConfig = {
           keywords: ["LLT", "커넥터", "케이블"]
         },
         partnerStory: {
-          image: "/images/thumbnail-llt.png",
+          image: "/images/thumbnail-llt.webp",
           text: "커넥터/케이블 전문 제조사로서 산업용 커넥터 전문 제품을 제공합니다",
           learnMoreLink: "/partners/llt"
         }
@@ -721,7 +721,7 @@ export const navigationConfig: NavigationConfig = {
           keywords: ["모어댄올", "커넥터", "FPC"]
         },
         partnerStory: {
-          image: "/images/thumbnail-morethanall.png",
+          image: "/images/thumbnail-morethanall.webp",
           text: "보드-보드/FPC 커넥터 전문 기업으로서 맞춤형 설계 가능한 제품을 제공합니다",
           learnMoreLink: "/partners/morethanall"
         }
@@ -742,7 +742,7 @@ export const navigationConfig: NavigationConfig = {
           keywords: ["큐브일렉트로닉스", "센서", "스위스"]
         },
         partnerStory: {
-          image: "/images/thumbnail-kube.png",
+          image: "/images/thumbnail-kube.webp",
           text: "센서 전문 기업으로서 고신뢰성 제품을 제공합니다",
           learnMoreLink: "/partners/kube"
         }
@@ -763,7 +763,7 @@ export const navigationConfig: NavigationConfig = {
           keywords: ["엑셀세미", "전원관리", "LED드라이버"]
         },
         partnerStory: {
-          image: "/images/thumbnail-xlsemi.png",
+          image: "/images/thumbnail-xlsemi.webp",
           text: "전원관리 IC 전문 기업으로서 다양한 제품 스펙트럼을 제공합니다",
           learnMoreLink: "/partners/xlsemi"
         }
@@ -784,7 +784,7 @@ export const navigationConfig: NavigationConfig = {
           keywords: ["파워텍", "전원관리", "전장부품"]
         },
         partnerStory: {
-          image: "/images/thumbnail-powtech.png",
+          image: "/images/thumbnail-powtech.webp",
           text: "전원관리 IC 및 전장용 부품 전문 기업으로서 자동차 인증 보유 제품을 제공합니다",
           learnMoreLink: "/partners/powtech"
         }
@@ -805,7 +805,7 @@ export const navigationConfig: NavigationConfig = {
           keywords: ["지티엠", "전원관리", "전장부품"]
         },
         partnerStory: {
-          image: "/images/thumbnail-gtm.png",
+          image: "/images/thumbnail-gtm.webp",
           text: "전원관리 IC 및 전장용 부품 전문 기업으로서 자동차 인증 보유 제품을 제공합니다",
           learnMoreLink: "/partners/gtm"
         }

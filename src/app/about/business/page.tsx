@@ -2,8 +2,7 @@ import { Building2, PackageCheck, Handshake, Cpu } from "lucide-react";
 import AboutLayout from "../AboutLayout";
 import { BusinessAccordion } from "./BusinessAccordion";
 import { ApplicationsTabs } from "./ApplicationsTabs";
-import Link from "next/link";
-import Image from "next/image";
+
 
 export default function BusinessPage() {
   const businessAreas = [
