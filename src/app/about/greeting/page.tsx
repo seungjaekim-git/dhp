@@ -34,7 +34,7 @@ export default function GreetingPage() {
           <div className="md:w-1/3">
             <div className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden">
               <Image
-                src="/images/ceo.jpg"
+                src="/images/background_img.webp"
                 alt="CEO 프로필"
                 fill
                 className="object-cover"

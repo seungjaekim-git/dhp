@@ -1,12 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import TimelineSimple from "./TimelineSimple";
 import TimelineDetailed from "./TimelineDetailed";
-import { ListFilter, SortDesc, Download, CalendarDays } from "lucide-react";
-import React from "react";
+import { ListFilter, SortDesc, Download } from "lucide-react";
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 
 interface TimelineLayoutProps {
@@ -18,132 +16,114 @@ export default function TimelinePage({ timelineData }: TimelineLayoutProps) {
   const [isDesc, setIsDesc] = useState(true);
   const [isViewDropdownOpen, setIsViewDropdownOpen] = useState(false);
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
 
-  const handleScroll = useCallback(() => {
-    const scrolled = window.scrollY > 0;
-    if (scrolled !== isScrolled) {
-      setIsScrolled(scrolled);
-    }
-  }, [isScrolled]);
-
-  useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [handleScroll]);
-
-  const sortedTimelineData = isDesc 
+  const sortedTimelineData = isDesc
     ? [...timelineData].reverse()
     : timelineData;
 
   return (
-    <div className="container mx-auto flex justify-center">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="col-span-1 md:col-span-3">
-          <div className="bg-white rounded-2xl border border-gray-100">
-            <div className="p-4 border-b border-gray-100">
-              <div className="flex flex-wrap gap-2 justify-center">
-                <div className="relative">
-                  <TooltipProvider delayDuration={0}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          onClick={() => setIsViewDropdownOpen(!isViewDropdownOpen)}
-                          className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-                        >
-                          <ListFilter className="w-4 h-4 mr-2" />
-                          {isDetailed ? "자세히 보기" : "간략히 보기"}
-                        </button>
-                      </TooltipTrigger>
-                    </Tooltip>
-                  </TooltipProvider>
-                  {isViewDropdownOpen && (
-                    <div className="absolute right-0 w-40 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50">
-                      <button
-                        onClick={() => {
-                          setIsDetailed(false);
-                          setIsViewDropdownOpen(false);
-                        }}
-                        className="w-full px-4 py-2 text-sm text-center hover:bg-gray-50"
-                      >
-                        간략히 보기
-                      </button>
-                      <button
-                        onClick={() => {
-                          setIsDetailed(true);
-                          setIsViewDropdownOpen(false);
-                        }}
-                        className="w-full px-4 py-2 text-sm text-center hover:bg-gray-50"
-                      >
-                        자세히 보기
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <div className="relative">
-                  <TooltipProvider delayDuration={0}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
-                          className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-                        >
-                          <SortDesc className="w-4 h-4 mr-2" />
-                          {isDesc ? "최신순" : "과거순"}
-                        </button>
-                      </TooltipTrigger>
-                    </Tooltip>
-                  </TooltipProvider>
-                  {isSortDropdownOpen && (
-                    <div className="absolute right-0 w-40 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50">
-                      <button
-                        onClick={() => {
-                          setIsDesc(true);
-                          setIsSortDropdownOpen(false);
-                        }}
-                        className="w-full px-4 py-2 text-sm text-center hover:bg-gray-50"
-                      >
-                        최신순
-                      </button>
-                      <button
-                        onClick={() => {
-                          setIsDesc(false);
-                          setIsSortDropdownOpen(false);
-                        }}
-                        className="w-full px-4 py-2 text-sm text-center hover:bg-gray-50"
-                      >
-                        과거순
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <Link
-                  href="/files/Selection_Guide.pdf"
-                  className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+    <div className="container mx-auto space-y-8 px-4">
+      {/* 상단 제어 버튼 */}
+      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+        <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+          {/* 보기 옵션 */}
+          <div className="relative">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setIsViewDropdownOpen(!isViewDropdownOpen)}
+                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-300 rounded-lg hover:bg-gray-100 transition"
+                  >
+                    <ListFilter className="w-4 h-4 mr-2" />
+                    {isDetailed ? "자세히 보기" : "간략히 보기"}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>연혁 보기 옵션</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            {isViewDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-lg shadow-md z-50">
+                <button
+                  onClick={() => {
+                    setIsDetailed(false);
+                    setIsViewDropdownOpen(false);
+                  }}
+                  className="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-50"
                 >
-                  <Download className="w-4 h-4 mr-2" />
-                  엑셀 다운로드
-                </Link>
+                  간략히 보기
+                </button>
+                <button
+                  onClick={() => {
+                    setIsDetailed(true);
+                    setIsViewDropdownOpen(false);
+                  }}
+                  className="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-50"
+                >
+                  자세히 보기
+                </button>
               </div>
-            </div>
-
-            <div className=" p-8">
-              <div className={isDetailed ? "hidden" : "block"}>
-                <TimelineSimple timelineData={sortedTimelineData} />
-              </div>
-              <div className={isDetailed ? "block" : "hidden"}>
-                <TimelineDetailed timelineData={sortedTimelineData} />
-              </div>
-            </div>
+            )}
           </div>
+
+          {/* 정렬 옵션 */}
+          <div className="relative">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-300 rounded-lg hover:bg-gray-100 transition"
+                  >
+                    <SortDesc className="w-4 h-4 mr-2" />
+                    {isDesc ? "최신순" : "과거순"}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>정렬 옵션</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            {isSortDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-lg shadow-md z-50">
+                <button
+                  onClick={() => {
+                    setIsDesc(true);
+                    setIsSortDropdownOpen(false);
+                  }}
+                  className="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-50"
+                >
+                  최신순
+                </button>
+                <button
+                  onClick={() => {
+                    setIsDesc(false);
+                    setIsSortDropdownOpen(false);
+                  }}
+                  className="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-50"
+                >
+                  과거순
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* 다운로드 버튼 */}
+          <Link
+            href="/files/Selection_Guide.pdf"
+            className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-300 rounded-lg hover:bg-gray-100 transition"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            엑셀 다운로드
+          </Link>
         </div>
-        <div className="col-span-1">
-          {/* 추가적인 컨텐츠를 위한 공간 */}
-        </div>
+      </div>
+
+      {/* 연혁 콘텐츠 */}
+      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+        {isDetailed ? (
+          <TimelineDetailed timelineData={sortedTimelineData} />
+        ) : (
+          <TimelineSimple timelineData={sortedTimelineData} />
+        )}
       </div>
     </div>
   );

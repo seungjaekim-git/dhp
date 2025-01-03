@@ -32,11 +32,10 @@ export default function AboutLayout({
   title,
   icon,
   breadcrumb,
-  description,
   badges = [],
 }: AboutLayoutProps) {
   const [isScrolled, setIsScrolled] = useState(false);
-  const pathname = usePathname();
+  const pathname = usePathname() || "/about";
 
   useEffect(() => {
     const handleScroll = throttle(() => {
@@ -70,13 +69,15 @@ export default function AboutLayout({
       <div
         className={`sticky top-[4px] z-40 transition-all duration-300 ease-in-out rounded-xl ${
           isScrolled
-            ? "bg-white shadow-sm border border-gray-200 p-3"
-            : "bg-gradient-to-r from-sky-50 to-blue-50 border border-sky-100 p-3"
+            ? "bg-white shadow-sm border border-gray-2"
+            : "bg-gradient-to-r from-sky-50 to-blue-50 border border-sky-100 p-4"
         }`}
       >
-        <div className="flex flex-col space-y-3">
+        <div className={`flex flex-col ${
+              isScrolled ? "m-2" : "space-y-3"
+            }`}>
           <div
-            className={`flex items-center gap-1.5 text-sm text-gray-600 ${
+            className={`flex items-center gap-1 text-sm text-gray-600 ${
               isScrolled ? "hidden" : ""
             }`}
           >
@@ -103,7 +104,7 @@ export default function AboutLayout({
             ))}
           </div>
 
-          <div className="flex items-start gap-3">
+          <div className="flex gap-2">
             <div
               className={`transition-all duration-300 ${
                 isScrolled
@@ -111,8 +112,8 @@ export default function AboutLayout({
                   : "w-8 h-8 bg-gradient-to-br from-blue-500 to-sky-400 text-white"
               } rounded-lg flex items-center justify-center`}
             >
-              {icon}
-            </div>
+            {icon}
+          </div>
 
             <div className="flex-1">
               <div className="flex items-center gap-3">
@@ -142,7 +143,7 @@ export default function AboutLayout({
 
           {/* Navigation */}
           <div className={`${isScrolled ? "hidden" : ""}`}>
-            <div className="flex gap-1.5">
+            <div className="flex gap-2">
               <TooltipProvider delayDuration={100}>
                 {navigationItems.map((item) => (
                   <div key={item.href}>
@@ -151,10 +152,10 @@ export default function AboutLayout({
                         <Link
                           href={item.href}
                           className={`
-                            flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all
+                            flex items-center gap-2 px-3 py-2 rounded-full text-xs transition-all
                             ${pathname === item.href 
-                              ? "bg-blue-500 text-white" 
-                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                              ? "bg-blue-500 text-white font-bold" 
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200 font-medium"
                             }
                           `}
                         >

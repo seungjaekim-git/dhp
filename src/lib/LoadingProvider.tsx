@@ -1,7 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import React, { createContext, useContext, useState, ReactNode } from "react";
 
 // 로딩 상태 타입 정의
 interface LoadingContextProps {
@@ -15,12 +14,6 @@ const LoadingContext = createContext<LoadingContextProps | undefined>(undefined)
 // Provider 컴포넌트
 export const LoadingProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [loading, setLoading] = useState(false);
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    setLoading(false);
-  }, [pathname, searchParams]);
 
   return (
     <LoadingContext.Provider value={{ loading, setLoading }}>

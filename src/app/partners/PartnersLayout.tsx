@@ -34,11 +34,10 @@ export default function PartnersLayout({
   title,
   logo,
   breadcrumb,
-  description,
   badges = [],
 }: PartnersLayoutProps) {
   const [isScrolled, setIsScrolled] = useState(false);
-  const pathname = usePathname();
+  const pathname = usePathname() || "/partners";
 
   useEffect(() => {
     const handleScroll = throttle(() => {

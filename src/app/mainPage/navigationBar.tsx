@@ -144,37 +144,44 @@ const Navigation = () => {
     switch (selectedMenu) {
       case company.title:
         return (
-          <div className="flex flex-col space-y-2">
+          <div className="flex flex-col space-y-2 rounded-lg ">
             {company.items.map(item => (
-              <Link 
-                key={item.title}
-                href={item.link} 
-                className="py-2 hover:bg-neutral-100 font-bold"
-              >
-                {item.title}
-              </Link>
+              <SheetClose key={item.title} asChild>
+                <Link 
+                  href={item.link} 
+                  className="p-2 hover:bg-neutral-100 font-bold rounded-lg"
+                >
+                  {item.title}
+                </Link>
+              </SheetClose>
             ))}
           </div>
         );  
       case products.title:
         return (
-          <div className="flex flex-col space-y-2">
+          <div className="flex flex-col">
             {products.categories.map((category) => (
-              <div key={category.title} className="mb-4">
-                <Link href={category.link} className="block text-md font-bold mb-2 p-2 rounded-md hover:bg-neutral-100 hover:text-neutral-500">
-                  {category.title}
-                </Link>
-                <div className="ml-4">
+              <div key={category.title} className="border-b border-gray-100 last:border-b-0">
+                <SheetClose asChild>
+                  <Link href={category.link} className="block py-3 px-4 text-[15px] font-medium text-gray-900 hover:bg-gray-50">
+                    {category.title}
+                  </Link>
+                </SheetClose>
+                <div className="bg-gray-50">
                   {category.content.map((subcategory) => (
-                    <div key={subcategory.title} className="mb-1">
-                      <Link href={subcategory.link} className="block rounded-md text-sm text-neutral-600 hover:text-neutral-500 font-bold p-2 hover:bg-neutral-100">
-                        {subcategory.title}
-                      </Link>
-                      <div className="ml-4">
+                    <div key={subcategory.title}>
+                      <SheetClose asChild>
+                        <Link href={subcategory.link} className="block py-2.5 px-6 text-[13px] text-gray-700 hover:bg-gray-100 hover:text-blue-600">
+                          {subcategory.title}
+                        </Link>
+                      </SheetClose>
+                      <div>
                         {subcategory.children.map((item) => (
-                          <Link key={item.title} href={item.link} className="block p-1 text-sm rounded-md hover:bg-neutral-100 font-bold hover:text-neutral-500">
-                            {item.title}
-                          </Link>
+                          <SheetClose key={item.title} asChild>
+                            <Link href={item.link} className="block py-2 px-8 text-[12px] text-gray-600 hover:bg-gray-100 hover:text-blue-600">
+                              {item.title}
+                            </Link>
+                          </SheetClose>
                         ))}
                       </div>
                     </div>
@@ -188,15 +195,17 @@ const Navigation = () => {
         return (
           <div className="flex flex-col space-y-4">
             {partners.items.map((item) => (
-              <div key={item.title} className="p-2 hover:bg-neutral-100 rounded-lg">
-                <div className="flex items-center">
-                  <Image src={item.icon} alt={item.title} width={30} height={30} className="mr-2" />
-                  <div>
-                    <div className="font-bold">{item.title}</div>
-                    <div className="text-sm text-neutral-600">{item.description}</div>
+              <SheetClose key={item.title} asChild>
+                <div className="p-2 hover:bg-neutral-100 rounded-lg">
+                  <div className="flex items-center">
+                    <Image src={item.icon} alt={item.title} width={30} height={30} className="mr-2" />
+                    <div>
+                      <div className="font-bold">{item.title}</div>
+                      <div className="text-sm text-neutral-600">{item.description}</div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </SheetClose>
             ))}
           </div>
         );
@@ -206,9 +215,11 @@ const Navigation = () => {
             <div className="mb-4">
               <h3 className="font-bold mb-2">{support.inquiry.title}</h3>
               {support.inquiry.items.map(item => (
-                <Link key={item.title} href={item.link} className="block py-2 hover:bg-neutral-100">
-                  {item.title}
-                </Link>
+                <SheetClose key={item.title} asChild>
+                  <Link href={item.link} className="block py-2 hover:bg-neutral-100">
+                    {item.title}
+                  </Link>
+                </SheetClose>
               ))}
             </div>
             <div className="mb-4">
@@ -248,7 +259,7 @@ const Navigation = () => {
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
-                <NavigationMenuTrigger onMouseEnter={() => debouncedSetSelectedMenu(navigationConfig.company.title)}>
+                <NavigationMenuTrigger onMouseEnter={() => debouncedSetSelectedMenu(navigationConfig.company.title)} className="text-gray-700 hover:text-blue-600">
                   {navigationConfig.company.title}
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
@@ -260,15 +271,15 @@ const Navigation = () => {
                           href={navigationConfig.company.link}
                         >
                           <div className="flex flex-col h-full justify-between bg-white/50 p-2 rounded-md mt-8">
-                            <h3 className="mb-2 text-2xl font-bold tracking-tight text-neutral-900">
+                            <h3 className="mb-2 text-2xl font-bold tracking-tight text-gray-900">
                               대한플러스전자(주)
                             </h3>
-                            <div className="flex flex-col text-neutral-900">
+                            <div className="flex flex-col text-gray-900">
                               <p className="text-xs leading-relaxed">최고의 서비스</p>
                               <p className="text-xs leading-relaxed">정확한 솔루션</p>
                               <p className="text-xs leading-relaxed">품질로 승부하는 반도체 유통 전문기업</p>
                             </div>
-                            <span className="text-sm text-neutral-600 items-center gap-1 flex">
+                            <span className="text-sm text-gray-600 items-center gap-1 flex">
                               <ArrowLeft className="w-4 h-4" />
                               회사 소개
                             </span>
@@ -284,16 +295,16 @@ const Navigation = () => {
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <NavigationMenuTrigger>{navigationConfig.products.title}</NavigationMenuTrigger>
+                <NavigationMenuTrigger className="text-gray-700 hover:text-blue-600">{navigationConfig.products.title}</NavigationMenuTrigger>
                 <NavigationMenuContent asChild>
                   <div className="flex overflow-y-auto mx-auto">
-                    <div className="w-1/5 lg:w-1/4 rounded-lg bg-gradient-to-b from-neutral-200 to-neutral-100 shadow-md">
+                    <div className="w-1/5 lg:w-1/4 rounded-lg bg-gradient-to-b from-gray-50 to-white shadow-sm">
                       {navigationConfig.products.categories.map((category) => (
                         <Link
                           href={category.link}
                           key={category.title}
                           onMouseEnter={() => setSelectedCategory(category.title)}
-                          className={`p-4 cursor-pointer hover:bg-gradient-to-r from-neutral-500 to-neutral-500 text-xs sm:text-sm md:text-base font-semibold text-neutral-800 hover:text-white transition-all duration-300 ${selectedCategory === category.title ? "bg-gradient-to-r from-neutral-500 to-neutral-500 text-white" : ""}`}
+                          className={`block p-4 cursor-pointer hover:bg-gradient-to-r from-blue-500 to-blue-400 text-xs sm:text-sm md:text-base font-semibold text-gray-700 hover:text-white transition-all duration-300 ${selectedCategory === category.title ? "bg-gradient-to-r from-blue-500 to-blue-400 text-white" : ""}`}
                         >
                           {category.title}
                         </Link>
@@ -307,13 +318,13 @@ const Navigation = () => {
                             category.content.map((contentItem) => (
                               <div key={contentItem.title} className="space-y-4">
                                 <Link href={contentItem.link}>
-                                  <h2 className="text-xs sm:text-sm font-bold hover:text-neutral-500 transition-colors duration-300">{contentItem.title}</h2>
+                                  <h2 className="text-xs sm:text-sm font-bold hover:text-blue-500 transition-colors duration-300">{contentItem.title}</h2>
                                 </Link>
                                 <div className="space-y-2">
                                   {contentItem.children.map((child) => (
-                                    <Link key={child.title} href={child.link} className="flex items-center space-x-2 rounded-md p-2 hover:bg-neutral-100 transition-colors duration-300">
-                                      <span className="h-6 w-6 sm:w-1 flex-shrink-0 text-neutral-400"></span>
-                                      <span className="text-xs text-neutral-700">{child.title}</span>
+                                    <Link key={child.title} href={child.link} className="flex items-center space-x-2 rounded-md p-2 hover:bg-gray-50 transition-colors duration-300">
+                                      <span className="h-6 w-6 sm:w-1 flex-shrink-0 text-gray-400"></span>
+                                      <span className="text-xs text-gray-600">{child.title}</span>
                                     </Link>
                                   ))}
                                 </div>
@@ -327,7 +338,7 @@ const Navigation = () => {
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <NavigationMenuTrigger>{navigationConfig.partners.title}</NavigationMenuTrigger>
+                <NavigationMenuTrigger className="text-gray-700 hover:text-blue-600">{navigationConfig.partners.title}</NavigationMenuTrigger>
                 <NavigationMenuContent asChild>
                   <div className="grid grid-cols-3 gap-6 p-2 overflow-y-auto">
                     <div className="col-span-2 grid grid-cols-2 gap-6">
@@ -342,8 +353,8 @@ const Navigation = () => {
                       ))}
                     </div>
                     <div className="col-span-1">
-                      <h3 className="text-xs sm:text-sm font-semibold text-neutral-900 mb-4">파트너사 스토리</h3>
-                      <div className="bg-neutral-100 rounded-lg overflow-hidden">
+                      <h3 className="text-xs sm:text-sm font-semibold text-gray-900 mb-4">파트너사 스토리</h3>
+                      <div className="bg-gray-50 rounded-lg overflow-hidden">
                         <Image
                           src={selectedPartner?.partnerStory.image || navigationConfig.partners.items[0].partnerStory.image}
                           alt="Partner Story"
@@ -352,10 +363,9 @@ const Navigation = () => {
                           className="w-full h-40 object-cover"
                         />
                         <div className="p-4">
-                          <p className="text-xs sm:text-sm text-neutral-600 mb-2">
+                          <p className="text-xs sm:text-sm text-gray-600 mb-2">
                             {selectedPartner?.partnerStory.text || navigationConfig.partners.items[0].partnerStory.text}
                           </p>
-                    
                         </div>
                       </div>
                     </div>
@@ -364,23 +374,23 @@ const Navigation = () => {
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <NavigationMenuTrigger>{navigationConfig.support.title}</NavigationMenuTrigger>
+                <NavigationMenuTrigger className="text-gray-700 hover:text-blue-600">{navigationConfig.support.title}</NavigationMenuTrigger>
                 <NavigationMenuContent asChild>
                   <div className="flex items-center justify-center overflow-y-auto">
-                    <div className="p-4 border-r dark:border-neutral-800">
-                      <div className="text-xs sm:text-sm dark:text-neutral-500 text-neutral-400 px-3">{navigationConfig.support.inquiry.title}</div>
+                    <div className="p-4 border-r border-gray-100">
+                      <div className="text-xs sm:text-sm text-gray-500 px-3">{navigationConfig.support.inquiry.title}</div>
                       {navigationConfig.support.inquiry.items.map((item) => (
                         <SupportLink key={item.title} title={item.title} description="" />
                       ))}
                     </div>
-                    <div className="p-4 border-r dark:border-neutral-800">
-                      <div className="text-xs sm:text-sm dark:text-neutral-500 text-neutral-400 px-3">{navigationConfig.support.contact.title}</div>
+                    <div className="p-4 border-r border-gray-100">
+                      <div className="text-xs sm:text-sm text-gray-500 px-3">{navigationConfig.support.contact.title}</div>
                       {navigationConfig.support.contact.items.map((item) => (
                         <SupportLink key={item.title} title={item.title} description="" />
                       ))}
                     </div>
-                    <div className="p-4 border-r dark:border-neutral-800">
-                      <div className="text-xs sm:text-sm dark:text-neutral-500 text-neutral-400 px-3">{navigationConfig.support.resources.title}</div>
+                    <div className="p-4 border-r border-gray-100">
+                      <div className="text-xs sm:text-sm text-gray-500 px-3">{navigationConfig.support.resources.title}</div>
                       {navigationConfig.support.resources.items.map((item) => (
                         <SupportLink key={item.title} title={item.title} description="" />
                       ))}
@@ -391,7 +401,7 @@ const Navigation = () => {
 
               <NavigationMenuItem>
                 <Link href="/quote" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>견적요청</NavigationMenuLink>
+                  <NavigationMenuLink className={`${navigationMenuTriggerStyle()} text-gray-700 hover:text-blue-600`}>견적요청</NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
             </NavigationMenuList>
@@ -430,8 +440,9 @@ const Navigation = () => {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-screen md:hidden">
-              <SheetHeader className="container border-b bg-white flex flex-row justify-between m-auto">
-                <SheetTitle className="text-lg font-semibold m-4">대한플러스전자</SheetTitle>
+              <SheetHeader className="container border-b bg-white flex flex-row items-center space-x-2 justify-between m-auto">
+                <Image src="/logos/dhp-logo.png" alt="대한플러스전자" width={40} height={10}/>
+                <SheetTitle className="text-lg font-bold m-2">대한플러스전자</SheetTitle>
                 <SheetClose asChild className="flex justify-center items-center">
                   <Button variant="ghost" size="icon">
                     <X className="h-6 w-6" />
@@ -447,6 +458,7 @@ const Navigation = () => {
                         onMouseEnter={() => setSelectedMenu(menu)}
                         onClick={() => setSelectedMenu(menu)}
                         className={`rounded-md text-left px-4 py-3.5 transition-all ${selectedMenu === menu ? "bg-neutral-100 font-bold" : "hover:bg-neutral-50"}`}
+                      
                       >
                         {menu}
                       </button>
