@@ -1,12 +1,12 @@
 'use client';
 
-import { columns } from "./columns";
 import { getData, getFilterFields } from "./constants";
 import { DataTable } from "./data-table";
 import { searchParamsCache } from "./search-params";
 import { Skeleton } from "@/components/ui/skeleton";
 import * as React from "react";
 import type { LEDDriverICColumnSchema, LEDDriverICFilterSchema } from "./schema";
+import { useColumns } from "./columns";
 
 export default function LEDDriverICListPage() {
   const [search, setSearch] = React.useState({});
@@ -27,7 +27,19 @@ export default function LEDDriverICListPage() {
     const fetchData = async () => {
       const result = await getData();
       const fields = await getFilterFields();
-      setData(result);
+      
+      // 데이터를 5배로 늘리기
+      const multipliedData = Array(5).fill(null).flatMap(() => 
+        result.map((item, index) => ({
+          ...item,
+          id: `${item.id}-${Math.random().toString(36).substr(2, 9)}`, // 고유 ID 생성
+          part_number: `${item.part_number}-${Math.floor(Math.random() * 1000)}`, // 부품 번호 변형
+          created_at: new Date(Date.now() - Math.random() * 10000000000).toISOString(), // 랜덤 생성일
+          updated_at: new Date(Date.now() - Math.random() * 1000000000).toISOString(), // 랜덤 수정일
+        }))
+      );
+
+      setData(multipliedData);
       setFilterFields(fields);
     };
     fetchData();
@@ -105,16 +117,13 @@ export default function LEDDriverICListPage() {
   }, [search]);
 
   return (
-    <div className="container mx-auto py-4">
-      <h1 className="text-2xl font-bold mb-6">LED Driver IC</h1>
       <React.Suspense fallback={<Skeleton />}>
         <DataTable
-          columns={columns}
+          columns={useColumns()}
           data={filteredData}
           filterFields={categoryFilterFields}
           defaultColumnFilters={searchFilters}
         />
       </React.Suspense>
-    </div>
   );
 }
