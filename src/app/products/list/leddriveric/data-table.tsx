@@ -1,18 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/custom/table";
+import React, { useState, useEffect, useRef } from "react";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetHeader, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Badge, Filter } from "lucide-react";
+import { Badge, Filter, Info, X, Copy, FileText, Scale, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useRouter } from "next/navigation";
 
 interface DataTableProps<T> {
   data: T[];
@@ -23,20 +17,39 @@ interface DataTableProps<T> {
     filterType?: 'text' | 'range' | 'select';
     filterOptions?: string[];
     render?: (row: T) => React.ReactNode;
+    tooltip?: {
+      title: string;
+      description: string;
+      specs?: Array<{
+        label: string;
+        value: string;
+        unit?: string;
+      }>;
+      ranges?: {
+        min: number;
+        max: number;
+        unit: string;
+      };
+    };
   }[];
 }
 
+type ActionType = 'compare' | 'quote' | 'copy' | null;
+
 export function DataTable<T extends { id: number }>({ data: initialData, columns }: DataTableProps<T>) {
+  const router = useRouter();
   const [data, setData] = useState<T[]>(initialData);
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+  const [selectedAction, setSelectedAction] = useState<ActionType>(null);
   const [filters, setFilters] = useState<Record<string, any>>({});
-  const [sortConfig, setSortConfig] = useState<{column: string | null, direction: 'asc' | 'desc'}>({
+  const [sortConfig, setSortConfig] = useState<{ column: string | null, direction: 'asc' | 'desc' }>({
     column: null,
     direction: 'asc'
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const tableRef = useRef<HTMLDivElement>(null);
 
   const itemsPerPageOptions = [10, 20, 30, 40, 50, 100];
 
@@ -45,8 +58,8 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
     let filteredData = [...initialData];
 
     if (searchTerm) {
-      filteredData = filteredData.filter(item => 
-        Object.values(item).some(value => 
+      filteredData = filteredData.filter(item =>
+        Object.values(item).some(value =>
           String(value).toLowerCase().includes(searchTerm.toLowerCase())
         )
       );
@@ -57,11 +70,11 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
         filteredData = filteredData.filter(item => {
           const itemValue = (item as any)[key];
           if (itemValue === null || itemValue === undefined) return false;
-          
+
           if (Array.isArray(itemValue)) {
             return itemValue.some(v => String(v).toLowerCase().includes(String(value).toLowerCase()));
           }
-          
+
           return String(itemValue).toLowerCase().includes(String(value).toLowerCase());
         });
       }
@@ -71,13 +84,13 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
       filteredData.sort((a, b) => {
         const aValue = (a as any)[sortConfig.column!];
         const bValue = (b as any)[sortConfig.column!];
-        
+
         if (Array.isArray(aValue) && Array.isArray(bValue)) {
-          return sortConfig.direction === 'asc' 
+          return sortConfig.direction === 'asc'
             ? aValue.join(',') > bValue.join(',') ? 1 : -1
             : aValue.join(',') < bValue.join(',') ? 1 : -1;
         }
-        
+
         if (sortConfig.direction === 'asc') {
           return aValue > bValue ? 1 : -1;
         }
@@ -99,6 +112,48 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
     setSelectedRows(newSelection);
   };
 
+  const handleHeaderClick = (header: string) => {
+    if (tableRef.current) {
+      const headerElement = tableRef.current.querySelector(`[data-header="${header}"]`);
+      if (headerElement) {
+        const fixedColumnsWidth = 200;
+        const headerRect = headerElement.getBoundingClientRect();
+        const containerRect = tableRef.current.getBoundingClientRect();
+        const scrollLeft = headerRect.left - containerRect.left - fixedColumnsWidth;
+
+        tableRef.current.scrollTo({
+          left: Math.max(0, scrollLeft),
+          behavior: 'smooth'
+        });
+      }
+    }
+  };
+
+  const handleRowClick = (id: number) => {
+    router.push(`/products/detail/${id}`);
+  };
+
+  const handleActionSelect = (action: ActionType) => {
+    setSelectedAction(action);
+    switch (action) {
+      case 'compare':
+        // 비교 로직
+        break;
+      case 'quote':
+        // 견적서 추가 로직
+        break;
+      case 'copy':
+        // 복사 로직
+        break;
+    }
+  };
+
+  const removeFilter = (key: string) => {
+    const newFilters = { ...filters };
+    delete newFilters[key];
+    setFilters(newFilters);
+  };
+
   const totalPages = Math.ceil(data.length / itemsPerPage);
   const paginatedData = data.slice(
     (currentPage - 1) * itemsPerPage,
@@ -106,11 +161,11 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
   );
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col w-max" ref={tableRef}>
       {/* 상단 고정 헤더 */}
-      <div className="sticky top-0 z-50 bg-white border-b">
+      <div className="sticky top-0 z-50 shadow-sm bg-white">
         <div className="flex items-center justify-between p-4">
-          <div className="flex items-center gap-4">
+          <div className="sticky left-2 z-40 flex items-center gap-4">
             <input
               type="text"
               placeholder="검색..."
@@ -130,7 +185,7 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
                   )}
                 </Button>
               </SheetTrigger>
-              <SheetContent className="min-w-[400px]">
+              <SheetContent className="min-w-[300px] max-w-[400px]">
                 <SheetHeader>
                   <SheetTitle>필터 설정</SheetTitle>
                   <SheetDescription>원하는 조건으로 필터링하세요</SheetDescription>
@@ -176,17 +231,39 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
               </SheetContent>
             </Sheet>
           </div>
+
+          {/* 활성화된 필터 표시 */}
+          {Object.keys(filters).length > 0 && (
+            <div className="flex flex-wrap gap-2 ml-4">
+              {Object.entries(filters).map(([key, value]) => {
+                const column = columns.find(col => col.key === key);
+                return (
+                  <Badge key={key} variant="secondary" className="px-3 py-1">
+                    {column?.header}: {value}
+                    <button
+                      onClick={() => removeFilter(key)}
+                      className="ml-2 hover:text-red-500"
+                    >
+                      <X size={14} />
+                    </button>
+                  </Badge>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
       {/* 테이블 컨테이너 */}
-          <table className="w-max min-w-full overflow-x-auto divide-y divide-gray-200">
-            <thead className="sticky top-0 bg-gray-50 z-40">
-              <tr>
-                <th className="sticky left-0 z-50 w-12 p-3 bg-gray-50" rowSpan={2}>
+      <div className="sticky top-[72px] z-40 shadow-sm">
+        <table className="w-max min-w-full divide-y divide-gray-200">
+          <thead className="sticky top-[72px] bg-gray-50 z-40 shadow-sm">
+            <tr>
+              <th className="sticky left-0 z-40 bg-gray-50 px-3 py-2 hover:bg-gray-100 transition-colors border-r">
+                <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
-                    className="w-4 h-4"
+                    className="w-4 h-4 cursor-pointer"
                     onChange={(e) => {
                       if (e.target.checked) {
                         setSelectedRows(new Set(data.map(row => row.id)));
@@ -195,114 +272,252 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
                       }
                     }}
                   />
-                </th>
-                {Object.entries(
-                  columns.reduce((acc, column) => {
-                    const header = column.header;
-                    if (!acc[header]) {
-                      acc[header] = [];
-                    }
-                    acc[header].push(column);
-                    return acc;
-                  }, {} as Record<string, typeof columns>)
-                ).map(([header, cols], index) => (
-                  <th
-                    key={header}
-                    colSpan={cols.length}
-                    className={cn(
-                      "px-6 py-3 text-left text-sm font-semibold text-gray-900 border-b whitespace-nowrap min-w-[150px]",
-                      index === 0 && "sticky left-12 z-40 bg-gray-50"
-                    )}
-                  >
-                    {header}
-                  </th>
-                ))}
-              </tr>
-              <tr>
-                {columns.map((column, index) => (
-                  <th
-                    key={column.key}
-                    className={cn(
-                      "px-6 py-3 text-left text-sm font-medium text-gray-500 whitespace-nowrap min-w-[150px]",
-                      index === 0 && "sticky left-12 z-40 bg-gray-50"
-                    )}
-                    onClick={() => {
-                      setSortConfig({
-                        column: column.key,
-                        direction: sortConfig.column === column.key && sortConfig.direction === 'asc' ? 'desc' : 'asc'
-                      });
-                    }}
-                  >
-                    <div className="flex items-center gap-2">
-                      {column.subheader && (
-                        <span className="text-xs text-gray-400">{column.subheader}</span>
-                      )}
-                      {sortConfig.column === column.key && (
-                        <span className="text-xs">
-                          {sortConfig.direction === 'asc' ? '↑' : '↓'}
-                        </span>
-                      )}
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {paginatedData.map((row) => (
-                <tr 
-                  key={row.id}
+                  <span className="text-xs text-gray-500">전체</span>
+                </div>
+              </th>
+              {Object.entries(
+                columns.reduce((acc, column) => {
+                  const header = column.header;
+                  if (!acc[header]) {
+                    acc[header] = [];
+                  }
+                  acc[header].push(column);
+                  return acc;
+                }, {} as Record<string, typeof columns>)
+              ).map(([header, cols], index) => (
+                <th
+                  key={header}
+                  data-header={header}
+                  colSpan={cols.length}
                   className={cn(
-                    "hover:bg-gray-50 transition-colors",
-                    selectedRows.has(row.id) && "bg-blue-50"
+                    "px-6 py-3 text-left text-sm font-semibold text-gray-900 border-b whitespace-nowrap min-w-[150px] hover:bg-gray-100 transition-colors cursor-pointer",
+                    index === 0 && "sticky left-12 z-40 bg-gray-50 border-r shadow-sm"
+                  )}
+                  onClick={() => handleHeaderClick(header)}
+                >
+                  <div className="flex items-center gap-2">
+                    {header}
+                    <span className="text-xs text-gray-400">({cols.length})</span>
+                  </div>
+                </th>
+              ))}
+            </tr>
+            <tr>
+              <th className="sticky left-0 z-40 bg-gray-50 px-3 py-2 border-r">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    disabled
+                    className="w-4 h-4 cursor-not-allowed opacity-50"
+                  />
+                  <span className="text-xs text-gray-400">선택</span>
+                </div>
+              </th>
+              {columns.map((column, index) => (
+                <th
+                  key={column.key}
+                  className={cn(
+                    "px-6 py-3 text-left text-sm font-medium text-gray-500 whitespace-nowrap min-w-[150px] hover:bg-gray-100 transition-colors",
+                    index === 0 && "sticky left-12 z-40 bg-gray-50 border-r shadow-sm"
                   )}
                 >
-                  <td className="sticky left-0 z-30 w-12 p-3 bg-white">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {column.subheader && (
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-gray-400">{column.subheader}</span>
+                          {column.tooltip && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <Info size={14} className="text-gray-400" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <div className="space-y-2 z-50">
+                                    <h4 className="font-medium">{column.tooltip.title}</h4>
+                                    <p className="text-sm text-gray-500">{column.tooltip.description}</p>
+                                    {column.tooltip.specs && (
+                                      <div className="space-y-1">
+                                        {column.tooltip.specs.map((spec, i) => (
+                                          <div key={i} className="flex justify-between text-sm">
+                                            <span className="text-gray-500">{spec.label}:</span>
+                                            <span>{spec.value}{spec.unit}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                    {column.tooltip.ranges && (
+                                      <div className="mt-2 text-sm">
+                                        <div className="text-gray-500">범위:</div>
+                                        <div>{column.tooltip.ranges.min} ~ {column.tooltip.ranges.max} {column.tooltip.ranges.unit}</div>
+                                      </div>
+                                    )}
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
+                        </div>
+                      )}
+                      <span>{column.key}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {sortConfig.column === column.key ? (
+                        <span className="text-blue-500">
+                          {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                        </span>
+                      ) : (
+                        <span className="text-gray-300">↕</span>
+                      )}
+                    </div>
+                  </div>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {paginatedData.length === 0 ? (
+              <tr>
+                <td colSpan={columns.length + 1} className="px-6 py-8 text-center text-gray-500">
+                  데이터가 없습니다
+                </td>
+              </tr>
+            ) : (
+              paginatedData.map((row, rowIndex) => (
+                <tr
+                  key={row.id}
+                  className={cn(
+                    "hover:bg-gray-50 transition-colors cursor-pointer group",
+                    selectedRows.has(row.id) && "bg-blue-50 hover:bg-blue-100",
+                    rowIndex % 2 === 0 && "bg-gray-50/30"
+                  )}
+                  onClick={() => handleRowClick(row.id)}
+                >
+                  <td
+                    className={cn(
+                      "sticky left-0 z-30 w-12 p-3 bg-white transition-colors border-r",
+                      "group-hover:bg-gray-50",
+                      selectedRows.has(row.id) && "bg-blue-50 group-hover:bg-blue-100"
+                    )}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleRowSelection(row.id);
+                    }}
+                  >
                     <input
                       type="checkbox"
-                      className="w-4 h-4"
+                      className="w-4 h-4 cursor-pointer"
                       checked={selectedRows.has(row.id)}
-                      onChange={() => toggleRowSelection(row.id)}
+                      onChange={() => { }}
                     />
                   </td>
                   {columns.map((column, index) => (
-                    <td 
-                      key={column.key} 
+                    <td
+                      key={column.key}
                       className={cn(
-                        "px-6 py-4 text-sm text-gray-900 whitespace-nowrap min-w-[150px]",
-                        index === 0 && "sticky left-12 z-30 bg-white"
+                        "px-6 py-4 text-sm text-gray-900 whitespace-nowrap min-w-[150px] transition-colors",
+                        index === 0 && "sticky left-12 z-30 bg-white border-r shadow-sm",
+                        "group-hover:bg-gray-50",
+                        selectedRows.has(row.id) && index === 0 && "bg-blue-50 group-hover:bg-blue-100"
                       )}
                     >
-                      {column.render ? column.render(row) : (row as any)[column.key]}
+                      <div className="flex items-center gap-2">
+                        {column.render ? column.render(row) : (row as any)[column.key]}
+                      </div>
                     </td>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
-      {/* 하단 페이지네이션 */}
-      <div className="sticky bottom-0 z-50 bg-white border-t">
+      {/* 하단 네비게이션 */}
+      <div className="sticky bottom-0 z-40 bg-white shadow-sm border-t-black border-t-2">
         <div className="flex items-center justify-between px-6 py-3">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 sticky left-4 z-40">
             {selectedRows.size > 0 && (
-              <span className="text-sm text-gray-700">
-                {selectedRows.size}개 선택됨
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-blue-600">
+                  {selectedRows.size}개 선택됨
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedRows(new Set())}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  선택 해제
+                </Button>
+              </div>
             )}
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-700">페이지당 행:</span>
               <select
                 value={itemsPerPage}
-                onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                className="px-3 py-1 text-sm border rounded-lg min-w-[100px]"
+                onChange={(e) => {
+                  setItemsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="px-3 py-1 text-sm border rounded-lg min-w-[100px] cursor-pointer hover:border-gray-400 transition-colors"
               >
                 {itemsPerPageOptions.map(option => (
                   <option key={option} value={option}>{option}개</option>
                 ))}
               </select>
             </div>
+            <span className="text-sm text-gray-500">
+              총 {data.length}개의 항목
+            </span>
+
+            {/* 선택된 항목이 있을 때 표시되는 액션 버튼들 */}
+            {selectedRows.size > 0 && (
+              <div className="flex justify-center gap-4">
+                <Button
+                  variant={selectedAction === 'compare' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleActionSelect('compare')}
+                  className="flex items-center gap-2"
+                >
+                  <Scale size={16} />
+                  비교하기
+                </Button>
+                <Button
+                  variant={selectedAction === 'quote' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleActionSelect('quote')}
+                  className="flex items-center gap-2"
+                >
+                  <FileText size={16} />
+                  견적서 추가
+                </Button>
+                <Button
+                  variant={selectedAction === 'copy' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleActionSelect('copy')}
+                  className="flex items-center gap-2"
+                >
+                  <Copy size={16} />
+                  복사하기
+                </Button>
+              </div>
+            )}
+
           </div>
-          <div className="flex items-center gap-4">
+
+
+
+          <div className="flex items-center gap-4 sticky right-4 z-40">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(1)}
+              className="min-w-[40px]"
+            >
+              ≪
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -312,9 +527,22 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
             >
               이전
             </Button>
-            <span className="text-sm text-gray-700 min-w-[80px] text-center">
-              {currentPage} / {totalPages}
-            </span>
+            <div className="flex items-center gap-1">
+              <input
+                type="number"
+                min={1}
+                max={totalPages}
+                value={currentPage}
+                onChange={(e) => {
+                  const page = Number(e.target.value);
+                  if (page >= 1 && page <= totalPages) {
+                    setCurrentPage(page);
+                  }
+                }}
+                className="w-16 px-2 py-1 text-sm text-center border rounded"
+              />
+              <span className="text-sm text-gray-700">/ {totalPages}</span>
+            </div>
             <Button
               variant="outline"
               size="sm"
@@ -323,6 +551,15 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
               className="min-w-[80px]"
             >
               다음
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(totalPages)}
+              className="min-w-[40px]"
+            >
+              ≫
             </Button>
           </div>
         </div>
