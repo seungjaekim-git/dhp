@@ -17,6 +17,7 @@ interface DataTableProps<T> {
     filterType?: 'text' | 'range' | 'select';
     filterOptions?: string[];
     render?: (row: T) => React.ReactNode;
+    symbol?: string;
     tooltip?: {
       title: string;
       description: string;
@@ -50,8 +51,57 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const tableRef = useRef<HTMLDivElement>(null);
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
+  const resizingRef = useRef<{
+    isResizing: boolean;
+    columnKey: string | null;
+    startX: number;
+    startWidth: number;
+  }>({
+    isResizing: false,
+    columnKey: null,
+    startX: 0,
+    startWidth: 0
+  });
 
   const itemsPerPageOptions = [10, 20, 30, 40, 50, 100];
+
+  const startResizing = (e: React.MouseEvent, columnKey: string) => {
+    e.preventDefault();
+    const startX = e.pageX;
+    const columnWidth = columnWidths[columnKey] || 150;
+
+    resizingRef.current = {
+      isResizing: true,
+      columnKey,
+      startX,
+      startWidth: columnWidth
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', stopResizing);
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!resizingRef.current.isResizing) return;
+
+    const { columnKey, startX, startWidth } = resizingRef.current;
+    if (!columnKey) return;
+
+    const diff = e.pageX - startX;
+    const newWidth = Math.max(150, startWidth + diff); // Minimum width of 150px
+
+    setColumnWidths(prev => ({
+      ...prev,
+      [columnKey]: newWidth
+    }));
+  };
+
+  const stopResizing = () => {
+    resizingRef.current.isResizing = false;
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', stopResizing);
+  };
 
   // 검색 및 필터링 로직
   useEffect(() => {
@@ -255,12 +305,12 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
       </div>
 
       {/* 테이블 컨테이너 */}
-      <div className="sticky top-[72px] z-40 shadow-sm">
-        <table className="w-max min-w-full divide-y divide-gray-200">
+      <div className="sticky top-[72px] z-40 shadow-sm pb-[72px]">
+        <table className="w-max min-w-full divide-y divide-gray-200 table-auto">
           <thead className="sticky top-[72px] bg-gray-50 z-40 shadow-sm">
             <tr>
               <th className="sticky left-0 z-40 bg-gray-50 px-3 py-2 hover:bg-gray-100 transition-colors border-r">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 whitespace-nowrap">
                   <input
                     type="checkbox"
                     className="w-4 h-4 cursor-pointer"
@@ -317,15 +367,18 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
                 <th
                   key={column.key}
                   className={cn(
-                    "px-6 py-3 text-left text-sm font-medium text-gray-500 whitespace-nowrap min-w-[150px] hover:bg-gray-100 transition-colors",
+                    "px-6 py-3 text-left text-sm font-medium text-gray-500 whitespace-nowrap hover:bg-gray-100 transition-colors relative",
                     index === 0 && "sticky left-12 z-40 bg-gray-50 border-r shadow-sm"
                   )}
+                  style={{ 
+                    width: columnWidths[column.key] || 150,
+                    minWidth: index === 0 ? 150 : undefined
+                  }}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       {column.subheader && (
                         <div className="flex items-center gap-1">
-                          <span className="text-xs text-gray-400">{column.subheader}</span>
                           {column.tooltip && (
                             <TooltipProvider>
                               <Tooltip>
@@ -357,11 +410,12 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
                               </Tooltip>
                             </TooltipProvider>
                           )}
+                          <span className="text-xs text-gray-400">{column.subheader}</span>
                         </div>
                       )}
-                      <span>{column.key}</span>
+                      <span className="flex items-center gap-1">({column.symbol})</span>
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex text-lg font-semibold items-center gap-2">
                       {sortConfig.column === column.key ? (
                         <span className="text-blue-500">
                           {sortConfig.direction === 'asc' ? '↑' : '↓'}
@@ -371,6 +425,12 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
                       )}
                     </div>
                   </div>
+                  {index !== 0 && (
+                    <div
+                      className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-blue-500/50"
+                      onMouseDown={(e) => startResizing(e, column.key)}
+                    />
+                  )}
                 </th>
               ))}
             </tr>
@@ -414,8 +474,9 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
                   {columns.map((column, index) => (
                     <td
                       key={column.key}
+                      style={{ width: columnWidths[column.key] || 150 }}
                       className={cn(
-                        "px-6 py-4 text-sm text-gray-900 whitespace-nowrap min-w-[150px] transition-colors",
+                        "px-6 py-4 text-sm text-gray-900 whitespace-nowrap transition-colors",
                         index === 0 && "sticky left-12 z-30 bg-white border-r shadow-sm",
                         "group-hover:bg-gray-50",
                         selectedRows.has(row.id) && index === 0 && "bg-blue-50 group-hover:bg-blue-100"

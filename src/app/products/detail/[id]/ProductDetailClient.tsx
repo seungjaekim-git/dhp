@@ -10,8 +10,50 @@ import {
 } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import ProductCard from "./ProductCard";
-import { Settings, FileText, MessageSquare, File } from "lucide-react";
+import { Settings, FileText, MessageSquare, File, Zap, Package, Cpu, Award } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
+interface LedDriverIC {
+  id: number;
+  subtitle: string;
+  product_id: number;
+  topologies: string[];
+  category_id: number;
+  dimming_methods: string[];
+  number_of_outputs: number;
+  input_voltage_range: string;
+  output_current_range: string | null;
+  output_voltage_range: string | null;
+  led_driver_ic_options: string[];
+  operating_temperature: string;
+  typical_input_voltage: string | null;
+  led_driver_ic_features: string[];
+  typical_output_current: string | null;
+  typical_output_voltage: string | null;
+  operating_frequency_range: string | null;
+  led_driver_ic_applications: {
+    id: number;
+    name: string;
+  }[];
+  typical_operating_frequency: string | null;
+  category_specific_attributes: any;
+  led_driver_ic_certifications: {
+    id: number;
+    name: string;
+  }[];
+}
+
+interface Document {
+  id: number;
+  url: string;
+  type: string;
+  title: string;
+  subtitle?: string;
+  certification_date?: string;
+  expiry_date?: string;
+  created_at: string;
+  updated_at: string;
+}
 
 interface ProductProps {
   id: number;
@@ -22,38 +64,10 @@ interface ProductProps {
   description: string;
   created_at: string;
   updated_at: string;
-  led_driver_ic: {
-    id: number;
-    subtitle: string;
-    product_id: number;
-    topologies: string[];
-    category_id: number;
-    dimming_methods: string[];
-    number_of_outputs: number;
-    input_voltage_range: string;
-    output_current_range: string | null;
-    output_voltage_range: string | null;
-    led_driver_ic_options: string[];
-    operating_temperature: string;
-    typical_input_voltage: string | null;
-    led_driver_ic_features: string[];
-    typical_output_current: string | null;
-    typical_output_voltage: string | null;
-    operating_frequency_range: string | null;
-    led_driver_ic_applications: string[];
-    typical_operating_frequency: string | null;
-    category_specific_attributes: any;
-    led_driver_ic_certifications: string[];
-  }[];
+  led_driver_ic: LedDriverIC[];
   images: { url: string }[];
-  documents: {
-    id: number;
-    url: string;
-    type: string;
-    title: string;
-    created_at: string;
-    updated_at: string;
-  }[];
+  documents: Document[];
+  manufacturer: any;
 }
 
 export default function ProductDetailPage({
@@ -62,6 +76,7 @@ export default function ProductDetailPage({
   product: ProductProps;
 }) {
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [selectedSpec, setSelectedSpec] = useState<string | null>(null);
 
   const handleBookmarkToggle = () => {
     setIsBookmarked((prev) => !prev);
@@ -73,9 +88,51 @@ export default function ProductDetailPage({
     alert("링크가 클립보드에 복사되었습니다!");
   };
 
+  const renderDocumentSection = (type: string, title: string, icon: React.ReactNode, bgColor: string) => {
+    const filteredDocs = product.documents.filter(doc => doc.type === type);
+    
+    if (filteredDocs.length === 0) return null;
+
+    return (
+      <div className="space-y-4">
+        <h4 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
+          {icon}
+          {title}
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {filteredDocs.map((doc) => (
+            <div
+              key={doc.id}
+              className="p-4 border-2 rounded-lg hover:shadow-lg transition space-y-2"
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <h5 className="font-semibold text-lg">{doc.title}</h5>
+                  {doc.subtitle && <p className="text-sm text-gray-600">{doc.subtitle}</p>}
+                </div>
+                <Badge variant="outline" className={bgColor}>{title}</Badge>
+              </div>
+              {doc.certification_date && (
+                <div className="text-sm text-gray-500">
+                  <p>인증일: {doc.certification_date}</p>
+                  {doc.expiry_date && <p>만료일: {doc.expiry_date}</p>}
+                </div>
+              )}
+              <Button variant="outline" className="w-full mt-2">
+                <a href={doc.url} target="_blank" rel="noopener noreferrer">
+                  다운로드
+                </a>
+              </Button>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="bg-gray-50 min-h-screen">
-      <div className="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 py-10 px-4">
+      <div className="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 py-10 px-4 relative">
         {/* Left Section: Image and Options */}
         <div className="col-span-2 space-y-6">
           {/* Product Image */}
@@ -95,14 +152,12 @@ export default function ProductDetailPage({
                 <Share
                   className="w-6 h-6 text-gray-500 cursor-pointer hover:text-gray-700"
                   onClick={handleShare}
-                  title="공유하기"
                 />
                 <Star
                   className={`w-6 h-6 cursor-pointer ${
                     isBookmarked ? "text-yellow-400" : "text-gray-500"
                   } hover:text-yellow-500`}
                   onClick={handleBookmarkToggle}
-                  title="북마크"
                 />
               </div>
             </div>
@@ -110,64 +165,154 @@ export default function ProductDetailPage({
           </div>
 
           {/* Tabs Section */}
+          <div className="sticky top-16 z-10 bg-white shadow-md">
             <Tabs defaultValue="specs">
-              {/* Styled Tabs */}
               <TabsList className="w-full h-auto grid grid-cols-4 justify-stretch border-gray-200">
-                <TabsTrigger
-                  value="specs"
-                  className="flex items-center gap-4 py-4 text-gray-600 hover:text-gray-900 border-b-2 border-transparent hover:border-black transition text-md md:text-sm"
-                >
-                  <Settings size={24} className="hidden md:block text-gray-600" />
+                <TabsTrigger value="specs" className="flex items-center gap-4 py-4">
+                  <Settings size={24} className="hidden md:block" />
                   기술사양
                 </TabsTrigger>
-                <TabsTrigger
-                  value="docs"
-                  className="flex items-center gap-4 py-4 text-gray-600 hover:text-gray-900 border-b-2 border-transparent hover:border-black transition text-md md:text-sm"
-                >
-                  <FileText size={24} className="hidden md:block text-gray-600" />
+                <TabsTrigger value="docs" className="flex items-center gap-4 py-4">
+                  <FileText size={24} className="hidden md:block" />
                   문서
                 </TabsTrigger>
-                <TabsTrigger
-                  value="reviews"
-                  className="flex items-center gap-4 py-4 text-gray-600 hover:text-gray-900 border-b-2 border-transparent hover:border-black transition text-md md:text-sm"
-                >
-                  <MessageSquare size={24} className="hidden md:block text-gray-600" />
+                <TabsTrigger value="reviews" className="flex items-center gap-4 py-4">
+                  <MessageSquare size={24} className="hidden md:block" />
                   리뷰/Q&A
                 </TabsTrigger>
-                <TabsTrigger
-                  value="blogs"
-                  className="flex items-center gap-4 py-4 text-gray-600 hover:text-gray-900 border-b-2 border-transparent hover:border-black transition text-md md:text-sm"
-                >
-                  <File size={24} className="hidden md:block text-gray-600" />
+                <TabsTrigger value="blogs" className="flex items-center gap-4 py-4">
+                  <File size={24} className="hidden md:block" />
                   관련 블로그
                 </TabsTrigger>
               </TabsList>
 
-              {/* Specifications Tab */}
               <TabsContent value="specs">
-                <div className="space-y-8 mt-6">
-                  {product.led_driver_ic.map((ic, icIndex) => (
-                    <div key={icIndex} className="space-y-4">
-                      <h3 className="text-xl md:text-2xl font-semibold text-gray-700 mb-4">
-                        LED Driver IC #{icIndex + 1}
-                      </h3>
-                      {Object.entries(ic).map(([key, value]) => (
-                        <div
-                          key={key}
-                          className="flex justify-between items-center p-6 bg-gray-50 rounded-lg shadow-md hover:bg-gray-100 transition"
-                        >
-                          <span className="text-gray-600 font-medium capitalize text-lg md:text-xl">
-                            {key.replace(/_/g, " ")}
-                          </span>
-                          <span className="text-gray-800 text-base md:text-lg">
-                            {Array.isArray(value)
-                              ? value.join(", ")
-                              : value !== null
-                              ? value.toString()
-                              : "N/A"}
-                          </span>
+                <div className="space-y-8 p-6">
+                  {product.led_driver_ic.map((ic, index) => (
+                    <div key={index} className="space-y-8">
+                      {/* 주요 사양 섹션 */}
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                          <Zap className="w-6 h-6 text-blue-600" />
+                          <h4 className="text-lg font-semibold text-gray-700">주요 사양</h4>
                         </div>
-                      ))}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <Button 
+                            variant="outline"
+                            className="p-4 h-auto flex flex-col items-center gap-2 hover:bg-blue-50 border-2"
+                            onClick={() => setSelectedSpec('input_voltage_range')}
+                          >
+                            <div className="text-sm font-medium text-blue-600">입력 전압</div>
+                            <div className="font-mono text-2xl font-bold">
+                              {JSON.parse(ic.input_voltage_range || "[0,0]").join("~")}V
+                            </div>
+                            <div className="text-xs text-gray-500">V<sub>in</sub></div>
+                          </Button>
+
+                          <Button 
+                            variant="outline"
+                            className="p-4 h-auto flex flex-col items-center gap-2 hover:bg-blue-50 border-2"
+                            onClick={() => setSelectedSpec('output_current_range')}
+                          >
+                            <div className="text-sm font-medium text-blue-600">출력 전류</div>
+                            <div className="font-mono text-2xl font-bold">
+                              {ic.output_current_range ? 
+                                `${JSON.parse(ic.output_current_range).join("~")}mA` : 
+                                "N/A"}
+                            </div>
+                            <div className="text-xs text-gray-500">I<sub>out</sub></div>
+                          </Button>
+
+                          <Button 
+                            variant="outline"
+                            className="p-4 h-auto flex flex-col items-center gap-2 hover:bg-blue-50 border-2"
+                            onClick={() => setSelectedSpec('operating_temperature')}
+                          >
+                            <div className="text-sm font-medium text-blue-600">동작 온도</div>
+                            <div className="font-mono text-2xl font-bold">
+                              {JSON.parse(ic.operating_temperature || "[0,0]").join("~")}°C
+                            </div>
+                            <div className="text-xs text-gray-500">T<sub>op</sub></div>
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* 패키지 정보 섹션 */}
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                          <Package className="w-6 h-6 text-purple-600" />
+                          <h4 className="text-lg font-semibold text-gray-700">패키지 정보</h4>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          {ic.led_driver_ic_options.map((option, index) => (
+                            <div key={index} className="p-4 border-2 rounded-lg bg-purple-50/20">
+                              <h5 className="text-sm font-medium text-purple-600 mb-2">
+                                {typeof option === 'string' ? option : '옵션 정보'}
+                              </h5>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* 기술 정보 섹션 */}
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                          <Cpu className="w-6 h-6 text-amber-600" />
+                          <h4 className="text-lg font-semibold text-gray-700">기술 정보</h4>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="p-4 border-2 rounded-lg">
+                            <h5 className="text-sm font-medium text-amber-600 mb-2">토폴로지</h5>
+                            <div className="flex flex-wrap gap-2">
+                              {ic.topologies?.map((topology, index) => (
+                                <Badge key={index} variant="outline" className="px-3 py-1 bg-amber-50">
+                                  {topology}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="p-4 border-2 rounded-lg">
+                            <h5 className="text-sm font-medium text-amber-600 mb-2">디밍 방식</h5>
+                            <div className="flex flex-wrap gap-2">
+                              {ic.dimming_methods?.map((method, index) => (
+                                <Badge key={index} variant="outline" className="px-3 py-1 bg-amber-50">
+                                  {method}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 인증 및 응용 섹션 */}
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                          <Award className="w-6 h-6 text-pink-600" />
+                          <h4 className="text-lg font-semibold text-gray-700">인증 및 응용</h4>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="p-4 border-2 rounded-lg">
+                            <h5 className="text-sm font-medium text-pink-600 mb-2">인증</h5>
+                            <div className="flex flex-wrap gap-2">
+                              {ic.led_driver_ic_certifications?.map((cert, index) => (
+                                <Badge key={index} variant="outline" className="px-3 py-1 bg-pink-50">
+                                  {cert.name}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="p-4 border-2 rounded-lg">
+                            <h5 className="text-sm font-medium text-pink-600 mb-2">응용분야</h5>
+                            <div className="flex flex-wrap gap-2">
+                              {ic.led_driver_ic_applications?.map((app, index) => (
+                                <Badge key={index} variant="outline" className="px-3 py-1 bg-pink-50">
+                                  {app.name}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -175,23 +320,36 @@ export default function ProductDetailPage({
 
               {/* Documents Tab */}
               <TabsContent value="docs">
-                <div className="mt-6 space-y-6">
-                  <h3 className="text-xl md:text-2xl font-semibold">제품 관련 문서</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {product.documents.map((doc) => (
-                      <div
-                        key={doc.id}
-                        className="flex items-center justify-between p-6 border rounded-lg hover:shadow-lg transition"
-                      >
-                        <span className="font-medium text-lg md:text-xl">{doc.title}</span>
-                        <Button variant="outline">
-                          <a href={doc.url} target="_blank" rel="noopener noreferrer">
-                            다운로드
-                          </a>
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
+                <div className="mt-6 space-y-8">
+                  <h3 className="text-2xl font-bold text-gray-800 border-b pb-4">제품 관련 문서</h3>
+                  
+                  {renderDocumentSection(
+                    'certification',
+                    '인증서',
+                    <Award className="w-5 h-5 text-green-600" />,
+                    'bg-green-50'
+                  )}
+                  
+                  {renderDocumentSection(
+                    'datasheet',
+                    '데이터시트',
+                    <FileText className="w-5 h-5 text-blue-600" />,
+                    'bg-blue-50'
+                  )}
+                  
+                  {renderDocumentSection(
+                    'technical',
+                    '기술 문서',
+                    <Cpu className="w-5 h-5 text-amber-600" />,
+                    'bg-amber-50'
+                  )}
+                  
+                  {renderDocumentSection(
+                    'support',
+                    '기술 지원',
+                    <MessageSquare className="w-5 h-5 text-purple-600" />,
+                    'bg-purple-50'
+                  )}
                 </div>
               </TabsContent>
 
@@ -212,9 +370,13 @@ export default function ProductDetailPage({
               </TabsContent>
             </Tabs>
           </div>
+        </div>
+
         {/* Right Section: Sticky Product Info Card */}
-        <div className="w-[400px] rounded-2xl border border-gray-200 bg-white shadow-sm">
-          <ProductCard />
+        <div className="sticky top-16 h-fit">
+          <div className="w-[400px] rounded-2xl border border-gray-200 bg-white shadow-lg">
+            <ProductCard partner={product.manufacturer} product={product} />
+          </div>
         </div>
       </div>
     </div>

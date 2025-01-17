@@ -1,12 +1,12 @@
 "use client";
 
-import { Info } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 
 interface Column {
   key: string;
   header: string;
   subheader?: string;
+  symbol?: React.ReactNode;
   filterType?: 'text' | 'range' | 'select';
   filterOptions?: string[];
   render?: (row: any) => React.ReactNode;
@@ -42,7 +42,7 @@ export const useColumns = (): Column[] => {
       },
       render: (row) => (
         <div className="flex flex-col bg-blue-50/20 p-2">
-          <div className="max-w-fit line-clamp-2 font-medium">{row.name}</div>
+          <div className="max-w-fit line-clamp-2 font-bold">{row.name}</div>
           <span className="text-muted-foreground text-sm">{row.subtitle}</span>
         </div>
       )
@@ -51,6 +51,7 @@ export const useColumns = (): Column[] => {
       key: "number_of_outputs",
       header: "전기적 특성",
       subheader: "출력 수",
+      symbol: <div>N<sub>ch</sub></div>,
       filterType: 'select',
       filterOptions: ['1', '2', '3', '4+'],
       tooltip: {
@@ -63,7 +64,7 @@ export const useColumns = (): Column[] => {
         ]
       },
       render: (row) => (
-        <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 p-1">
+        <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 p-1 font-bold ml-auto">
           {row.number_of_outputs}
         </div>
       )
@@ -72,6 +73,7 @@ export const useColumns = (): Column[] => {
       key: "input_voltage_range",
       header: "전기적 특성",
       subheader: "입력 전압",
+      symbol: <div>V<sub>in</sub></div>,
       filterType: 'range',
       tooltip: {
         title: "입력 전압 범위",
@@ -90,7 +92,7 @@ export const useColumns = (): Column[] => {
       render: (row) => {
         const [min, max] = JSON.parse(row.input_voltage_range || "[0,0]");
         return (
-          <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 p-1">
+          <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 p-1 ml-auto">
             {min}V ~ {max}V
           </div>
         );
@@ -100,6 +102,7 @@ export const useColumns = (): Column[] => {
       key: "output_current_range",
       header: "전기적 특성",
       subheader: "출력 전류",
+      symbol: <div>I<sub>out</sub></div>,
       filterType: 'range',
       tooltip: {
         title: "출력 전류 범위",
@@ -118,7 +121,7 @@ export const useColumns = (): Column[] => {
       render: (row) => {
         const [min, max] = JSON.parse(row.output_current_range || "[0,0]");
         return (
-          <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 p-1">
+          <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 p-1 ml-auto">
             {min}mA ~ {max}mA
           </div>
         );
@@ -126,8 +129,9 @@ export const useColumns = (): Column[] => {
     },
     {
       key: "operating_temperature",
-      header: "전기적 특성",
+      header: "전기적 특성", 
       subheader: "동작 온도",
+      symbol: <div>T<sub>op</sub></div>,
       filterType: 'range',
       tooltip: {
         title: "동작 온도 범위",
@@ -146,7 +150,7 @@ export const useColumns = (): Column[] => {
       render: (row) => {
         const [min, max] = JSON.parse(row.operating_temperature || "[0,0]");
         return (
-          <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 p-1">
+          <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 p-1 ml-auto">
             {min}°C ~ {max}°C
           </div>
         );
@@ -168,7 +172,7 @@ export const useColumns = (): Column[] => {
         ]
       },
       render: (row) => (
-        <div className="max-w-fit line-clamp-2 bg-purple-50/20 p-1">
+        <div className="max-w-fit line-clamp-2 bg-purple-50/20 p-1 ml-auto">
           {row.options[0]?.mounting_style}
         </div>
       )
@@ -189,7 +193,7 @@ export const useColumns = (): Column[] => {
         ]
       },
       render: (row) => (
-        <div className="max-w-fit line-clamp-2 bg-purple-50/20 p-1">
+        <div className="max-w-fit line-clamp-2 bg-purple-50/20 p-1 ml-auto">
           {row.options[0]?.storage_type}
         </div>
       )
@@ -211,7 +215,7 @@ export const useColumns = (): Column[] => {
         ]
       },
       render: (row) => (
-        <div className="max-w-fit line-clamp-2 bg-purple-50/20 p-1">
+        <div className="max-w-fit line-clamp-2 bg-purple-50/20 p-1 ml-auto">
           {row.options[0]?.package_types?.[0]?.package_type?.name}
         </div>
       )
@@ -231,7 +235,7 @@ export const useColumns = (): Column[] => {
         ]
       },
       render: (row) => (
-        <div className="max-w-fit line-clamp-2 bg-purple-50/20 p-1">
+        <div className="max-w-fit line-clamp-2 bg-purple-50/20 p-1 ml-auto">
           {row.options[0]?.package_detail}
         </div>
       )
@@ -252,8 +256,12 @@ export const useColumns = (): Column[] => {
         ]
       },
       render: (row) => (
-        <div className="text-muted-foreground max-w-fit line-clamp-2 bg-amber-50/20 p-1">
-          {row.topologies?.join(", ")}
+        <div className="flex flex-wrap gap-1 justify-end">
+          {row.topologies?.map((topology: string) => (
+            <Badge key={topology} variant="outline" className="bg-amber-50/20">
+              {topology}
+            </Badge>
+          ))}
         </div>
       )
     },
@@ -273,8 +281,12 @@ export const useColumns = (): Column[] => {
         ]
       },
       render: (row) => (
-        <div className="text-muted-foreground max-w-fit line-clamp-2 bg-amber-50/20 p-1">
-          {row.dimming_methods?.join(", ")}
+        <div className="flex flex-wrap gap-1 justify-end">
+          {row.dimming_methods?.map((method: string) => (
+            <Badge key={method} variant="outline" className="bg-amber-50/20">
+              {method}
+            </Badge>
+          ))}
         </div>
       )
     },
@@ -294,14 +306,15 @@ export const useColumns = (): Column[] => {
           { label: "CCC", value: "중국 안전 인증" }
         ]
       },
-      render: (row) => {
-        const certNames = row.certifications?.map((c: any) => c.certification.name);
-        return (
-          <div className="text-muted-foreground max-w-fit line-clamp-2 bg-pink-50/20 p-1">
-            {certNames?.join(", ")}
-          </div>
-        );
-      }
+      render: (row) => (
+        <div className="flex flex-wrap gap-1 justify-end">
+          {row.certifications?.map((cert: any) => (
+            <Badge key={cert.certification.name} variant="outline" className="bg-pink-50/20">
+              {cert.certification.name}
+            </Badge>
+          ))}
+        </div>
+      )
     },
     {
       key: "applications",
@@ -319,14 +332,15 @@ export const useColumns = (): Column[] => {
           { label: "Consumer", value: "가전" }
         ]
       },
-      render: (row) => {
-        const appNames = row.applications?.map((a: any) => a.application.name);
-        return (
-          <div className="text-muted-foreground max-w-fit line-clamp-2 bg-pink-50/20 p-1">
-            {appNames?.join(", ")}
-          </div>
-        );
-      }
+      render: (row) => (
+        <div className="flex flex-wrap gap-1 justify-end">
+          {row.applications?.map((app: any) => (
+            <Badge key={app.application.name} variant="outline" className="bg-pink-50/20">
+              {app.application.name}
+            </Badge>
+          ))}
+        </div>
+      )
     }
   ];
 };
