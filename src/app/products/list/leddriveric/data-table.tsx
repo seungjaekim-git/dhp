@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetHeader, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetHeader, SheetTrigger, SheetFooter } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge, Filter, Info, X, Copy, FileText, Scale, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -235,49 +235,68 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
                   )}
                 </Button>
               </SheetTrigger>
-              <SheetContent className="min-w-[300px] max-w-[400px]">
-                <SheetHeader>
-                  <SheetTitle>필터 설정</SheetTitle>
-                  <SheetDescription>원하는 조건으로 필터링하세요</SheetDescription>
+              <SheetContent className="min-w-[300px] max-w-[400px] h-full bg-gradient-to-b from-blue-50 via-white to-blue-50">
+                <SheetHeader className="border-b pb-4">
+                  <SheetTitle className="text-2xl font-semibold text-blue-900">필터 설정</SheetTitle>
+                  <SheetDescription className="text-blue-600">원하는 조건으로 필터링하세요</SheetDescription>
                 </SheetHeader>
-                <div className="mt-6 space-y-6">
-                  {columns.map(column => (
-                    <div key={column.key} className="space-y-2">
-                      <label className="text-sm font-medium">
-                        {column.header}
-                        {column.subheader && (
-                          <span className="text-xs text-gray-500 ml-2">
-                            ({column.subheader})
-                          </span>
+                
+                <div className="flex-1 max-h-3/4 h-[500px] overflow-y-auto py-6">
+                  <div className="bg-white rounded-xl shadow-sm p-6 space-y-6">
+                    {columns.map(column => (
+                      <div key={column.key} className="space-y-2">
+                        <label className="text-sm font-medium text-blue-900">
+                          {column.header}
+                          {column.subheader && (
+                            <span className="text-xs text-blue-400 ml-2">
+                              ({column.subheader})
+                            </span>
+                          )}
+                        </label>
+                        {column.filterType === 'select' && column.filterOptions ? (
+                          <select
+                            onChange={(e) => setFilters(prev => ({
+                              ...prev,
+                              [column.key]: e.target.value
+                            }))}
+                            className="w-full px-4 py-2 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all"
+                          >
+                            <option value="">전체</option>
+                            {column.filterOptions.map(option => (
+                              <option key={option} value={option}>{option}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            type={column.filterType === 'range' ? 'number' : 'text'}
+                            placeholder={`${column.header} 필터...`}
+                            onChange={(e) => setFilters(prev => ({
+                              ...prev,
+                              [column.key]: e.target.value
+                            }))}
+                            className="w-full px-4 py-2 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all"
+                          />
                         )}
-                      </label>
-                      {column.filterType === 'select' && column.filterOptions ? (
-                        <select
-                          onChange={(e) => setFilters(prev => ({
-                            ...prev,
-                            [column.key]: e.target.value
-                          }))}
-                          className="w-full px-3 py-2 border rounded-lg"
-                        >
-                          <option value="">전체</option>
-                          {column.filterOptions.map(option => (
-                            <option key={option} value={option}>{option}</option>
-                          ))}
-                        </select>
-                      ) : (
-                        <input
-                          type={column.filterType === 'range' ? 'number' : 'text'}
-                          placeholder={`${column.header} 필터...`}
-                          onChange={(e) => setFilters(prev => ({
-                            ...prev,
-                            [column.key]: e.target.value
-                          }))}
-                          className="w-full px-3 py-2 border rounded-lg"
-                        />
-                      )}
-                    </div>
-                  ))}
+                      </div>
+                    ))}
+                  </div>
                 </div>
+
+                <SheetFooter className="border-t pt-4 flex justify-between">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setFilters({})}
+                    className="px-6 py-2 text-blue-600 border-blue-200 hover:bg-blue-50"
+                  >
+                    초기화
+                  </Button>
+                  <Button 
+                    onClick={() => {}}
+                    className="px-6 py-2 bg-blue-600 text-white hover:bg-blue-700"
+                  >
+                    필터 적용
+                  </Button>
+                </SheetFooter>
               </SheetContent>
             </Sheet>
           </div>

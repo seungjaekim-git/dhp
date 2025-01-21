@@ -1,0 +1,257 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// Products with specifications and polymorphic support
+model products {
+  id               Int         @id @default(autoincrement())
+  name             String      @unique
+  type             String      // E.g., 'LEDDriverIC', 'Combo', etc.
+  manufacturer_id  Int?
+  part_number      String?     @unique
+  specifications   Json        // JSONB field for product-specific attributes
+  description      String?
+  datasheet_url    String?
+  country_id       Int?
+  storage_type_id  Int?
+  created_at       DateTime    @default(now()) @db.Timestamp(6)
+  updated_at       DateTime    @db.Timestamp(6)
+
+  // Relations
+  manufacturer     manufacturers?      @relation(fields: [manufacturer_id], references: [id])
+  country          countries?          @relation(fields: [country_id], references: [id])
+  storage_type     storage_types?      @relation(fields: [storage_type_id], references: [id])
+  categories       categories[]        @relation("ProductCategories")
+  applications     applications[]      @relation("ProductApplications")
+  certifications   certifications[]    @relation("ProductCertifications")
+  features         features[]          @relation("ProductFeatures")
+  documents        documents[]         @relation("ProductDocuments")
+  images           images[]
+  combos           product_combos[]    @relation("ComboProducts")
+  combo_items      product_combo_items[]
+
+  @@index([type], map: "idx_product_type")
+  @@index([specifications], map: "idx_product_specs", type: Gin)
+  @@index([manufacturer_id], map: "idx_manufacturer")
+  @@index([country_id], map: "idx_country") 
+  @@index([storage_type_id], map: "idx_storage_type")
+}
+
+// Product combos
+model product_combos {
+  id               Int         @id @default(autoincrement())
+  name             String      @unique
+  description      String?
+  discount_percent Decimal?    @db.Decimal(5, 2) // Optional discount for the combo
+  total_price      Decimal     @db.Decimal(10, 2)
+  created_at       DateTime    @default(now()) @db.Timestamp(6)
+  updated_at       DateTime    @db.Timestamp(6)
+
+  // Relations
+  products         products[]  @relation("ComboProducts")
+  combo_items      product_combo_items[]
+
+  @@index([name], map: "idx_combo_name")
+}
+
+// Items in a product combo
+model product_combo_items {
+  id               Int         @id @default(autoincrement())
+  combo_id         Int
+  product_id       Int
+  quantity         Int         @default(1)
+
+  // Relations
+  combo            product_combos @relation(fields: [combo_id], references: [id], onDelete: Cascade)
+  product          products      @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@unique([combo_id, product_id], map: "unique_combo_product")
+  @@index([combo_id], map: "idx_combo")
+  @@index([product_id], map: "idx_product")
+}
+
+// Categories for products
+model categories {
+  id               Int         @id @default(autoincrement())
+  name             String      @unique
+  parent_id        Int?
+  description      String?
+  created_at       DateTime    @default(now()) @db.Timestamp(6)
+  updated_at       DateTime    @db.Timestamp(6)
+
+  // Relations
+  parent           categories? @relation("CategoryHierarchy", fields: [parent_id], references: [id], onDelete: Cascade)
+  children         categories[] @relation("CategoryHierarchy")
+  products         products[]  @relation("ProductCategories")
+
+  @@index([parent_id], map: "idx_parent_category")
+}
+
+// Applications for products
+model applications {
+  id           Int         @id @default(autoincrement())
+  name         String      @unique
+  created_at   DateTime    @default(now()) @db.Timestamp(6)
+  updated_at   DateTime    @db.Timestamp(6)
+
+  // Relations
+  products     products[]  @relation("ProductApplications")
+
+  @@index([name], map: "idx_application_name")
+}
+
+// Certifications for products
+model certifications {
+  id           Int         @id @default(autoincrement())
+  name         String      @unique
+  description  String?
+  created_at   DateTime    @default(now()) @db.Timestamp(6)
+  updated_at   DateTime    @db.Timestamp(6)
+
+  // Relations
+  products     products[]  @relation("ProductCertifications")
+
+  @@index([name], map: "idx_certification_name")
+}
+
+// Features for products
+model features {
+  id           Int         @id @default(autoincrement())
+  name         String      @unique
+  description  String?
+  created_at   DateTime    @default(now()) @db.Timestamp(6)
+  updated_at   DateTime    @db.Timestamp(6)
+
+  // Relations
+  products     products[]  @relation("ProductFeatures")
+
+  @@index([name], map: "idx_feature_name")
+}
+
+// Documents for products
+model documents {
+  id           Int         @id @default(autoincrement())
+  title        String
+  url          String
+  type_id      Int?
+  created_at   DateTime    @default(now()) @db.Timestamp(6)
+  updated_at   DateTime    @db.Timestamp(6)
+
+  // Relations
+  document_type document_types? @relation(fields: [type_id], references: [id])
+  products      products[]     @relation("ProductDocuments")
+
+  @@index([type_id], map: "idx_document_type")
+  @@index([title], map: "idx_document_title")
+}
+
+// Images for products
+model images {
+  id           Int       @id @default(autoincrement())
+  title        String?
+  url          String
+  description  String?
+  product_id   Int?
+  created_at   DateTime  @default(now()) @db.Timestamp(6)
+  updated_at   DateTime  @db.Timestamp(6)
+
+  // Relations
+  product      products? @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@index([product_id], map: "idx_image_product")
+}
+
+// Manufacturers
+model manufacturers {
+  id           Int         @id @default(autoincrement())
+  name         String      @unique
+  website      String?
+  created_at   DateTime    @default(now()) @db.Timestamp(6)
+  updated_at   DateTime    @db.Timestamp(6)
+
+  // Relations
+  products     products[]
+
+  @@index([name], map: "idx_manufacturer_name")
+}
+
+// Enum Models
+model countries {
+  id           Int         @id @default(autoincrement())
+  name         String      @unique
+  description  String?
+  products     products[]
+
+  @@index([name], map: "idx_country_name")
+}
+
+model storage_types {
+  id           Int         @id @default(autoincrement())
+  name         String      @unique
+  description  String?
+  products     products[]
+
+  @@index([name], map: "idx_storage_type_name")
+}
+
+model document_types {
+  id           Int         @id @default(autoincrement())
+  name         String      @unique
+  description  String?
+  documents    documents[]
+
+  @@index([name], map: "idx_document_type_name")
+}
+
+
+// enum country {
+//   Taiwan
+//   China
+//   Switzerland
+// }
+
+// enum dimming_method {
+//   PWM
+//   Analog
+//   Hybrid
+//   Digital
+// }
+
+// enum document_type {
+//   Datasheet
+//   Application_Note @map("Application Note")
+// }
+
+// enum mounting_style {
+//   Through_Hole  @map("Through-Hole")
+//   Surface_Mount @map("Surface-Mount")
+//   Snap_In       @map("Snap-In")
+//   Plug_In       @map("Plug-In")
+// }
+
+// enum storage_type {
+//   Reel
+//   Tube
+//   Tray
+// }
+
+// enum topology {
+//   Buck
+//   Boost
+//   Buck_Boost              @map("Buck-Boost")
+//   Flyback
+//   SEPIC
+//   Linear
+//   Cuk
+//   Half_Bridge_Full_Bridge @map("Half-Bridge/Full-Bridge")
+//   Switching
+//   Constant_Current        @map("Constant Current")
+//   Constant_Voltage        @map("Constant Voltage")
+//   Hysteretic_PFM          @map("Hysteretic PFM")
+// }
