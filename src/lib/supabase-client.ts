@@ -13,6 +13,6 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
   },
   db: {
-    schema: 'dhp'
+    schema: 'public'
   }
 });
