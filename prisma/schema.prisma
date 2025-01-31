@@ -11,7 +11,7 @@ datasource db {
 model products {
   id              Int                   @id @default(autoincrement())
   name            String                @unique
-  type            String
+  subtitle        String
   manufacturer_id Int?
   part_number     String?               @unique
   specifications  Json
@@ -34,7 +34,7 @@ model products {
   features        features[]            @relation("ProductFeatures")
   manufacturers   manufacturers[]       @relation("ManufacturerMainProducts")
 
-  @@index([type], map: "idx_product_type")
+  @@index([subtitle], map: "idx_product_subtitle")
   @@index([specifications], map: "idx_product_specs", type: Gin)
   @@index([manufacturer_id], map: "idx_manufacturer")
   @@index([country_id], map: "idx_country")
