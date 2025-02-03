@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Command, CommandInput, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import {
   Select,
   SelectContent,
@@ -20,97 +22,13 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { Checkbox } from "@/components/ui/checkbox";
 import * as Schema from "./Schema";
-import { z } from "zod";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
-interface Option {
-  value: string;
-  label: string;
-}
-
-interface MultiSelectProps {
-  options: Option[];
-  selected: string[];
-  onChange: (values: string[]) => void;
-}
-
-const MultiSelect = ({ options, selected, onChange }: MultiSelectProps) => {
-  const handleCheckboxChange = (value: string) => {
-    const newSelected = selected.includes(value)
-      ? selected.filter(item => item !== value)
-      : [...selected, value];
-    onChange(newSelected);
-  };
-
-  return (
-    <div className="flex flex-col gap-2 max-h-48 overflow-y-auto border rounded-md p-2">
-      {options.map((option) => (
-        <div key={option.value} className="flex items-center space-x-2">
-          <Checkbox
-            id={option.value}
-            checked={selected.includes(option.value)}
-            onCheckedChange={() => handleCheckboxChange(option.value)}
-          />
-          <label
-            htmlFor={option.value}
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            {option.label}
-          </label>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-interface MultiLevelOption {
-  value: string;
-  label: string;
-  children?: MultiLevelOption[];
-}
-
-interface MultiLevelSelectProps {
-  options: MultiLevelOption[];
-  selected: string[];
-  onChange: (values: string[]) => void;
-}
-
-const MultiLevelSelect = ({ options, selected, onChange }: MultiLevelSelectProps) => {
-  const handleCheckboxChange = (value: string) => {
-    const newSelected = selected.includes(value)
-      ? selected.filter(item => item !== value)
-      : [...selected, value];
-    onChange(newSelected);
-  };
-
-  const renderOptions = (options: MultiLevelOption[], level = 0) => {
-    return options.map((option) => (
-      <div key={option.value} className={`flex items-center space-x-2 ml-${level * 4}`}>
-        <Checkbox
-          id={option.value}
-          checked={selected.includes(option.value)}
-          onCheckedChange={() => handleCheckboxChange(option.value)}
-        />
-        <label
-          htmlFor={option.value}
-          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-        >
-          {option.label}
-        </label>
-        {option.children && renderOptions(option.children, level + 1)}
-      </div>
-    ));
-  };
-
-  return (
-    <div className="flex flex-col gap-2 max-h-48 overflow-y-auto border rounded-md p-2">
-      {renderOptions(options)}
-    </div>
-  );
-};
 
 const INITIAL_FORM_VALUES = {
   name: "",
@@ -119,53 +37,18 @@ const INITIAL_FORM_VALUES = {
   part_number: "",
   specifications: {},
   description: "",
-  datasheet_url: "",
-  country_id: "",
   storage_type_id: "",
   categories: [] as string[],
   applications: [] as string[],
   certifications: [] as string[],
   features: [] as string[],
   documents: [] as File[],
-  images: [] as File[]
+  images: [] as File[],
+  specificationSchema: "",
+  newApplication: "",
+  newCertification: "",
+  newFeature: ""
 };
-
-const schemas = [
-  { categoryName: 'Base Component', schema: Schema.BaseComponentSchema },
-  { categoryName: 'LED Driver IC', schema: Schema.LEDDriverICSchema },
-  { categoryName: 'RGB LED Driver IC', schema: Schema.RGBLEDDriverICSchema },
-  { categoryName: 'AMUSE LED Driver IC', schema: Schema.AMUSELEDDriverICSchema },
-  { categoryName: 'DC-DC Converter LED Driver IC', schema: Schema.DCDCConverterLEDDriverICSchema },
-  { categoryName: 'DC-DC Controller LED Driver IC', schema: Schema.DCDCControllerLEDDriverICSchema },
-  { categoryName: 'PMIC', schema: Schema.PMICSchema },
-  { categoryName: 'Connector', schema: Schema.ConnectorSchema },
-  { categoryName: 'Other Component', schema: Schema.OtherComponentSchema },
-  { categoryName: 'Mini/Micro LED Driver IC', schema: Schema.MiniMicroLEDDriverICSchema },
-  { categoryName: 'SRAM Embedded LED Driver IC', schema: Schema.SRAMEmbeddedLEDDriverICSchema },
-  { categoryName: 'SPWM LED Driver IC', schema: Schema.SPWMLEDDriverICSchema },
-  { categoryName: 'Multi-Function LED Driver IC', schema: Schema.MultiFunctionLEDDriverICSchema },
-  { categoryName: 'Rectifier Diode', schema: Schema.RectifierDiodeSchema },
-  { categoryName: 'Zener Diode', schema: Schema.ZenerDiodeSchema },
-  { categoryName: 'Schottky Diode', schema: Schema.SchottkyDiodeSchema },
-  { categoryName: 'TVS Diode', schema: Schema.TVSDiodeSchema },
-  { categoryName: 'PIR Sensor', schema: Schema.PIRSensorSchema },
-  { categoryName: 'Temperature Sensor', schema: Schema.TemperatureSensorSchema },
-  { categoryName: 'ADC', schema: Schema.ADCSchema },
-  { categoryName: 'DAC', schema: Schema.DACSchema },
-  { categoryName: 'Memory IC', schema: Schema.MemoryICSchema },
-  { categoryName: 'Flash Memory IC', schema: Schema.FlashMemoryICSchema },
-  { categoryName: 'SRAM IC', schema: Schema.SRAMICSchema },
-  { categoryName: 'DRAM IC', schema: Schema.DRAMICSchema },
-  { categoryName: 'MOSFET', schema: Schema.MOSFETSchema },
-  { categoryName: 'N-Channel MOSFET', schema: Schema.NChannelMOSFETSchema },
-  { categoryName: 'P-Channel MOSFET', schema: Schema.PChannelMOSFETSchema },
-  { categoryName: 'Super Junction MOSFET', schema: Schema.SuperJunctionMOSFETSchema },
-  { categoryName: 'IGBT', schema: Schema.IGBTSchema },
-  { categoryName: 'Microcontroller', schema: Schema.MicrocontrollerSchema },
-  { categoryName: 'ASIC', schema: Schema.ASICSchema },
-  { categoryName: 'FPGA', schema: Schema.FPGASchema },
-  { categoryName: 'Amplifier IC', schema: Schema.AmplifierICSchema },
-];
 
 export default function CreateProduct() {
   const [manufacturers, setManufacturers] = useState<Array<{id: number, name: string}>>([]);
@@ -177,7 +60,7 @@ export default function CreateProduct() {
   const [features, setFeatures] = useState<Array<{id: number, name: string}>>([]);
   const [loading, setLoading] = useState(false);
   const [documentTypes, setDocumentTypes] = useState<Array<{id: number, name: string}>>([]);
-  const [selectedSchema, setSelectedSchema] = useState<z.ZodTypeAny | null>(null);
+
   const form = useForm({
     defaultValues: INITIAL_FORM_VALUES
   });
@@ -225,13 +108,151 @@ export default function CreateProduct() {
     fetchData();
   }, []);
 
+  const addApplication = async (name: string, parentId?: number) => {
+    // 현재 최대 ID 값 조회
+    const { data: maxIdResult } = await supabase
+      .from("applications")
+      .select("id")
+      .order("id", { ascending: false })
+      .limit(1)
+      .single();
+
+    const nextId = (maxIdResult?.id || 0) + 1;
+
+    const { data: newApp, error: appError } = await supabase
+      .from("applications") 
+      .insert([{
+        id: nextId,
+        name,
+        parent_id: parentId
+      }])
+      .select()
+      .single();
+
+    if (appError) throw appError;
+    setApplications([...applications, newApp]);
+  }
+
+  const TestDocumentUpload = () => {
+    const [file, setFile] = useState<File | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [result, setResult] = useState<string>('');
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files && e.target.files[0]) {
+        setFile(e.target.files[0]);
+      }
+    };
+
+    const handleUpload = async () => {
+      if (!file) {
+        alert('파일을 선택해주세요');
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `documents/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('product-documents')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('product-documents')
+          .getPublicUrl(filePath);
+
+        setResult(`업로드 성공! URL: ${publicUrl}`);
+
+      } catch (error) {
+        console.error('업로드 에러:', error);
+        setResult('업로드 실패');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    return (
+      <Card className="mt-4">
+        <CardHeader>
+          <CardTitle>문서 업로드 테스트</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <Input 
+              type="file" 
+              onChange={handleFileChange}
+              accept=".pdf,.doc,.docx,.txt"
+            />
+            <Button 
+              onClick={handleUpload} 
+              disabled={loading}
+              className="w-full"
+            >
+              {loading ? '업로드 중...' : '테스트 업로드'}
+            </Button>
+            {result && (
+              <div className="p-4 bg-slate-100 rounded">
+                {result}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   const onSubmit = async (data: any) => {
     setLoading(true);
     try {
-      // Handle file uploads
+      // 새로운 응용분야 추가
+      if (data.newApplication) {
+        const { data: newApp, error: appError } = await supabase
+          .from('applications')
+          .insert([{ name: data.newApplication }])
+          .select()
+          .single();
+          
+        if (appError) throw appError;
+        setApplications([...applications, newApp]);
+      }
+
+      // 새로운 인증 추가
+      if (data.newCertification) {
+        const { data: newCert, error: certError } = await supabase
+          .from('certifications')
+          .insert([{ name: data.newCertification }])
+          .select()
+          .single();
+          
+        if (certError) throw certError;
+        setCertifications([...certifications, newCert]);
+      }
+
+      // 새로운 특징 추가
+      if (data.newFeature) {
+        const { data: newFeat, error: featError } = await supabase
+          .from('features')
+          .insert([{ name: data.newFeature }])
+          .select()
+          .single();
+          
+        if (featError) throw featError;
+        setFeatures([...features, newFeat]);
+      }
+
+      // 이미지 업로드 처리
       const imageUrls = await Promise.all((data.images || []).map(async (image: any) => {
         if (!image.file) return null;
-        const fileName = `${Date.now()}-${image.file.name}`;
+        
+        // 제품 이름으로 폴더 경로 생성
+        const folderPath = `${data.name}/`;
+        const fileName = `${folderPath}${Date.now()}-${image.file.name}`;
+
         await supabase.storage.from("product-images").upload(fileName, image.file);
         const { data: { publicUrl } } = supabase.storage.from("product-images").getPublicUrl(fileName);
         return {
@@ -241,25 +262,37 @@ export default function CreateProduct() {
         };
       }));
 
+      // 문서 업로드 처리
       const documentUrls = await Promise.all((data.documents || []).map(async (doc: any) => {
         if (!doc.file) return null;
-        const fileName = `${Date.now()}-${doc.file.name}`;
+
+        // 제품 이름으로 폴더 경로 생성
+        const folderPath = `${data.name}/`;
+        const fileName = `${folderPath}${Date.now()}-${doc.file.name}`;
+
         await supabase.storage.from("product-documents").upload(fileName, doc.file);
         const { data: { publicUrl } } = supabase.storage.from("product-documents").getPublicUrl(fileName);
+        
+        // documents 테이블 스키마에 맞게 데이터 구조 수정
         return {
-          url: publicUrl,
           title: doc.title || doc.file.name,
-          type_id: doc.type_id,
+          url: publicUrl,
+          type_id: doc.type_id || null, // document_types 테이블의 FK
           updated_at: new Date().toISOString()
         };
       }));
 
-      // Save product data
+      // 제품 데이터 저장
       const { data: product, error } = await supabase
         .from("products")
         .insert([{
-          ...data,
-          specifications: JSON.stringify(data.specifications),
+          name: data.name,
+          subtitle: data.subtitle,
+          manufacturer_id: data.manufacturer_id,
+          part_number: data.part_number,
+          specifications: data.specifications,
+          description: data.description,
+          storage_type_id: data.storage_type_id,
           updated_at: new Date().toISOString()
         }])
         .select()
@@ -267,566 +300,927 @@ export default function CreateProduct() {
 
       if (error) throw error;
 
-      // Save relationships
-      if (imageUrls.length) {
-        await supabase.from("images").insert(
-          imageUrls.filter(Boolean).map(img => ({
+      // 관계 데이터 저장
+      const relations = [
+        {
+          table: "_ProductCategories",
+          data: data.categories?.map((categoryId: string) => ({
+            product_id: product.id,
+            category_id: parseInt(categoryId)
+          })) || []
+        },
+        {
+          table: "_ProductApplications", 
+          data: data.applications?.map((applicationId: string) => ({
+            product_id: product.id,
+            application_id: parseInt(applicationId)
+          })) || []
+        },
+        {
+          table: "_ProductCertifications",
+          data: data.certifications?.map((certificationId: string) => ({
+            product_id: product.id,
+            certification_id: parseInt(certificationId)
+          })) || []
+        },
+        {
+          table: "_ProductFeatures",
+          data: data.features?.map((featureId: string) => ({
+            product_id: product.id,
+            feature_id: parseInt(featureId)
+          })) || []
+        }
+      ];
+
+      // 이미지와 문서는 직접 해당 테이블에 저장
+      if (imageUrls.length > 0) {
+        const { error: imgError } = await supabase
+          .from("images")
+          .insert(imageUrls.filter(Boolean).map(img => ({
             ...img,
             product_id: product.id,
             updated_at: new Date().toISOString()
-          }))
-        );
+          })));
+        if (imgError) throw imgError;
       }
 
-      if (documentUrls.length) {
-        await supabase.from("documents").insert(
-          documentUrls.filter(Boolean).map(doc => ({
-            ...doc,
-            product_id: product.id
-          }))
-        );
+      // 문서 데이터 저장 및 product_documents 관계 테이블 생성
+      if (documentUrls.length > 0) {
+        // 먼저 documents 테이블에 문서 정보 저장
+        const { data: savedDocs, error: docError } = await supabase
+          .from("documents")
+          .insert(documentUrls.filter(Boolean))
+          .select();
+          
+        if (docError) throw docError;
+
+        // product_documents 관계 테이블에 연결 정보 저장
+        const productDocumentsData = savedDocs.map(doc => ({
+          product_id: product.id,
+          document_id: doc.id
+        }));
+
+        const { error: prodDocError } = await supabase
+          .from("product_documents")
+          .insert(productDocumentsData);
+
+        if (prodDocError) throw prodDocError;
       }
 
-      alert("Product successfully registered");
+
+      // 관계 테이블에 데이터 저장
+      for (const relation of relations) {
+        if (relation.data.length > 0) {
+          const { error: relError } = await supabase
+            .from(relation.table)
+            .insert(relation.data);
+          if (relError) throw relError;
+        }
+      }
+
+      alert("제품이 성공적으로 등록되었습니다");
       form.reset();
-      
     } catch (error) {
-      console.error("Error creating product:", error);
-      alert("Error occurred while registering product");
+      console.error("제품 생성 오류:", error);
+      alert("제품 등록 중 오류가 발생했습니다");
     } finally {
       setLoading(false);
     }
   };
 
-  const renderSpecificationField = (key: string, value: z.ZodTypeAny, path: string) => {
-  // LED Driver IC Schema 관련 필드 렌더링을 위한 함수
-  const renderLEDDriverICFields = (schema: z.ZodObject<any>, path: string) => {
-    const fields = schema.shape;
+  const { handleSubmit } = form;
+  return (
+    
+    <Form {...form}>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        <TestDocumentUpload />
+        <Card>
+          <CardHeader>
+            <CardTitle>기본 정보</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>제품명</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-    return Object.entries(fields).map(([key, value]) => {
-      // Range 타입 필드 처리 (전압, 전류 등의 범위값)
-      if (key.includes('_voltage') || key.includes('_current') || key.includes('temperature')) {
-        return (
-          <div key={key} className="space-y-2">
-            <FormLabel>{value.description}</FormLabel>
-            <div className="grid grid-cols-3 gap-2">
               <FormField
                 control={form.control}
-                name={`${path}.${key}.min`}
+                name="subtitle"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm">최소값</FormLabel>
+                    <FormLabel>부제목</FormLabel>
                     <FormControl>
-                      <Input type="number" {...field} />
+                      <Input {...field} />
                     </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name={`${path}.${key}.typ`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm">일반값</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name={`${path}.${key}.max`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm">최대값</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} />
-                    </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-          </div>
-        );
-      }
 
-      // Value 타입 필드 처리 (단일 값)
-      if (key.includes('_frequency') || key.includes('_power') || key.includes('_time')) {
-        return (
-          <FormField
-            key={key}
-            control={form.control}
-            name={`${path}.${key}.value`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{value.description}</FormLabel>
-                <FormControl>
-                  <Input type="number" {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        );
-      }
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="manufacturer_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>제조사</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="제조사 선택" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {manufacturers.map((manufacturer) => (
+                          <SelectItem key={manufacturer.id} value={manufacturer.id.toString()}>
+                            {manufacturer.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-      // 배열 타입 필드 처리 (보호기능, 통신인터페이스 등)
-      if (Array.isArray(value.element)) {
-        return (
-          <FormField
-            key={key}
-            control={form.control}
-            name={`${path}.${key}`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{value.description}</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="쉼표로 구분하여 입력" />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        );
-      }
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="storage_type_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>보관 유형</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="보관 유형 선택" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {storageTypes.map((type) => (
+                          <SelectItem key={type.id} value={type.id.toString()}>
+                            {type.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-      // Enum 타입 필드 처리 (토폴로지, 스캔모드 등)
-      if (value._def.typeName === 'ZodEnum') {
-        return (
-          <FormField
-            key={key}
-            control={form.control}
-            name={`${path}.${key}`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{value.description}</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="선택하세요" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {value._def.values.map((val: string) => (
-                      <SelectItem key={val} value={val}>
-                        {val}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormItem>
-            )}
-          />
-        );
-      }
+              <FormField
+                control={form.control}
+                name="part_number"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>부품 번호</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-      // Boolean 타입 필드 처리 (절연여부, HDR지원 등)
-      if (value._def.typeName === 'ZodBoolean') {
-        return (
-          <FormField
-            key={key}
-            control={form.control}
-            name={`${path}.${key}`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{value.description}</FormLabel>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        );
-      }
-    });
-  };
-
-  // 기본 필드 렌더링 로직
-  if (typeof value === 'object' && value._def.typeName === 'ZodObject') {
-    const schema = value as z.ZodObject<any>;
-    
-    // LED Driver IC 관련 스키마 확인
-    if (schema.description?.includes('LED 드라이버 IC')) {
-      return renderLEDDriverICFields(schema, path);
-    }
-  }
-  };
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        {/* Basic Information Fields */}
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Product Name</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="subtitle"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Subtitle</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* Manufacturer and Part Number */}
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="manufacturer_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Manufacturer</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select manufacturer" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {manufacturers.map((manufacturer) => (
-                      <SelectItem key={manufacturer.id} value={manufacturer.id.toString()}>
-                        {manufacturer.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="part_number"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Part Number</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* Description and Datasheet URL */}
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="datasheet_url"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Datasheet URL</FormLabel>
-              <FormControl>
-                <Input {...field} type="url" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Categories and Specifications */}
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="categories"
-            render={({ field }) => {
-              const getChildCategories = (parentId: number | null) => {
-                return categories.filter(cat => cat.parent_id === parentId);
-              };
-
-              const renderCategorySelect = (level: number, selectedValues: string[]) => {
-                const parentId = level === 0 ? null : Number(selectedValues[level - 1]);
-                const availableCategories = getChildCategories(parentId);
-
-                if (availableCategories.length === 0) return null;
-
-                return (
-                  <Select
-                    key={level}
-                    onValueChange={(value) => {
-                      const newValues = [...selectedValues.slice(0, level), value];
-                      field.onChange(newValues);
-                      
-                      const selectedCategory = categories.find(c => c.id.toString() === value);
-                      const matchedSchema = schemas.find(s => s.categoryName === selectedCategory?.name);
-                      
-                      if (matchedSchema) {
-                        form.setValue('specifications', {
-                          categoryId: value,
-                          schema: matchedSchema.schema
-                        });
-                      }
-                    }}
-                    value={selectedValues[level]}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={`Level ${level + 1} Category`} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableCategories.map((category) => (
-                        <SelectItem key={category.id} value={category.id.toString()}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                );
-              };
-
-              const selectedCategories = field.value || [];
-              const maxDepth = 5;
-              
-              return (
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Categories</FormLabel>
-                  <div className="flex flex-col gap-2">
-                    {Array.from({ length: maxDepth }).map((_, index) => {
-                      const select = renderCategorySelect(index, selectedCategories);
-                      if (!select || (index > 0 && !selectedCategories[index - 1])) return null;
-                      return select;
-                    })}
-                  </div>
+                  <FormLabel>설명</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
-              );
-            }}
-          />
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="specifications"
-            render={({ field }) => {
-              if (!field.value?.schema) return null;
-
-              const schema = field.value.schema;
-              const schemaFields = Object.entries(schema.shape || {});
-
-              return (
+            <FormField
+              control={form.control}
+              name="specifications"
+              render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Specifications</FormLabel>
-                  <div className="space-y-4">
-                    {schemaFields.map(([key, value]) => 
-                      renderSpecificationField(key, value, `specifications.${key}`)
-                    )}
-                  </div>
+                  <FormLabel>제품 사양</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="JSON 형식으로 사양을 입력하세요"
+                      className="h-[400px] font-mono"
+                      onChange={(e) => {
+                        try {
+                          const parsedValue = JSON.parse(e.target.value);
+                          field.onChange(parsedValue);
+                        } catch {
+                          field.onChange(e.target.value);
+                        }
+                      }}
+                      value={typeof field.value === 'object' ? 
+                        JSON.stringify(field.value, null, 2) : 
+                        field.value}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    올바른 JSON 형식으로 입력해주세요
+                  </FormDescription>
+                  <FormMessage />
                 </FormItem>
-              );
-            }}
-          />
-        </div>
+              )}
+            />
+          </CardContent>
+        </Card>
 
-        {/* Applications and Features */}
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="applications"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Applications</FormLabel>
-                <MultiSelect
-                  options={applications.map(app => ({
-                    value: app.id.toString(),
-                    label: app.name
-                  }))}
-                  selected={field.value}
-                  onChange={field.onChange}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="features"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Features</FormLabel>
-                <MultiSelect
-                  options={features.map(feature => ({
-                    value: feature.id.toString(),
-                    label: feature.name
-                  }))}
-                  selected={field.value}
-                  onChange={field.onChange}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* Images and Documents */}
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="images"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Images</FormLabel>
-                <div className="space-y-2">
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      field.onChange([...(field.value || []), { file: null, title: '', description: '' }]);
-                    }}
-                  >
-                    Add Image
-                  </Button>
-                  {field.value?.map((image: any, index: number) => (
-                    <div key={index} className="flex gap-2">
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0] || null;
-                          const newImages = field.value.map((img: any, i: number) =>
-                            i === index ? { ...img, file } : img
-                          );
-                          field.onChange(newImages);
-                        }}
-                      />
-                      <Input
-                        type="text"
-                        placeholder="Image Title"
-                        value={image.title || ''}
-                        onChange={(e) => {
-                          const newImages = field.value.map((img: any, i: number) =>
-                            i === index ? { ...img, title: e.target.value } : img
-                          );
-                          field.onChange(newImages);
-                        }}
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        onClick={() => {
-                          const newImages = field.value.filter((_: any, i: number) => i !== index);
-                          field.onChange(newImages);
-                        }}
-                      >
-                        Remove
+        <Card>
+          <CardHeader>
+            <CardTitle>분류 및 특성</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <FormField
+              control={form.control}
+              name="categories"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>카테고리</FormLabel>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {field.value.map((value) => {
+                      const category = categories.find(c => c.id.toString() === value);
+                      return (
+                        <Button
+                          key={value}
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => {
+                            field.onChange(field.value.filter(v => v !== value));
+                          }}
+                        >
+                          {category?.name} ✕
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start">
+                        {field.value.length > 0 ? (
+                          `${field.value.length}개 선택됨`
+                        ) : (
+                          "카테고리 선택..."
+                        )}
                       </Button>
-                    </div>
-                  ))}
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[400px] p-0">
+                      <Command>
+                        <CommandInput placeholder="카테고리 검색..." />
+                        <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
+                        <CommandGroup className="max-h-[300px] overflow-y-auto">
+                          {categories.map(cat => {
+                            const hasChildren = categories.some(c => c.parent_id === cat.id);
+                            const isChild = cat.parent_id !== null;
+                            return !isChild && (
+                              <>
+                                <CommandItem
+                                  key={cat.id}
+                                  onSelect={() => {
+                                    const value = cat.id.toString();
+                                    const newSelected = field.value.includes(value)
+                                      ? field.value.filter(v => v !== value)
+                                      : [...field.value, value];
+                                    field.onChange(newSelected);
+                                  }}
+                                >
+                                  <Checkbox
+                                    checked={field.value.includes(cat.id.toString())}
+                                    className="mr-2"
+                                  />
+                                  {cat.name}
+                                </CommandItem>
+                                {hasChildren && (
+                                  <div className="ml-4">
+                                    {categories
+                                      .filter(child => child.parent_id === cat.id)
+                                      .map(child => {
+                                        const hasGrandChildren = categories.some(c => c.parent_id === child.id);
+                                        return (
+                                          <>
+                                            <CommandItem
+                                              key={child.id}
+                                              onSelect={() => {
+                                                const value = child.id.toString();
+                                                const newSelected = field.value.includes(value)
+                                                  ? field.value.filter(v => v !== value)
+                                                  : [...field.value, value];
+                                                field.onChange(newSelected);
+                                              }}
+                                            >
+                                              <Checkbox
+                                                checked={field.value.includes(child.id.toString())}
+                                                className="mr-2"
+                                              />
+                                              {child.name}
+                                            </CommandItem>
+                                            {hasGrandChildren && (
+                                              <div className="ml-4">
+                                                {categories
+                                                  .filter(grandChild => grandChild.parent_id === child.id)
+                                                  .map(grandChild => {
+                                                    const hasGreatGrandChildren = categories.some(c => c.parent_id === grandChild.id);
+                                                    return (
+                                                      <>
+                                                        <CommandItem
+                                                          key={grandChild.id}
+                                                          onSelect={() => {
+                                                            const value = grandChild.id.toString();
+                                                            const newSelected = field.value.includes(value)
+                                                              ? field.value.filter(v => v !== value)
+                                                              : [...field.value, value];
+                                                            field.onChange(newSelected);
+                                                          }}
+                                                        >
+                                                          <Checkbox
+                                                            checked={field.value.includes(grandChild.id.toString())}
+                                                            className="mr-2"
+                                                          />
+                                                          {grandChild.name}
+                                                        </CommandItem>
+                                                        {hasGreatGrandChildren && (
+                                                          <div className="ml-4">
+                                                            {categories
+                                                              .filter(greatGrandChild => greatGrandChild.parent_id === grandChild.id)
+                                                              .map(greatGrandChild => (
+                                                                <CommandItem
+                                                                  key={greatGrandChild.id}
+                                                                  onSelect={() => {
+                                                                    const value = greatGrandChild.id.toString();
+                                                                    const newSelected = field.value.includes(value)
+                                                                      ? field.value.filter(v => v !== value)
+                                                                      : [...field.value, value];
+                                                                    field.onChange(newSelected);
+                                                                  }}
+                                                                >
+                                                                  <Checkbox
+                                                                    checked={field.value.includes(greatGrandChild.id.toString())}
+                                                                    className="mr-2"
+                                                                  />
+                                                                  {greatGrandChild.name}
+                                                                </CommandItem>
+                                                              ))}
+                                                          </div>
+                                                        )}
+                                                      </>
+                                                    );
+                                                  })}
+                                              </div>
+                                            )}
+                                          </>
+                                        );
+                                      })}
+                                  </div>
+                                )}
+                              </>
+                            );
+                          })}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="documents"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Documents</FormLabel>
-                <div className="space-y-2">
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      field.onChange([...(field.value || []), { file: null, title: '', type_id: '' }]);
-                    }}
-                  >
-                    Add Document
-                  </Button>
-                  {field.value?.map((doc: any, index: number) => (
-                    <div key={index} className="flex gap-2">
-                      <Input
-                        type="file"
-                        accept=".pdf,.doc,.docx"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0] || null;
-                          const newDocs = field.value.map((d: any, i: number) =>
-                            i === index ? { ...d, file } : d
-                          );
-                          field.onChange(newDocs);
-                        }}
-                      />
-                      <Input
-                        type="text"
-                        placeholder="Document Title"
-                        value={doc.title || ''}
-                        onChange={(e) => {
-                          const newDocs = field.value.map((d: any, i: number) =>
-                            i === index ? { ...d, title: e.target.value } : d
-                          );
-                          field.onChange(newDocs);
-                        }}
-                      />
-                      <Select
-                        value={doc.type_id || ''}
-                        onValueChange={(value) => {
-                          const newDocs = field.value.map((d: any, i: number) =>
-                            i === index ? { ...d, type_id: value } : d
-                          );
-                          field.onChange(newDocs);
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {documentTypes.map((type) => (
-                            <SelectItem key={type.id} value={type.id.toString()}>
-                              {type.name}
-                            </SelectItem>
+            <FormField
+              control={form.control}
+              name="applications"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>응용 분야</FormLabel>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {field.value.map((value) => {
+                      const application = applications.find(a => a.id.toString() === value);
+                      return (
+                        <Button
+                          key={value}
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => {
+                            field.onChange(field.value.filter(v => v !== value));
+                          }}
+                        >
+                          {application?.name} ✕
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  <div className="flex gap-2">
+                    <FormField
+                      control={form.control}
+                      name="newApplication"
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            <Input {...field} placeholder="새로운 최상위 응용 분야 입력" />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <Button 
+                      type="button"
+                      onClick={() => {
+                        form.setValue('newApplication', '');
+                      }}
+                    >
+                      추가
+                    </Button>
+                  </div>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start mt-2">
+                        {field.value.length > 0 ? (
+                          `${field.value.length}개 선택됨`
+                        ) : (
+                          "응용 분야 선택..."
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[400px] p-0">
+                      <Command>
+                        <CommandInput placeholder="응용 분야 검색..." />
+                        <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
+                        <CommandGroup className="max-h-[300px] overflow-y-auto">
+                          {/* 1단계: 최상위 응용분야 */}
+                          {applications
+                            .filter(app => !app.parent_id)
+                            .map(app => (
+                              <>
+                                <CommandItem
+                                  key={app.id}
+                                  onSelect={() => {
+                                    const value = app.id.toString();
+                                    const newSelected = field.value.includes(value)
+                                      ? field.value.filter(v => v !== value)
+                                      : [...field.value, value];
+                                    field.onChange(newSelected);
+                                  }}
+                                >
+                                  <Checkbox
+                                    checked={field.value.includes(app.id.toString())}
+                                    className="mr-2"
+                                  />
+                                  {app.name}
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="ml-2"
+                                    onClick={async (e) => {
+                                      e.stopPropagation();
+                                      const newApp = prompt("새로운 하위 응용분야 이름을 입력하세요");
+                                      if (newApp) {
+                                        try {
+                                          const exists = applications.some(a => a.name === newApp);
+                                          if (exists) {
+                                            alert('이미 존재하는 응용분야입니다');
+                                            return;
+                                          }
+                                          await addApplication(newApp, app.id);
+                                        } catch (error) {
+                                          console.error('하위 응용분야 추가 오류:', error);
+                                          alert('하위 응용분야 추가 중 오류가 발생했습니다');
+                                        }
+                                      }
+                                    }}
+                                  >
+                                    + 하위 추가
+                                  </Button>
+                                </CommandItem>
+                                {/* 2단계: 중간 응용분야 */}
+                                <div className="ml-4">
+                                  {applications
+                                    .filter(child => child.parent_id === app.id)
+                                    .map(child => (
+                                      <>
+                                        <CommandItem
+                                          key={child.id}
+                                          onSelect={() => {
+                                            const value = child.id.toString();
+                                            const newSelected = field.value.includes(value)
+                                              ? field.value.filter(v => v !== value)
+                                              : [...field.value, value];
+                                            field.onChange(newSelected);
+                                          }}
+                                        >
+                                          <Checkbox
+                                            checked={field.value.includes(child.id.toString())}
+                                            className="mr-2"
+                                          />
+                                          {child.name}
+                                          <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            className="ml-2"
+                                            onClick={async (e) => {
+                                              e.stopPropagation();
+                                              const newApp = prompt("새로운 하위 응용분야 이름을 입력하세요");
+                                              if (newApp) {
+                                                try {
+                                                  const exists = applications.some(a => a.name === newApp);
+                                                  if (exists) {
+                                                    alert('이미 존재하는 응용분야입니다');
+                                                    return;
+                                                  }
+                                                  await addApplication(newApp, child.id);
+                                                } catch (error) {
+                                                  console.error('하위 응용분야 추가 오류:', error);
+                                                  alert('하위 응용분야 추가 중 오류가 발생했습니다');
+                                                }
+                                              }
+                                            }}
+                                          >
+                                            + 하위 추가
+                                          </Button>
+                                        </CommandItem>
+                                        {/* 3단계: 최하위 응용분야 */}
+                                        <div className="ml-4">
+                                          {applications
+                                            .filter(grandChild => grandChild.parent_id === child.id)
+                                            .map(grandChild => (
+                                              <CommandItem
+                                                key={grandChild.id}
+                                                onSelect={() => {
+                                                  const value = grandChild.id.toString();
+                                                  const newSelected = field.value.includes(value)
+                                                    ? field.value.filter(v => v !== value)
+                                                    : [...field.value, value];
+                                                  field.onChange(newSelected);
+                                                }}
+                                              >
+                                                <Checkbox
+                                                  checked={field.value.includes(grandChild.id.toString())}
+                                                  className="mr-2"
+                                                />
+                                                {grandChild.name}
+                                              </CommandItem>
+                                            ))}
+                                        </div>
+                                      </>
+                                    ))}
+                                </div>
+                              </>
+                            ))}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                    </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="certifications"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>인증</FormLabel>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {field.value.map((value) => {
+                      const certification = certifications.find(c => c.id.toString() === value);
+                      return (
+                        <Button
+                          key={value}
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => {
+                            field.onChange(field.value.filter(v => v !== value));
+                          }}
+                        >
+                          {certification?.name} ✕
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  <div className="flex gap-2">
+                    <FormField
+                      control={form.control}
+                      name="newCertification"
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            <Input {...field} placeholder="새로운 인증 입력" />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <Button 
+                      type="button"
+                      onClick={() => {
+                        form.setValue('newCertification', '');
+                      }}
+                    >
+                      추가
+                    </Button>
+                  </div>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start mt-2">
+                        {field.value.length > 0 ? (
+                          `${field.value.length}개 선택됨`
+                        ) : (
+                          "인증 선택..."
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[400px] p-0">
+                      <Command>
+                        <CommandInput placeholder="인증 검색..." />
+                        <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
+                        <CommandGroup className="max-h-[300px] overflow-y-auto">
+                          {certifications.map(cert => (
+                            <CommandItem
+                              key={cert.id}
+                              onSelect={() => {
+                                const value = cert.id.toString();
+                                const newSelected = field.value.includes(value)
+                                  ? field.value.filter(v => v !== value)
+                                  : [...field.value, value];
+                                field.onChange(newSelected);
+                              }}
+                            >
+                              <Checkbox
+                                checked={field.value.includes(cert.id.toString())}
+                                className="mr-2"
+                              />
+                              {cert.name}
+                            </CommandItem>
                           ))}
-                        </SelectContent>
-                      </Select>
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        onClick={() => {
-                          const newDocs = field.value.filter((_: any, i: number) => i !== index);
-                          field.onChange(newDocs);
-                        }}
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <Button type="submit" disabled={loading}>
-          {loading ? "Processing..." : "Register Product"}
-        </Button>
+            <FormField
+              control={form.control}
+              name="features"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>특징</FormLabel>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {field.value.map((value) => {
+                      const feature = features.find(f => f.id.toString() === value);
+                      return (
+                        <Button
+                          key={value}
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => {
+                            field.onChange(field.value.filter(v => v !== value));
+                          }}
+                        >
+                          {feature?.name} ✕
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  <div className="flex gap-2">
+                    <FormField
+                      control={form.control}
+                      name="newFeature"
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            <Input {...field} placeholder="새로운 특징 입력" />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <Button 
+                      type="button"
+                      onClick={() => {
+                        form.setValue('newFeature', '');
+                      }}
+                    >
+                      추가
+                    </Button>
+                  </div>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start mt-2">
+                        {field.value.length > 0 ? (
+                          `${field.value.length}개 선택됨`
+                        ) : (
+                          "특징 선택..."
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[400px] p-0">
+                      <Command>
+                        <CommandInput placeholder="특징 검색..." />
+                        <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
+                        <CommandGroup className="max-h-[300px] overflow-y-auto">
+                          {features.map((feature) => (
+                            <CommandItem
+                              key={feature.id}
+                              onSelect={() => {
+                                const value = feature.id.toString();
+                                const newSelected = field.value.includes(value)
+                                  ? field.value.filter(v => v !== value)
+                                  : [...field.value, value];
+                                field.onChange(newSelected);
+                              }}
+                            >
+                              <Checkbox
+                                checked={field.value.includes(feature.id.toString())}
+                                className="mr-2"
+                              />
+                              {feature.name}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />  
+            <Card>
+              <CardHeader>
+                <CardTitle>이미지 및 문서</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="images"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>이미지</FormLabel>
+                      <div className="space-y-2">
+                        <Button
+                          type="button"
+                          onClick={() => {
+                            field.onChange([...(field.value || []), { file: null, title: '', description: '' }]);
+                          }}
+                        >
+                          이미지 추가
+                        </Button>
+                        {field.value?.map((image: any, index: number) => (
+                          <div key={index} className="flex gap-2">
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0] || null;
+                                const newImages = field.value.map((img: any, i: number) =>
+                                  i === index ? { ...img, file, title: file?.name || '' } : img
+                                );
+                                field.onChange(newImages);
+                              }}
+                            />
+                            <Input
+                              type="text"
+                              placeholder="이미지 제목"
+                              value={image.title || ''}
+                              onChange={(e) => {
+                                const newImages = field.value.map((img: any, i: number) =>
+                                  i === index ? { ...img, title: e.target.value } : img
+                                );
+                                field.onChange(newImages);
+                              }}
+                            />
+                            <Input
+                              type="text"
+                              placeholder="이미지 설명"
+                              value={image.description || ''}
+                              onChange={(e) => {
+                                const newImages = field.value.map((img: any, i: number) =>
+                                  i === index ? { ...img, description: e.target.value } : img
+                                );
+                                field.onChange(newImages);
+                              }}
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              onClick={() => {
+                                const newImages = field.value.filter((_: any, i: number) => i !== index);
+                                field.onChange(newImages);
+                              }}
+                            >
+                              삭제
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="documents"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>문서</FormLabel>
+                      <div className="space-y-2">
+                        <Button
+                          type="button"
+                          onClick={() => {
+                            field.onChange([...(field.value || []), { file: null, title: '', type_id: '' }]);
+                          }}
+                        >
+                          문서 추가
+                        </Button>
+                        {field.value?.map((doc: any, index: number) => (
+                          <div key={index} className="flex gap-2">
+                            <Input
+                              type="file"
+                              accept=".pdf,.doc,.docx"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0] || null;
+                                const newDocs = field.value.map((d: any, i: number) =>
+                                  i === index ? { ...d, file, title: file?.name || '' } : d
+                                );
+                                field.onChange(newDocs);
+                              }}
+                            />
+                            <Input
+                              type="text"
+                              placeholder="문서 제목"
+                              value={doc.title || ''}
+                              onChange={(e) => {
+                                const newDocs = field.value.map((d: any, i: number) =>
+                                  i === index ? { ...d, title: e.target.value } : d
+                                );
+                                field.onChange(newDocs);
+                              }}
+                            />
+                            <Select
+                              value={doc.type_id || ''}
+                              onValueChange={(value) => {
+                                const newDocs = field.value.map((d: any, i: number) =>
+                                  i === index ? { ...d, type_id: value } : d
+                                );
+                                field.onChange(newDocs);
+                              }}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="문서 유형 선택" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {documentTypes.map((type) => (
+                                  <SelectItem key={type.id} value={type.id.toString()}>
+                                    {type.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              onClick={() => {
+                                const newDocs = field.value.filter((_: any, i: number) => i !== index);
+                                field.onChange(newDocs);
+                              }}
+                            >
+                              삭제
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+
+            <Button type="submit" disabled={loading} className="w-full">
+              {loading ? "처리 중..." : "제품 등록"}
+            </Button>
+        </CardContent>
+      </Card>
       </form>
-    </Form>
+      </Form>
+
+  
   );
+
+  
 }

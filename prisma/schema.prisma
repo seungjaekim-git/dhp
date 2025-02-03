@@ -13,17 +13,14 @@ model products {
   name            String                @unique
   subtitle        String
   manufacturer_id Int?
-  part_number     String?               @unique
+  part_number     String?              
   specifications  Json
   description     String?
-  datasheet_url   String?
-  country_id      Int?
   storage_type_id Int?
   created_at      DateTime              @default(now()) @db.Timestamp(6)
   updated_at      DateTime              @db.Timestamp(6)
   images          images[]
   combo_items     product_combo_items[]
-  country         countries?            @relation(fields: [country_id], references: [id])
   manufacturer    manufacturers?        @relation(fields: [manufacturer_id], references: [id])
   storage_type    storage_types?        @relation(fields: [storage_type_id], references: [id])
   combos          product_combos[]      @relation("ComboProducts")
@@ -37,7 +34,6 @@ model products {
   @@index([subtitle], map: "idx_product_subtitle")
   @@index([specifications], map: "idx_product_specs", type: Gin)
   @@index([manufacturer_id], map: "idx_manufacturer")
-  @@index([country_id], map: "idx_country")
   @@index([storage_type_id], map: "idx_storage_type")
 }
 
@@ -180,7 +176,6 @@ model countries {
   characteristics    String?
   required_documents String?
   manufacturers      manufacturers[]
-  products           products[]
 
   @@index([name], map: "idx_country_name")
 }

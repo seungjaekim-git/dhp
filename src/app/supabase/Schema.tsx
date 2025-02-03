@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { LEDDriverICInfoSchema, ElectricalCharacteristicsSchema, MaximumRatingsSchema, PackagingInfoSchema } from "./LEDDriverIC";
+
 // 기본 단위 스키마 정의
 const VoltageUnitSchema = z.literal("V").describe('전압 단위');
 const CurrentUnitSchema = z.literal("A").describe('전류 단위');
@@ -38,27 +40,14 @@ export const BaseComponentSchema = z.object({
   part_number: z.string().describe('부품번호'),
   description: z.string().nullable().describe('설명'),
   datasheet_url: z.string().url().nullable().describe('데이터시트 URL'),
-  rohs_compliant: z.boolean().nullable().describe('RoHS 준수 여부'),
-  package_type: z.string().nullable().describe('패키지 타입'),
-  operating_temperature: RangeSchema(z.number(), TemperatureUnitSchema).describe('동작 온도 범위')
 }).describe('기본 전자부품 사양');
 
 // LED 드라이버 IC 스키마
 export const LEDDriverICSchema = BaseComponentSchema.extend({
-  supply_voltage: RangeSchema(z.number(), VoltageUnitSchema).describe('공급 전압 (VDD)'),
-  input_voltage: RangeSchema(z.number(), VoltageUnitSchema).describe('입력 전압 (VIN)'),
-  output_current: ValueSchema(z.number(), CurrentUnitSchema).describe('출력 전류 (IOUT)'),
-  output_voltage: RangeSchema(z.number(), VoltageUnitSchema).describe('출력 전압 (VDS)'),
-  clock_frequency: ValueSchema(z.number(), FrequencyUnitSchema).describe('클럭 주파수 (FCLK)'),
-  gnd_terminal_current: ValueSchema(z.number(), CurrentUnitSchema).describe('GND 단자 전류 (IGND)'),
-  power_dissipation: z.array(
-    z.object({
-      package_type: z.string().describe('패키지 타입'),
-      value: ValueSchema(z.number(), PowerUnitSchema).describe('전력 소비')
-    })
-  ).describe('전력 소비 (PD)'),
-  operating_temperature: RangeSchema(z.number(), TemperatureUnitSchema).describe('동작 온도 (Topr)'),
-  storage_temperature: RangeSchema(z.number(), TemperatureUnitSchema).describe('보관 온도 (Tstg)')
+  ...LEDDriverICInfoSchema.shape,
+  ...ElectricalCharacteristicsSchema.shape,
+  ...MaximumRatingsSchema.shape,
+  ...PackagingInfoSchema.shape
 }).describe('LED 드라이버 IC 사양');
 
 // 일반 IC 스키마 
@@ -120,6 +109,11 @@ export const OtherComponentSchema = BaseComponentSchema.extend({
   specifications: z.record(z.string()).describe('세부 사양'),
   features: z.array(z.string()).describe('주요 기능')
 }).describe('기타 부품 사양');
+
+// Linear Regulator LED Drirver IC 스키마
+export const LinearRegulatorLEDDriverICSchema = LEDDriverICSchema.extend({
+  test: z.string().describe('테스트'),
+}).describe('선형 리그레이터 LED 드라이버 IC 사양');
 
 // Mini-/Micro LED Driver IC 스키마
 export const MiniMicroLEDDriverICSchema = LEDDriverICSchema.extend({
