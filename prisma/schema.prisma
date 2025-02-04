@@ -8,168 +8,44 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model products {
-  id              Int                   @id @default(autoincrement())
-  name            String                @unique
-  subtitle        String
-  manufacturer_id Int?
-  part_number     String?              
-  specifications  Json
-  description     String?
-  storage_type_id Int?
-  created_at      DateTime              @default(now()) @db.Timestamp(6)
-  updated_at      DateTime              @db.Timestamp(6)
-  images          images[]
-  combo_items     product_combo_items[]
-  manufacturer    manufacturers?        @relation(fields: [manufacturer_id], references: [id])
-  storage_type    storage_types?        @relation(fields: [storage_type_id], references: [id])
-  combos          product_combos[]      @relation("ComboProducts")
-  applications    applications[]        @relation("ProductApplications")
-  categories      categories[]          @relation("ProductCategories")
-  certifications  certifications[]      @relation("ProductCertifications")
-  documents       documents[]           @relation("ProductDocuments")
-  features        features[]            @relation("ProductFeatures")
-  manufacturers   manufacturers[]       @relation("ManufacturerMainProducts")
-
-  @@index([subtitle], map: "idx_product_subtitle")
-  @@index([specifications], map: "idx_product_specs", type: Gin)
-  @@index([manufacturer_id], map: "idx_manufacturer")
-  @@index([storage_type_id], map: "idx_storage_type")
-}
-
-model product_combos {
-  id               Int                   @id @default(autoincrement())
-  name             String                @unique
-  description      String?
-  discount_percent Decimal?              @db.Decimal(5, 2)
-  total_price      Decimal               @db.Decimal(10, 2)
-  created_at       DateTime              @default(now()) @db.Timestamp(6)
-  updated_at       DateTime              @db.Timestamp(6)
-  combo_items      product_combo_items[]
-  products         products[]            @relation("ComboProducts")
-
-  @@index([name], map: "idx_combo_name")
-}
-
-model product_combo_items {
-  id         Int            @id @default(autoincrement())
-  combo_id   Int
-  product_id Int
-  quantity   Int            @default(1)
-  combo      product_combos @relation(fields: [combo_id], references: [id], onDelete: Cascade)
-  product    products       @relation(fields: [product_id], references: [id], onDelete: Cascade)
-
-  @@unique([combo_id, product_id], map: "unique_combo_product")
-  @@index([combo_id], map: "idx_combo")
-  @@index([product_id], map: "idx_product")
-}
-
-model categories {
-  id                Int             @id @default(autoincrement())
-  name              String          @unique
-  parent_id         Int?
-  description       String?
-  parent            categories?     @relation("CategoryHierarchy", fields: [parent_id], references: [id], onDelete: Cascade)
-  children          categories[]    @relation("CategoryHierarchy")
-  manufacturers     manufacturers[] @relation("ManufacturerCategories")
-  products          products[]      @relation("ProductCategories")
-
-  @@index([parent_id], map: "idx_parent_category")
-}
-
 model applications {
-  id                 Int            @id @default(autoincrement())
-  name               String         @unique
-  description        String?
-  parent_id          Int?
-  applications       applications?  @relation("applicationsToapplications", fields: [parent_id], references: [id], onDelete: Cascade)
-  other_applications applications[] @relation("applicationsToapplications")
-  products           products[]     @relation("ProductApplications")
+  id                   BigInt                 @id @default(autoincrement())
+  name                 String                 @unique
+  description          String?
+  parent_id            BigInt?
+  applications         applications?          @relation("applicationsToapplications", fields: [parent_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  other_applications   applications[]         @relation("applicationsToapplications")
+  product_applications product_applications[]
 
   @@index([name], map: "idx_application_name")
 }
 
+model categories {
+  id                 BigInt               @id @default(autoincrement())
+  name               String               @unique
+  parent_id          BigInt?
+  description        String?
+  categories         categories?          @relation("categoriesTocategories", fields: [parent_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  other_categories   categories[]         @relation("categoriesTocategories")
+  product_categories product_categories[]
+
+  @@index([parent_id], map: "idx_parent_category")
+}
+
 model certifications {
-  id                    Int        @id @default(autoincrement())
-  name                  String     @unique
-  description           String?
-  applicable_categories String[]
-  certification_body    String?
-  certification_type    String?
-  products              products[] @relation("ProductCertifications")
+  id                     BigInt                   @id @default(autoincrement())
+  name                   String                   @unique
+  description            String?
+  applicable_categories  String[]
+  certification_body     String?
+  certification_type     String?
+  product_certifications product_certifications[]
 
   @@index([name], map: "idx_certification_name")
 }
 
-model features {
-  id          Int        @id @default(autoincrement())
-  name        String     @unique
-  description String?
-  products    products[] @relation("ProductFeatures")
-
-  @@index([name], map: "idx_feature_name")
-}
-
-model documents {
-  id            Int             @id @default(autoincrement())
-  title         String
-  url           String
-  type_id       Int?
-  created_at    DateTime        @default(now()) @db.Timestamp(6)
-  updated_at    DateTime        @db.Timestamp(6)
-  document_type document_types? @relation(fields: [type_id], references: [id])
-  products      products[]      @relation("ProductDocuments")
-
-  @@index([type_id], map: "idx_document_type")
-  @@index([title], map: "idx_document_title")
-}
-
-model images {
-  id          Int       @id @default(autoincrement())
-  title       String?
-  url         String
-  description String?
-  product_id  Int?
-  created_at  DateTime  @default(now()) @db.Timestamp(6)
-  updated_at  DateTime  @db.Timestamp(6)
-  product     products? @relation(fields: [product_id], references: [id], onDelete: Cascade)
-
-  @@index([product_id], map: "idx_image_product")
-}
-
-model manufacturers {
-  id                      Int         @id @default(autoincrement())
-  name                    String      @unique
-  website                 String?
-  established            String?
-  headquarters           String?
-  business_type          String?
-  employees              String?
-  company_overview       String?
-  business_overview      String?
-  emails                 String[]
-  phones                 String[]
-  faxes                  String[]
-  key_milestones         Json?
-  branches               String[]
-  annual_revenue         String?
-  sales_markets          String[]
-  logo                   String?
-  building               String?
-  product_images         String[]
-  linkedin_link          String?
-  facebook_link          String?
-  country_id             Int?
-  countries              countries?   @relation(fields: [country_id], references: [id], onDelete: Cascade)
-  categories             categories[] @relation("ManufacturerCategories")
-  products               products[]
-  main_products          products[]   @relation("ManufacturerMainProducts")
-
-  @@index([name], map: "idx_manufacturer_name")
-}
-
 model countries {
-  id                 Int             @id @default(autoincrement())
+  id                 BigInt          @id @default(autoincrement())
   name               String          @unique
   description        String?
   regulations        String?
@@ -180,22 +56,174 @@ model countries {
   @@index([name], map: "idx_country_name")
 }
 
-model storage_types {
-  id          Int        @id @default(autoincrement())
-  name        String     @unique
-  description String?
-  category    String?
-  products    products[]
-
-  @@index([name], map: "idx_storage_type_name")
-}
-
 model document_types {
-  id          Int         @id @default(autoincrement())
+  id          BigInt      @id @default(autoincrement())
   name        String      @unique
   description String?
   category    String?
   documents   documents[]
 
   @@index([name], map: "idx_document_type_name")
+}
+
+model documents {
+  id             BigInt          @id @default(autoincrement())
+  title          String
+  url            String
+  type_id        BigInt?
+  created_at     DateTime?       @default(now()) @db.Timestamp(6)
+  updated_at     DateTime?       @default(now()) @db.Timestamp(6)
+  document_types document_types? @relation(fields: [type_id], references: [id], onUpdate: NoAction)
+
+  @@index([title], map: "idx_document_title")
+  @@index([type_id], map: "idx_document_type")
+}
+
+model features {
+  id               BigInt             @id @default(autoincrement())
+  name             String             @unique
+  description      String?
+  product_features product_features[]
+
+  @@index([name], map: "idx_feature_name")
+}
+
+model images {
+  id          BigInt    @id @default(autoincrement())
+  title       String?
+  url         String
+  description String?
+  product_id  BigInt?
+  created_at  DateTime? @default(now()) @db.Timestamp(6)
+  updated_at  DateTime? @default(now()) @db.Timestamp(6)
+  products    products? @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([product_id], map: "idx_image_product")
+}
+
+model manufacturers {
+  id                BigInt     @id @default(autoincrement())
+  name              String     @unique
+  website           String?
+  established       String?
+  headquarters      String?
+  business_type     String?
+  employees         String?
+  company_overview  String?
+  business_overview String?
+  emails            String[]
+  phones            String[]
+  faxes             String[]
+  key_milestones    Json?
+  branches          String[]
+  annual_revenue    String?
+  sales_markets     String[]
+  logo              String?
+  building          String?
+  product_images    String[]
+  linkedin_link     String?
+  facebook_link     String?
+  country_id        BigInt?
+  countries         countries? @relation(fields: [country_id], references: [id], onUpdate: NoAction)
+  products          products[]
+
+  @@index([name], map: "idx_manufacturer_name")
+}
+
+model product_applications {
+  product_id     BigInt
+  application_id BigInt
+  applications   applications @relation(fields: [application_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  products       products     @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([product_id, application_id])
+}
+
+model product_categories {
+  product_id  BigInt
+  category_id BigInt
+  categories  categories @relation(fields: [category_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  products    products   @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([product_id, category_id])
+}
+
+model product_certifications {
+  product_id       BigInt
+  certification_id BigInt
+  certifications   certifications @relation(fields: [certification_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  products         products       @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([product_id, certification_id])
+}
+
+model product_combo_items {
+  id             BigInt         @id @default(autoincrement())
+  combo_id       BigInt
+  product_id     BigInt
+  quantity       Int?           @default(1)
+  product_combos product_combos @relation(fields: [combo_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  products       products       @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([combo_id, product_id], map: "unique_combo_product")
+  @@index([combo_id], map: "idx_combo")
+  @@index([product_id], map: "idx_product")
+}
+
+model product_combos {
+  id                  BigInt                @id @default(autoincrement())
+  name                String                @unique
+  description         String?
+  discount_percent    Decimal?              @db.Decimal(5, 2)
+  total_price         Decimal               @db.Decimal(10, 2)
+  created_at          DateTime?             @default(now()) @db.Timestamp(6)
+  updated_at          DateTime?             @default(now()) @db.Timestamp(6)
+  product_combo_items product_combo_items[]
+
+  @@index([name], map: "idx_combo_name")
+}
+
+model product_features {
+  product_id BigInt
+  feature_id BigInt
+  features   features @relation(fields: [feature_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  products   products @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([product_id, feature_id])
+}
+
+model products {
+  id                     BigInt                   @id @default(autoincrement())
+  name                   String                   @unique
+  manufacturer_id        BigInt?
+  part_number            String?                  @unique
+  specifications         Json
+  description            String?
+  storage_type_id        BigInt?
+  created_at             DateTime?                @default(now()) @db.Timestamp(6)
+  updated_at             DateTime?                @default(now()) @db.Timestamp(6)
+  subtitle               String
+  images                 images[]
+  product_applications   product_applications[]
+  product_categories     product_categories[]
+  product_certifications product_certifications[]
+  product_combo_items    product_combo_items[]
+  product_features       product_features[]
+  manufacturers          manufacturers?           @relation(fields: [manufacturer_id], references: [id], onUpdate: NoAction)
+  storage_types          storage_types?           @relation(fields: [storage_type_id], references: [id], onUpdate: NoAction)
+
+  @@index([manufacturer_id], map: "idx_manufacturer")
+  @@index([specifications], map: "idx_product_specs", type: Gin)
+  @@index([subtitle], map: "idx_product_subtitle")
+  @@index([storage_type_id], map: "idx_storage_type")
+}
+
+model storage_types {
+  id          BigInt     @id @default(autoincrement())
+  name        String     @unique
+  description String?
+  category    String?
+  products    products[]
+
+  @@index([name], map: "idx_storage_type_name")
 }

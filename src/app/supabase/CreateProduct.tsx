@@ -29,6 +29,42 @@ import { Checkbox } from "@/components/ui/checkbox";
 import * as Schema from "./Schema";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
+interface Application {
+  id: number;
+  name: string;
+  parent_id?: number;
+}
+
+interface Category {
+  id: number;
+  name: string;
+  parent_id?: number;
+}
+
+interface Certification {
+  id: number;
+  name: string;
+}
+
+interface Feature {
+  id: number;
+  name: string;
+}
+
+interface DocumentType {
+  id: number;
+  name: string;
+}
+
+interface Manufacturer {
+  id: number;
+  name: string;
+}
+
+interface StorageType {
+  id: number;
+  name: string;
+}
 
 const INITIAL_FORM_VALUES = {
   name: "",
@@ -51,15 +87,15 @@ const INITIAL_FORM_VALUES = {
 };
 
 export default function CreateProduct() {
-  const [manufacturers, setManufacturers] = useState<Array<{id: number, name: string}>>([]);
+  const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
   const [countries, setCountries] = useState<Array<{id: number, name: string}>>([]);
-  const [storageTypes, setStorageTypes] = useState<Array<{id: number, name: string}>>([]);
-  const [categories, setCategories] = useState<Array<{id: number, name: string, parent_id?: number}>>([]);
-  const [applications, setApplications] = useState<Array<{id: number, name: string}>>([]);
-  const [certifications, setCertifications] = useState<Array<{id: number, name: string}>>([]);
-  const [features, setFeatures] = useState<Array<{id: number, name: string}>>([]);
+  const [storageTypes, setStorageTypes] = useState<StorageType[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [certifications, setCertifications] = useState<Certification[]>([]);
+  const [features, setFeatures] = useState<Feature[]>([]);
   const [loading, setLoading] = useState(false);
-  const [documentTypes, setDocumentTypes] = useState<Array<{id: number, name: string}>>([]);
+  const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([]);
 
   const form = useForm({
     defaultValues: INITIAL_FORM_VALUES
@@ -132,6 +168,8 @@ export default function CreateProduct() {
     if (appError) throw appError;
     setApplications([...applications, newApp]);
   }
+
+  
 
   const TestDocumentUpload = () => {
     const [file, setFile] = useState<File | null>(null);
@@ -303,28 +341,28 @@ export default function CreateProduct() {
       // 관계 데이터 저장
       const relations = [
         {
-          table: "_ProductCategories",
+          table: "product_categories",
           data: data.categories?.map((categoryId: string) => ({
             product_id: product.id,
             category_id: parseInt(categoryId)
           })) || []
         },
         {
-          table: "_ProductApplications", 
+          table: "product_applications", 
           data: data.applications?.map((applicationId: string) => ({
             product_id: product.id,
             application_id: parseInt(applicationId)
           })) || []
         },
         {
-          table: "_ProductCertifications",
+          table: "product_certifications",
           data: data.certifications?.map((certificationId: string) => ({
             product_id: product.id,
             certification_id: parseInt(certificationId)
           })) || []
         },
         {
-          table: "_ProductFeatures",
+          table: "product_features",
           data: data.features?.map((featureId: string) => ({
             product_id: product.id,
             feature_id: parseInt(featureId)
@@ -925,8 +963,26 @@ export default function CreateProduct() {
                     />
                     <Button 
                       type="button"
-                      onClick={() => {
-                        form.setValue('newCertification', '');
+                      onClick={async () => {
+                        const newCertName = form.getValues('newCertification');
+                        if (!newCertName) return;
+                        
+                        try {
+                          const { data: newCert, error } = await supabase
+                            .from('certifications')
+                            .insert([{ name: newCertName }])
+                            .select()
+                            .single();
+                            
+                          if (error) throw error;
+                          
+                          setCertifications([...certifications, newCert]);
+                          form.setValue('certifications', [...field.value, newCert.id.toString()]);
+                          form.setValue('newCertification', '');
+                        } catch (error) {
+                          console.error('인증 추가 오류:', error);
+                          alert('인증 추가 중 오류가 발생했습니다');
+                        }
                       }}
                     >
                       추가
@@ -1011,8 +1067,26 @@ export default function CreateProduct() {
                     />
                     <Button 
                       type="button"
-                      onClick={() => {
-                        form.setValue('newFeature', '');
+                      onClick={async () => {
+                        const newFeatureName = form.getValues('newFeature');
+                        if (!newFeatureName) return;
+                        
+                        try {
+                          const { data: newFeature, error } = await supabase
+                            .from('features')
+                            .insert([{ name: newFeatureName }])
+                            .select()
+                            .single();
+                            
+                          if (error) throw error;
+                          
+                          setFeatures([...features, newFeature]);
+                          form.setValue('features', [...field.value, newFeature.id.toString()]);
+                          form.setValue('newFeature', '');
+                        } catch (error) {
+                          console.error('특징 추가 오류:', error);
+                          alert('특징 추가 중 오류가 발생했습니다');
+                        }
                       }}
                     >
                       추가
