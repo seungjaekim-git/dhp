@@ -67,13 +67,14 @@ model document_types {
 }
 
 model documents {
-  id             BigInt          @id @default(autoincrement())
-  title          String
-  url            String
-  type_id        BigInt?
-  created_at     DateTime?       @default(now()) @db.Timestamp(6)
-  updated_at     DateTime?       @default(now()) @db.Timestamp(6)
-  document_types document_types? @relation(fields: [type_id], references: [id], onUpdate: NoAction)
+  id                BigInt              @id @default(autoincrement())
+  title             String
+  url               String
+  type_id           BigInt?
+  created_at        DateTime?           @default(now()) @db.Timestamp(6)
+  updated_at        DateTime?           @default(now()) @db.Timestamp(6)
+  document_types    document_types?     @relation(fields: [type_id], references: [id], onUpdate: NoAction)
+  product_documents product_documents[]
 
   @@index([title], map: "idx_document_title")
   @@index([type_id], map: "idx_document_type")
@@ -101,33 +102,111 @@ model images {
   @@index([product_id], map: "idx_image_product")
 }
 
-model manufacturers {
-  id                BigInt     @id @default(autoincrement())
-  name              String     @unique
-  website           String?
-  established       String?
-  headquarters      String?
-  business_type     String?
-  employees         String?
-  company_overview  String?
-  business_overview String?
-  emails            String[]
-  phones            String[]
-  faxes             String[]
-  key_milestones    Json?
-  branches          String[]
-  annual_revenue    String?
-  sales_markets     String[]
-  logo              String?
-  building          String?
-  product_images    String[]
-  linkedin_link     String?
-  facebook_link     String?
-  country_id        BigInt?
-  countries         countries? @relation(fields: [country_id], references: [id], onUpdate: NoAction)
-  products          products[]
+model manufacturer_branches {
+  id              BigInt        @id @default(autoincrement())
+  manufacturer_id BigInt
+  branch_info     String
+  manufacturers   manufacturers @relation(fields: [manufacturer_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
 
+model manufacturer_emails {
+  id              BigInt        @id @default(autoincrement())
+  manufacturer_id BigInt
+  email           String
+  manufacturers   manufacturers @relation(fields: [manufacturer_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model manufacturer_faxes {
+  id              BigInt        @id @default(autoincrement())
+  manufacturer_id BigInt
+  fax             String
+  manufacturers   manufacturers @relation(fields: [manufacturer_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model manufacturer_images {
+  id              BigInt        @id @default(autoincrement())
+  manufacturer_id BigInt
+  image_url       String
+  description     String?
+  manufacturers   manufacturers @relation(fields: [manufacturer_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model manufacturer_phones {
+  id              BigInt        @id @default(autoincrement())
+  manufacturer_id BigInt
+  phone           String
+  manufacturers   manufacturers @relation(fields: [manufacturer_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model manufacturers {
+  id                    BigInt                  @id @default(autoincrement())
+  name                  String                  @unique
+  website               String?
+  established           String?
+  headquarters          String?
+  business_type         String?
+  company_overview      String?
+  business_overview     String?
+  key_milestones        Json?
+  annual_revenue        String?
+  sales_markets         String[]
+  logo                  String?
+  building              String?
+  linkedin_link         String?
+  facebook_link         String?
+  country_id            BigInt?
+  role                  String?                 @default("manufacturer")
+  manufacturer_branches manufacturer_branches[]
+  manufacturer_emails   manufacturer_emails[]
+  manufacturer_faxes    manufacturer_faxes[]
+  manufacturer_images   manufacturer_images[]
+  manufacturer_phones   manufacturer_phones[]
+  countries             countries?              @relation(fields: [country_id], references: [id], onUpdate: NoAction)
+  partner_details       partner_details?
+  post_manufacturers    post_manufacturers[]
+  products              products[]
+
+  @@index([key_milestones], map: "idx_manufacturer_key_milestones", type: Gin)
   @@index([name], map: "idx_manufacturer_name")
+}
+
+model partner_details {
+  manufacturer_id      BigInt        @id
+  distribution_regions String?
+  contract_terms       String?
+  partner_contact      String?
+  manufacturers        manufacturers @relation(fields: [manufacturer_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model post_manufacturers {
+  post_id         BigInt
+  manufacturer_id BigInt
+  manufacturers   manufacturers @relation(fields: [manufacturer_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  posts           posts         @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([post_id, manufacturer_id])
+}
+
+model post_products {
+  post_id    BigInt
+  product_id BigInt
+  posts      posts    @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  products   products @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([post_id, product_id])
+}
+
+model posts {
+  id                 BigInt               @id @default(autoincrement())
+  title              String
+  content            String
+  category           post_category
+  summary            String?
+  image_url          String?
+  created_at         DateTime?            @default(now()) @db.Timestamp(6)
+  updated_at         DateTime?            @default(now()) @db.Timestamp(6)
+  post_manufacturers post_manufacturers[]
+  post_products      post_products[]
 }
 
 model product_applications {
@@ -170,6 +249,7 @@ model product_combo_items {
   @@index([product_id], map: "idx_product")
 }
 
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model product_combos {
   id                  BigInt                @id @default(autoincrement())
   name                String                @unique
@@ -181,6 +261,15 @@ model product_combos {
   product_combo_items product_combo_items[]
 
   @@index([name], map: "idx_combo_name")
+}
+
+model product_documents {
+  product_id  BigInt
+  document_id BigInt
+  documents   documents @relation(fields: [document_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  products    products  @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([product_id, document_id])
 }
 
 model product_features {
@@ -198,16 +287,19 @@ model products {
   manufacturer_id        BigInt?
   part_number            String?                  @unique
   specifications         Json
+  tables                 Json?
   description            String?
   storage_type_id        BigInt?
   created_at             DateTime?                @default(now()) @db.Timestamp(6)
   updated_at             DateTime?                @default(now()) @db.Timestamp(6)
   subtitle               String
   images                 images[]
+  post_products          post_products[]
   product_applications   product_applications[]
   product_categories     product_categories[]
   product_certifications product_certifications[]
   product_combo_items    product_combo_items[]
+  product_documents      product_documents[]
   product_features       product_features[]
   manufacturers          manufacturers?           @relation(fields: [manufacturer_id], references: [id], onUpdate: NoAction)
   storage_types          storage_types?           @relation(fields: [storage_type_id], references: [id], onUpdate: NoAction)
@@ -226,4 +318,12 @@ model storage_types {
   products    products[]
 
   @@index([name], map: "idx_storage_type_name")
+}
+
+enum post_category {
+  news_event
+  notice
+  tech_blog
+  discontinued
+  product_launch
 }

@@ -34,7 +34,7 @@ export const LEDDriverICInfoSchema = z.object({
   thermal_pad: z.boolean().describe("Thermal Pad 포함 여부"),
   topology: z.enum([  "Buck",
     "Boost",
-    "Buck-Boost",
+    "Buck-Boost", 
     "Charge Pump",
     "Linear Regulator",
     "Constant Current Sink",
@@ -45,6 +45,16 @@ export const LEDDriverICInfoSchema = z.object({
     "Full-Bridge",
     "Other"]).array().describe("토폴로지"),
   dimming_method: z.enum(["PWM", "Analog"]).array().describe("조정 방법"),
+  switching_frequency: z.object({
+    min: z.number().optional().describe("최소 스위칭 주파수 (kHz)"),
+    max: z.number().optional().describe("최대 스위칭 주파수 (kHz)"),
+    typ: z.number().describe("일반 스위칭 주파수 (kHz)"),
+    unit: z.literal("kHz").describe("주파수 단위")
+  }).describe("스위칭 주파수"),
+  supply_package: z.string().describe("공급 장치 패키지"),
+  package_case: z.string().describe("패키지/케이스"),
+  mounting_type: z.string().describe("실장 유형"),
+  internal_switch: z.boolean().describe("내부스위치 유무"),
 });
 
 

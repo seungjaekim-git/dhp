@@ -5,9 +5,8 @@ import { supabase } from "@/lib/supabase-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { Command, CommandInput, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
+import DataSection_LEDDriverIC from "./DataSection_LEDDriverIC";
+import TableDataSection from "./TableDataSetcion";
 import {
   Select,
   SelectContent,
@@ -25,8 +24,12 @@ import {
   FormDescription
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
-import { Checkbox } from "@/components/ui/checkbox";
-import * as Schema from "./Schema";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Plus } from "lucide-react";
+import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList, CommandInput } from "@/components/ui/command";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 interface Application {
@@ -72,6 +75,7 @@ const INITIAL_FORM_VALUES = {
   manufacturer_id: "",
   part_number: "",
   specifications: {},
+  tables: [], // 새로 추가된 테이블 형식 사양 데이터 (JSON)
   description: "",
   storage_type_id: "",
   categories: [] as string[],
@@ -145,7 +149,6 @@ export default function CreateProduct() {
   }, []);
 
   const addApplication = async (name: string, parentId?: number) => {
-    // 현재 최대 ID 값 조회
     const { data: maxIdResult } = await supabase
       .from("applications")
       .select("id")
@@ -156,7 +159,7 @@ export default function CreateProduct() {
     const nextId = (maxIdResult?.id || 0) + 1;
 
     const { data: newApp, error: appError } = await supabase
-      .from("applications") 
+      .from("applications")
       .insert([{
         id: nextId,
         name,
@@ -167,9 +170,7 @@ export default function CreateProduct() {
 
     if (appError) throw appError;
     setApplications([...applications, newApp]);
-  }
-
-  
+  };
 
   const TestDocumentUpload = () => {
     const [file, setFile] = useState<File | null>(null);
@@ -205,7 +206,6 @@ export default function CreateProduct() {
           .getPublicUrl(filePath);
 
         setResult(`업로드 성공! URL: ${publicUrl}`);
-
       } catch (error) {
         console.error('업로드 에러:', error);
         setResult('업로드 실패');
@@ -247,7 +247,7 @@ export default function CreateProduct() {
   const onSubmit = async (data: any) => {
     setLoading(true);
     try {
-      // 새로운 응용분야 추가
+      // 새로운 응용 분야 추가
       if (data.newApplication) {
         const { data: newApp, error: appError } = await supabase
           .from('applications')
@@ -286,11 +286,8 @@ export default function CreateProduct() {
       // 이미지 업로드 처리
       const imageUrls = await Promise.all((data.images || []).map(async (image: any) => {
         if (!image.file) return null;
-        
-        // 제품 이름으로 폴더 경로 생성
         const folderPath = `${data.name}/`;
         const fileName = `${folderPath}${Date.now()}-${image.file.name}`;
-
         await supabase.storage.from("product-images").upload(fileName, image.file);
         const { data: { publicUrl } } = supabase.storage.from("product-images").getPublicUrl(fileName);
         return {
@@ -303,24 +300,19 @@ export default function CreateProduct() {
       // 문서 업로드 처리
       const documentUrls = await Promise.all((data.documents || []).map(async (doc: any) => {
         if (!doc.file) return null;
-
-        // 제품 이름으로 폴더 경로 생성
         const folderPath = `${data.name}/`;
         const fileName = `${folderPath}${Date.now()}-${doc.file.name}`;
-
         await supabase.storage.from("product-documents").upload(fileName, doc.file);
         const { data: { publicUrl } } = supabase.storage.from("product-documents").getPublicUrl(fileName);
-        
-        // documents 테이블 스키마에 맞게 데이터 구조 수정
         return {
           title: doc.title || doc.file.name,
           url: publicUrl,
-          type_id: doc.type_id || null, // document_types 테이블의 FK
+          type_id: doc.type_id || null,
           updated_at: new Date().toISOString()
         };
       }));
 
-      // 제품 데이터 저장
+      // 제품 데이터 저장 (새로운 'tables' 필드 포함)
       const { data: product, error } = await supabase
         .from("products")
         .insert([{
@@ -329,6 +321,7 @@ export default function CreateProduct() {
           manufacturer_id: data.manufacturer_id,
           part_number: data.part_number,
           specifications: data.specifications,
+          tables: data.tables, // 새로 추가된 테이블 사양 정보
           description: data.description,
           storage_type_id: data.storage_type_id,
           updated_at: new Date().toISOString()
@@ -338,7 +331,7 @@ export default function CreateProduct() {
 
       if (error) throw error;
 
-      // 관계 데이터 저장
+      // 관계 데이터 저장 (카테고리, 응용 분야, 인증, 특징)
       const relations = [
         {
           table: "product_categories",
@@ -370,7 +363,7 @@ export default function CreateProduct() {
         }
       ];
 
-      // 이미지와 문서는 직접 해당 테이블에 저장
+      // 이미지 저장
       if (imageUrls.length > 0) {
         const { error: imgError } = await supabase
           .from("images")
@@ -382,9 +375,8 @@ export default function CreateProduct() {
         if (imgError) throw imgError;
       }
 
-      // 문서 데이터 저장 및 product_documents 관계 테이블 생성
+      // 문서 저장 및 product_documents 관계 생성
       if (documentUrls.length > 0) {
-        // 먼저 documents 테이블에 문서 정보 저장
         const { data: savedDocs, error: docError } = await supabase
           .from("documents")
           .insert(documentUrls.filter(Boolean))
@@ -392,7 +384,6 @@ export default function CreateProduct() {
           
         if (docError) throw docError;
 
-        // product_documents 관계 테이블에 연결 정보 저장
         const productDocumentsData = savedDocs.map(doc => ({
           product_id: product.id,
           document_id: doc.id
@@ -401,10 +392,8 @@ export default function CreateProduct() {
         const { error: prodDocError } = await supabase
           .from("product_documents")
           .insert(productDocumentsData);
-
         if (prodDocError) throw prodDocError;
       }
-
 
       // 관계 테이블에 데이터 저장
       for (const relation of relations) {
@@ -428,10 +417,9 @@ export default function CreateProduct() {
 
   const { handleSubmit } = form;
   return (
-    
     <Form {...form}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-        <TestDocumentUpload />
+        {/* TestDocumentUpload 컴포넌트 등 필요 시 추가 */}
         <Card>
           <CardHeader>
             <CardTitle>기본 정보</CardTitle>
@@ -550,29 +538,51 @@ export default function CreateProduct() {
               name="specifications"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>제품 사양</FormLabel>
+                  <FormLabel>제품 사양 (JSON)</FormLabel>
                   <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder="JSON 형식으로 사양을 입력하세요"
-                      className="h-[400px] font-mono"
+                    <Textarea 
+                      value={typeof field.value === 'object' ? JSON.stringify(field.value, null, 2) : field.value}
                       onChange={(e) => {
                         try {
-                          const parsedValue = JSON.parse(e.target.value);
-                          field.onChange(parsedValue);
-                        } catch {
+                          const jsonValue = JSON.parse(e.target.value);
+                          field.onChange(jsonValue);
+                        } catch (err) {
                           field.onChange(e.target.value);
                         }
                       }}
-                      value={typeof field.value === 'object' ? 
-                        JSON.stringify(field.value, null, 2) : 
-                        field.value}
+                      placeholder="제품 사양을 JSON 형식으로 입력하세요"
+                      className="font-mono min-h-[200px]"
                     />
                   </FormControl>
-                  <FormDescription>
-                    올바른 JSON 형식으로 입력해주세요
-                  </FormDescription>
-                  <FormMessage />
+                  <FormLabel className="text-2xl font-bold tracking-tight text-gray-900 mt-8 mb-4">사양 미리보기</FormLabel>
+                  {typeof field.value === 'object' && <DataSection_LEDDriverIC data={field.value} />}
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control} 
+              name="tables"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>테이블 데이터 (JSON)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      value={typeof field.value === 'object' ? JSON.stringify(field.value, null, 2) : field.value}
+                      onChange={(e) => {
+                        try {
+                          const jsonValue = JSON.parse(e.target.value);
+                          field.onChange(jsonValue);
+                        } catch (err) {
+                          field.onChange(e.target.value);
+                        }
+                      }}
+                      placeholder="테이블 데이터를 JSON 형식으로 입력하세요"
+                      className="font-mono min-h-[200px]"
+                    />
+                  </FormControl>
+                  <FormLabel className="mt-4 mb-2">테이블 미리보기</FormLabel>
+                  {typeof field.value === 'object' && <TableDataSection data={field.value} />}
                 </FormItem>
               )}
             />
@@ -587,557 +597,353 @@ export default function CreateProduct() {
             <FormField
               control={form.control}
               name="categories"
-              render={({ field }) => (
+              render={({ field }) => {
+                const [filteredCategories, setFilteredCategories] = useState(categories);
+                return (
                 <FormItem>
                   <FormLabel>카테고리</FormLabel>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {field.value.map((value) => {
-                      const category = categories.find(c => c.id.toString() === value);
-                      return (
-                        <Button
-                          key={value}
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => {
-                            field.onChange(field.value.filter(v => v !== value));
-                          }}
-                        >
-                          {category?.name} ✕
-                        </Button>
-                      );
-                    })}
-                  </div>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start">
-                        {field.value.length > 0 ? (
-                          `${field.value.length}개 선택됨`
-                        ) : (
-                          "카테고리 선택..."
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[400px] p-0">
-                      <Command>
-                        <CommandInput placeholder="카테고리 검색..." />
-                        <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
-                        <CommandGroup className="max-h-[300px] overflow-y-auto">
-                          {categories.map(cat => {
-                            const hasChildren = categories.some(c => c.parent_id === cat.id);
-                            const isChild = cat.parent_id !== null;
-                            return !isChild && (
-                              <>
-                                <CommandItem
-                                  key={cat.id}
-                                  onSelect={() => {
-                                    const value = cat.id.toString();
-                                    const newSelected = field.value.includes(value)
-                                      ? field.value.filter(v => v !== value)
-                                      : [...field.value, value];
-                                    field.onChange(newSelected);
-                                  }}
-                                >
-                                  <Checkbox
-                                    checked={field.value.includes(cat.id.toString())}
-                                    className="mr-2"
+                  <FormControl>
+                    <div className="flex flex-wrap gap-2">
+                      {field.value?.map((categoryId: string) => {
+                        const category = categories.find(c => c.id.toString() === categoryId);
+                        return category ? (
+                          <Badge key={categoryId} variant="secondary" className="flex items-center gap-1">
+                            {category.name}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-4 w-4 p-0 hover:bg-transparent"
+                              onClick={() => {
+                                field.onChange(field.value.filter((id: string) => id !== categoryId));
+                              }}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </Badge>
+                        ) : null;
+                      })}
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm" className="h-8">
+                            <Plus className="h-4 w-4" /> 카테고리 선택
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-[400px] max-h-[600px] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle>카테고리 선택</DialogTitle>
+                          </DialogHeader>
+                          <div className="py-4">
+                            <Input
+                              type="search"
+                              placeholder="카테고리 검색..."
+                              className="mb-4"
+                              onChange={(e) => {
+                                const searchInput = e.target.value.toLowerCase();
+                                setFilteredCategories(
+                                  categories.filter(category =>
+                                    category.name.toLowerCase().includes(searchInput)
+                                  )
+                                );
+                              }}
+                            />
+                            <div className="space-y-2">
+                              {filteredCategories.map((category) => (
+                                <div key={category.id} className="flex items-center gap-2">
+                                  <input
+                                    type="checkbox"
+                                    id={`category-${category.id}`}
+                                    checked={field.value?.includes(category.id.toString())}
+                                    onChange={(e) => {
+                                      const categoryId = category.id.toString();
+                                      if (e.target.checked) {
+                                        field.onChange([...(field.value || []), categoryId]);
+                                      } else {
+                                        field.onChange(field.value?.filter((id: string) => id !== categoryId));
+                                      }
+                                    }}
                                   />
-                                  {cat.name}
-                                </CommandItem>
-                                {hasChildren && (
-                                  <div className="ml-4">
-                                    {categories
-                                      .filter(child => child.parent_id === cat.id)
-                                      .map(child => {
-                                        const hasGrandChildren = categories.some(c => c.parent_id === child.id);
-                                        return (
-                                          <>
-                                            <CommandItem
-                                              key={child.id}
-                                              onSelect={() => {
-                                                const value = child.id.toString();
-                                                const newSelected = field.value.includes(value)
-                                                  ? field.value.filter(v => v !== value)
-                                                  : [...field.value, value];
-                                                field.onChange(newSelected);
-                                              }}
-                                            >
-                                              <Checkbox
-                                                checked={field.value.includes(child.id.toString())}
-                                                className="mr-2"
-                                              />
-                                              {child.name}
-                                            </CommandItem>
-                                            {hasGrandChildren && (
-                                              <div className="ml-4">
-                                                {categories
-                                                  .filter(grandChild => grandChild.parent_id === child.id)
-                                                  .map(grandChild => {
-                                                    const hasGreatGrandChildren = categories.some(c => c.parent_id === grandChild.id);
-                                                    return (
-                                                      <>
-                                                        <CommandItem
-                                                          key={grandChild.id}
-                                                          onSelect={() => {
-                                                            const value = grandChild.id.toString();
-                                                            const newSelected = field.value.includes(value)
-                                                              ? field.value.filter(v => v !== value)
-                                                              : [...field.value, value];
-                                                            field.onChange(newSelected);
-                                                          }}
-                                                        >
-                                                          <Checkbox
-                                                            checked={field.value.includes(grandChild.id.toString())}
-                                                            className="mr-2"
-                                                          />
-                                                          {grandChild.name}
-                                                        </CommandItem>
-                                                        {hasGreatGrandChildren && (
-                                                          <div className="ml-4">
-                                                            {categories
-                                                              .filter(greatGrandChild => greatGrandChild.parent_id === grandChild.id)
-                                                              .map(greatGrandChild => (
-                                                                <CommandItem
-                                                                  key={greatGrandChild.id}
-                                                                  onSelect={() => {
-                                                                    const value = greatGrandChild.id.toString();
-                                                                    const newSelected = field.value.includes(value)
-                                                                      ? field.value.filter(v => v !== value)
-                                                                      : [...field.value, value];
-                                                                    field.onChange(newSelected);
-                                                                  }}
-                                                                >
-                                                                  <Checkbox
-                                                                    checked={field.value.includes(greatGrandChild.id.toString())}
-                                                                    className="mr-2"
-                                                                  />
-                                                                  {greatGrandChild.name}
-                                                                </CommandItem>
-                                                              ))}
-                                                          </div>
-                                                        )}
-                                                      </>
-                                                    );
-                                                  })}
-                                              </div>
-                                            )}
-                                          </>
-                                        );
-                                      })}
-                                  </div>
-                                )}
-                              </>
-                            );
-                          })}
-                        </CommandGroup>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
+                                  <label htmlFor={`category-${category.id}`}>{category.name}</label>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button type="button" variant="secondary" onClick={() => field.onChange([])}>
+                              초기화
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  </FormControl>
                 </FormItem>
-              )}
+              )}}
             />
 
             <FormField
               control={form.control}
-              name="applications"
-              render={({ field }) => (
+              name="applications" 
+              render={({ field }) => {
+                const [filteredApplications, setFilteredApplications] = useState(applications);
+                return (
                 <FormItem>
                   <FormLabel>응용 분야</FormLabel>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {field.value.map((value) => {
-                      const application = applications.find(a => a.id.toString() === value);
-                      return (
-                        <Button
-                          key={value}
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => {
-                            field.onChange(field.value.filter(v => v !== value));
-                          }}
-                        >
-                          {application?.name} ✕
-                        </Button>
-                      );
-                    })}
-                  </div>
-                  <div className="flex gap-2">
-                    <FormField
-                      control={form.control}
-                      name="newApplication"
-                      render={({ field }) => (
-                        <FormItem className="flex-1">
-                          <FormControl>
-                            <Input {...field} placeholder="새로운 최상위 응용 분야 입력" />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    <Button 
-                      type="button"
-                      onClick={() => {
-                        form.setValue('newApplication', '');
-                      }}
-                    >
-                      추가
-                    </Button>
-                  </div>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start mt-2">
-                        {field.value.length > 0 ? (
-                          `${field.value.length}개 선택됨`
-                        ) : (
-                          "응용 분야 선택..."
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[400px] p-0">
-                      <Command>
-                        <CommandInput placeholder="응용 분야 검색..." />
-                        <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
-                        <CommandGroup className="max-h-[300px] overflow-y-auto">
-                          {/* 1단계: 최상위 응용분야 */}
-                          {applications
-                            .filter(app => !app.parent_id)
-                            .map(app => (
-                              <>
-                                <CommandItem
-                                  key={app.id}
-                                  onSelect={() => {
-                                    const value = app.id.toString();
-                                    const newSelected = field.value.includes(value)
-                                      ? field.value.filter(v => v !== value)
-                                      : [...field.value, value];
-                                    field.onChange(newSelected);
-                                  }}
-                                >
-                                  <Checkbox
-                                    checked={field.value.includes(app.id.toString())}
-                                    className="mr-2"
-                                  />
-                                  {app.name}
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    className="ml-2"
-                                    onClick={async (e) => {
-                                      e.stopPropagation();
-                                      const newApp = prompt("새로운 하위 응용분야 이름을 입력하세요");
-                                      if (newApp) {
-                                        try {
-                                          const exists = applications.some(a => a.name === newApp);
-                                          if (exists) {
-                                            alert('이미 존재하는 응용분야입니다');
-                                            return;
-                                          }
-                                          await addApplication(newApp, app.id);
-                                        } catch (error) {
-                                          console.error('하위 응용분야 추가 오류:', error);
-                                          alert('하위 응용분야 추가 중 오류가 발생했습니다');
-                                        }
+                  <FormControl>
+                    <div className="flex flex-wrap gap-2">
+                      {field.value?.map((appId: string) => {
+                        const app = applications.find(a => a.id.toString() === appId);
+                        return app ? (
+                          <Badge key={appId} variant="secondary" className="flex items-center gap-1">
+                            {app.name}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-4 w-4 p-0 hover:bg-transparent"
+                              onClick={() => {
+                                field.onChange(field.value.filter((id: string) => id !== appId));
+                              }}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </Badge>
+                        ) : null;
+                      })}
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm" className="h-8">
+                            <Plus className="h-4 w-4" /> 응용 분야 선택
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-[400px] max-h-[600px] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle>응용 분야 선택</DialogTitle>
+                          </DialogHeader>
+                          <div className="py-4">
+                            <Input
+                              type="search"
+                              placeholder="응용 분야 검색..."
+                              className="mb-4"
+                              onChange={(e) => {
+                                const searchInput = e.target.value.toLowerCase();
+                                setFilteredApplications(
+                                  applications.filter(app =>
+                                    app.name.toLowerCase().includes(searchInput)
+                                  )
+                                );
+                              }}
+                            />
+                            <div className="space-y-2">
+                              {filteredApplications.map((app) => (
+                                <div key={app.id} className="flex items-center gap-2">
+                                  <input
+                                    type="checkbox"
+                                    id={`app-${app.id}`}
+                                    checked={field.value?.includes(app.id.toString())}
+                                    onChange={(e) => {
+                                      const appId = app.id.toString();
+                                      if (e.target.checked) {
+                                        field.onChange([...(field.value || []), appId]);
+                                      } else {
+                                        field.onChange(field.value?.filter((id: string) => id !== appId));
                                       }
                                     }}
-                                  >
-                                    + 하위 추가
-                                  </Button>
-                                </CommandItem>
-                                {/* 2단계: 중간 응용분야 */}
-                                <div className="ml-4">
-                                  {applications
-                                    .filter(child => child.parent_id === app.id)
-                                    .map(child => (
-                                      <>
-                                        <CommandItem
-                                          key={child.id}
-                                          onSelect={() => {
-                                            const value = child.id.toString();
-                                            const newSelected = field.value.includes(value)
-                                              ? field.value.filter(v => v !== value)
-                                              : [...field.value, value];
-                                            field.onChange(newSelected);
-                                          }}
-                                        >
-                                          <Checkbox
-                                            checked={field.value.includes(child.id.toString())}
-                                            className="mr-2"
-                                          />
-                                          {child.name}
-                                          <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            className="ml-2"
-                                            onClick={async (e) => {
-                                              e.stopPropagation();
-                                              const newApp = prompt("새로운 하위 응용분야 이름을 입력하세요");
-                                              if (newApp) {
-                                                try {
-                                                  const exists = applications.some(a => a.name === newApp);
-                                                  if (exists) {
-                                                    alert('이미 존재하는 응용분야입니다');
-                                                    return;
-                                                  }
-                                                  await addApplication(newApp, child.id);
-                                                } catch (error) {
-                                                  console.error('하위 응용분야 추가 오류:', error);
-                                                  alert('하위 응용분야 추가 중 오류가 발생했습니다');
-                                                }
-                                              }
-                                            }}
-                                          >
-                                            + 하위 추가
-                                          </Button>
-                                        </CommandItem>
-                                        {/* 3단계: 최하위 응용분야 */}
-                                        <div className="ml-4">
-                                          {applications
-                                            .filter(grandChild => grandChild.parent_id === child.id)
-                                            .map(grandChild => (
-                                              <CommandItem
-                                                key={grandChild.id}
-                                                onSelect={() => {
-                                                  const value = grandChild.id.toString();
-                                                  const newSelected = field.value.includes(value)
-                                                    ? field.value.filter(v => v !== value)
-                                                    : [...field.value, value];
-                                                  field.onChange(newSelected);
-                                                }}
-                                              >
-                                                <Checkbox
-                                                  checked={field.value.includes(grandChild.id.toString())}
-                                                  className="mr-2"
-                                                />
-                                                {grandChild.name}
-                                              </CommandItem>
-                                            ))}
-                                        </div>
-                                      </>
-                                    ))}
+                                  />
+                                  <label htmlFor={`app-${app.id}`}>{app.name}</label>
                                 </div>
-                              </>
-                            ))}
-                        </CommandGroup>
-                      </Command>
-                    </PopoverContent>
-                    </Popover>
-                  <FormMessage />
+                              ))}
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button type="button" variant="secondary" onClick={() => field.onChange([])}>
+                              초기화
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  </FormControl>
                 </FormItem>
-              )}
+              )}}
             />
 
             <FormField
               control={form.control}
               name="certifications"
-              render={({ field }) => (
+              render={({ field }) => {
+                const [filteredCertifications, setFilteredCertifications] = useState(certifications);
+                return (
                 <FormItem>
                   <FormLabel>인증</FormLabel>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {field.value.map((value) => {
-                      const certification = certifications.find(c => c.id.toString() === value);
-                      return (
-                        <Button
-                          key={value}
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => {
-                            field.onChange(field.value.filter(v => v !== value));
-                          }}
-                        >
-                          {certification?.name} ✕
-                        </Button>
-                      );
-                    })}
-                  </div>
-                  <div className="flex gap-2">
-                    <FormField
-                      control={form.control}
-                      name="newCertification"
-                      render={({ field }) => (
-                        <FormItem className="flex-1">
-                          <FormControl>
-                            <Input {...field} placeholder="새로운 인증 입력" />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    <Button 
-                      type="button"
-                      onClick={async () => {
-                        const newCertName = form.getValues('newCertification');
-                        if (!newCertName) return;
-                        
-                        try {
-                          const { data: newCert, error } = await supabase
-                            .from('certifications')
-                            .insert([{ name: newCertName }])
-                            .select()
-                            .single();
-                            
-                          if (error) throw error;
-                          
-                          setCertifications([...certifications, newCert]);
-                          form.setValue('certifications', [...field.value, newCert.id.toString()]);
-                          form.setValue('newCertification', '');
-                        } catch (error) {
-                          console.error('인증 추가 오류:', error);
-                          alert('인증 추가 중 오류가 발생했습니다');
-                        }
-                      }}
-                    >
-                      추가
-                    </Button>
-                  </div>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start mt-2">
-                        {field.value.length > 0 ? (
-                          `${field.value.length}개 선택됨`
-                        ) : (
-                          "인증 선택..."
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[400px] p-0">
-                      <Command>
-                        <CommandInput placeholder="인증 검색..." />
-                        <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
-                        <CommandGroup className="max-h-[300px] overflow-y-auto">
-                          {certifications.map(cert => (
-                            <CommandItem
-                              key={cert.id}
-                              onSelect={() => {
-                                const value = cert.id.toString();
-                                const newSelected = field.value.includes(value)
-                                  ? field.value.filter(v => v !== value)
-                                  : [...field.value, value];
-                                field.onChange(newSelected);
+                  <FormControl>
+                    <div className="flex flex-wrap gap-2">
+                      {field.value?.map((certId: string) => {
+                        const cert = certifications.find(c => c.id.toString() === certId);
+                        return cert ? (
+                          <Badge key={certId} variant="secondary" className="flex items-center gap-1">
+                            {cert.name}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-4 w-4 p-0 hover:bg-transparent"
+                              onClick={() => {
+                                field.onChange(field.value.filter((id: string) => id !== certId));
                               }}
                             >
-                              <Checkbox
-                                checked={field.value.includes(cert.id.toString())}
-                                className="mr-2"
-                              />
-                              {cert.name}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </Badge>
+                        ) : null;
+                      })}
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm" className="h-8">
+                            <Plus className="h-4 w-4" /> 인증 선택
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-[400px] max-h-[600px] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle>인증 선택</DialogTitle>
+                          </DialogHeader>
+                          <div className="py-4">
+                            <Input
+                              type="search"
+                              placeholder="인증 검색..."
+                              className="mb-4"
+                              onChange={(e) => {
+                                const searchInput = e.target.value.toLowerCase();
+                                setFilteredCertifications(
+                                  certifications.filter(cert =>
+                                    cert.name.toLowerCase().includes(searchInput)
+                                  )
+                                );
+                              }}
+                            />
+                            <div className="space-y-2">
+                              {filteredCertifications.map((cert) => (
+                                <div key={cert.id} className="flex items-center gap-2">
+                                  <input
+                                    type="checkbox"
+                                    id={`cert-${cert.id}`}
+                                    checked={field.value?.includes(cert.id.toString())}
+                                    onChange={(e) => {
+                                      const certId = cert.id.toString();
+                                      if (e.target.checked) {
+                                        field.onChange([...(field.value || []), certId]);
+                                      } else {
+                                        field.onChange(field.value?.filter((id: string) => id !== certId));
+                                      }
+                                    }}
+                                  />
+                                  <label htmlFor={`cert-${cert.id}`}>{cert.name}</label>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button type="button" variant="secondary" onClick={() => field.onChange([])}>
+                              초기화
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  </FormControl>
                 </FormItem>
-              )}
+              )}}
             />
 
             <FormField
               control={form.control}
               name="features"
-              render={({ field }) => (
+              render={({ field }) => {
+                const [filteredFeatures, setFilteredFeatures] = useState(features);
+                return (
                 <FormItem>
                   <FormLabel>특징</FormLabel>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {field.value.map((value) => {
-                      const feature = features.find(f => f.id.toString() === value);
-                      return (
-                        <Button
-                          key={value}
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => {
-                            field.onChange(field.value.filter(v => v !== value));
-                          }}
-                        >
-                          {feature?.name} ✕
-                        </Button>
-                      );
-                    })}
-                  </div>
-                  <div className="flex gap-2">
-                    <FormField
-                      control={form.control}
-                      name="newFeature"
-                      render={({ field }) => (
-                        <FormItem className="flex-1">
-                          <FormControl>
-                            <Input {...field} placeholder="새로운 특징 입력" />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    <Button 
-                      type="button"
-                      onClick={async () => {
-                        const newFeatureName = form.getValues('newFeature');
-                        if (!newFeatureName) return;
-                        
-                        try {
-                          const { data: newFeature, error } = await supabase
-                            .from('features')
-                            .insert([{ name: newFeatureName }])
-                            .select()
-                            .single();
-                            
-                          if (error) throw error;
-                          
-                          setFeatures([...features, newFeature]);
-                          form.setValue('features', [...field.value, newFeature.id.toString()]);
-                          form.setValue('newFeature', '');
-                        } catch (error) {
-                          console.error('특징 추가 오류:', error);
-                          alert('특징 추가 중 오류가 발생했습니다');
-                        }
-                      }}
-                    >
-                      추가
-                    </Button>
-                  </div>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start mt-2">
-                        {field.value.length > 0 ? (
-                          `${field.value.length}개 선택됨`
-                        ) : (
-                          "특징 선택..."
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[400px] p-0">
-                      <Command>
-                        <CommandInput placeholder="특징 검색..." />
-                        <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
-                        <CommandGroup className="max-h-[300px] overflow-y-auto">
-                          {features.map((feature) => (
-                            <CommandItem
-                              key={feature.id}
-                              onSelect={() => {
-                                const value = feature.id.toString();
-                                const newSelected = field.value.includes(value)
-                                  ? field.value.filter(v => v !== value)
-                                  : [...field.value, value];
-                                field.onChange(newSelected);
+                  <FormControl>
+                    <div className="flex flex-wrap gap-2">
+                      {field.value?.map((featureId: string) => {
+                        const feature = features.find(f => f.id.toString() === featureId);
+                        return feature ? (
+                          <Badge key={featureId} variant="secondary" className="flex items-center gap-1">
+                            {feature.name}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-4 w-4 p-0 hover:bg-transparent"
+                              onClick={() => {
+                                field.onChange(field.value.filter((id: string) => id !== featureId));
                               }}
                             >
-                              <Checkbox
-                                checked={field.value.includes(feature.id.toString())}
-                                className="mr-2"
-                              />
-                              {feature.name}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </Badge>
+                        ) : null;
+                      })}
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm" className="h-8">
+                            <Plus className="h-4 w-4" /> 특징 선택
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-[400px] max-h-[600px] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle>특징 선택</DialogTitle>
+                          </DialogHeader>
+                          <div className="py-4">
+                            <Input
+                              type="search"
+                              placeholder="특징 검색..."
+                              className="mb-4"
+                              onChange={(e) => {
+                                const searchInput = e.target.value.toLowerCase();
+                                setFilteredFeatures(
+                                  features.filter(feature =>
+                                    feature.name.toLowerCase().includes(searchInput)
+                                  )
+                                );
+                              }}
+                            />
+                            <div className="space-y-2">
+                              {filteredFeatures.map((feature) => (
+                                <div key={feature.id} className="flex items-center gap-2">
+                                  <input
+                                    type="checkbox"
+                                    id={`feature-${feature.id}`}
+                                    checked={field.value?.includes(feature.id.toString())}
+                                    onChange={(e) => {
+                                      const featureId = feature.id.toString();
+                                      if (e.target.checked) {
+                                        field.onChange([...(field.value || []), featureId]);
+                                      } else {
+                                        field.onChange(field.value?.filter((id: string) => id !== featureId));
+                                      }
+                                    }}
+                                  />
+                                  <label htmlFor={`feature-${feature.id}`}>{feature.name}</label>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button type="button" variant="secondary" onClick={() => field.onChange([])}>
+                              초기화
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  </FormControl>
                 </FormItem>
-              )}
-            />  
-            <Card>
-              <CardHeader>
-                <CardTitle>이미지 및 문서</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
+              )}}/>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>이미지 및 문서</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
                 <FormField
                   control={form.control}
                   name="images"
@@ -1288,13 +1094,8 @@ export default function CreateProduct() {
             <Button type="submit" disabled={loading} className="w-full">
               {loading ? "처리 중..." : "제품 등록"}
             </Button>
-        </CardContent>
-      </Card>
-      </form>
-      </Form>
-
-  
+          </form>
+        </Form>
   );
-
-  
 }
+
