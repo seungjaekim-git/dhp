@@ -1,14 +1,14 @@
 "use client";
 
-import type { LEDDriverICColumnSchema } from "./schema";
 import { supabase } from "@/lib/supabase-client";
 import { ENUMS } from "@/constants/enum";
+import { LEDDriverICInfoSchema } from "@/app/supabase/LEDDriverIC";
 
 export const getData = async () => {
   // Enum 데이터를 가져옵니다
   const enums = await ENUMS;
 
-  // LED Driver IC division의 제품들을 가져옵니다
+  // LED Driver IC 제품들을 가져옵니다
   const { data: products, error: productsError } = await supabase
     .from('products')
     .select(`
@@ -16,179 +16,180 @@ export const getData = async () => {
       name,
       part_number,
       description,
+      subtitle,
+      specifications,
+      storage_type_id,
+      storage_types(
+        id,
+        name,
+        description,
+        category
+      ),
       manufacturer:manufacturers(id, name),
-      division:divisions(id, name),
       images(id, title, url, description),
-      documents:product_documents(
-        document:documents(
+      product_categories(
+        categories(
+          id,
+          name,
+          description,
+          parent_id
+        )
+      ),
+      product_documents:product_documents(
+        documents(
           id,
           title,
           url,
-          type
+          type_id,
+          document_types(
+            id,
+            name,
+            category
+          )
+        )
+      ),
+      product_applications(
+        applications(
+          id,
+          name,
+          description
+        )
+      ),
+      product_features(
+        features(
+          id,
+          name,
+          description
+        )
+      ),
+      product_certifications(
+        certifications(
+          id,
+          name,
+          description,
+          certification_type
         )
       )
-    `)
-    .eq('division_id', 1);
+    `);
 
   if (productsError) {
     console.error('제품 데이터 가져오기 오류:', productsError);
     return [];
   }
 
-  // 가져온 제품들의 ID를 이용해 LED Driver IC 상세 정보를 가져옵니다
-  const productIds = products.map(product => product.id);
-  const { data: ledDriverICs, error: ledDriverICsError } = await supabase
-    .from('led_driver_ic')
-    .select(`
-      id,
-      product_id,
-      category_id,
-      subtitle,
-      number_of_outputs,
-      topologies,
-      dimming_methods,
-      input_voltage_range,
-      typical_input_voltage,
-      operating_frequency_range,
-      typical_operating_frequency,
-      output_current_range,
-      typical_output_current,
-      output_voltage_range,
-      typical_output_voltage,
-      operating_temperature,
-      category_specific_attributes,
-      category:categories(id, name),
-      certifications:led_driver_ic_certifications(
-        certification:certifications(id, name)
-      ),
-      features:led_driver_ic_features(
-        feature:features(id, name)
-      ),
-      applications:led_driver_ic_applications(
-        application:applications(id, name)
-      ),
-      options:led_driver_ic_options(
-        id,
-        option_name,
-        package_detail,
-        mounting_style,
-        storage_type,
-        notes,
-        moq_start,
-        moq_step,
-        lead_time_range,
-        prices,
-        package_types:led_driver_ic_option_package_types(
-          package_type:package_types(id, name)
-        )
-      )
-    `)
-    .in('product_id', productIds);
-
-  if (ledDriverICsError) {
-    console.error('LED Driver IC 데이터 가져오기 오류:', ledDriverICsError);
-    return [];
-  }
-
-  // 제품 데이터와 LED Driver IC 데이터를 병합하고 스키마에 맞게 변환합니다
+  // 제품 데이터를 스키마에 맞게 변환합니다
   const mergedData = products.map(product => {
-    const ledDriverIC = ledDriverICs.find(ic => ic.product_id === product.id);
+    const specs = LEDDriverICInfoSchema.parse(product.specifications);
     
-    if (ledDriverIC) {
-      // 배열 데이터 정규화
-      ledDriverIC.topologies = Array.isArray(ledDriverIC.topologies) ? ledDriverIC.topologies : [ledDriverIC.topologies];
-      ledDriverIC.dimming_methods = Array.isArray(ledDriverIC.dimming_methods) ? ledDriverIC.dimming_methods : [ledDriverIC.dimming_methods];
+    // specifications JSON 데이터 정규화
+    const ledDriverIC = {
+      ...product,
+      ...specs,
       
-      // 옵션 데이터 정규화
-      ledDriverIC.options = ledDriverIC.options.map(option => ({
-        id: option.id,
-        notes: option.notes,
-        prices: option.prices || {},
-        moq_step: option.moq_step,
-        moq_start: option.moq_start,
-        product_id: ledDriverIC.id,
-        option_name: option.option_name,
-        storage_type: option.storage_type,
-        mounting_style: option.mounting_style,
-        package_detail: option.package_detail,
-        lead_time_range: option.lead_time_range,
-        package_types: option.package_types.map(pt => ({
-          package_type: {
-            name: pt.package_type.name
-          }
-        }))
-      }));
+      // 배열 데이터 정규화
+      categories: product.product_categories.map(cat => ({
+        category: cat.categories
+      })),
 
-      // 인증, 특징, 응용분야 데이터 정규화
-      ledDriverIC.certifications = ledDriverIC.certifications.map(cert => ({
-        certification: {
-          name: cert.certification.name
+      certifications: product.product_certifications.map(cert => ({
+        certification: cert.certifications
+      })),
+
+      features: product.product_features.map(feat => feat.features),
+
+      applications: product.product_applications.map(app => ({
+        application: app.applications
+      })),
+
+      documents: product.product_documents.map(doc => ({
+        document: {
+          ...doc.documents,
+          type: doc.documents.document_types
         }
-      }));
-
-      ledDriverIC.features = ledDriverIC.features.map(feat => feat.feature.name);
-
-      ledDriverIC.applications = ledDriverIC.applications.map(app => ({
-        application: {
-          name: app.application.name
-        }
-      }));
-    }
-
-    return {
-        ...product,
-        ...ledDriverIC
-    } as unknown as LEDDriverICColumnSchema;
+      }))
+    };
+    console.log(ledDriverIC);
+    return ledDriverIC as unknown as LEDDriverICColumnSchema;
   });
 
   return mergedData;
 };
+
 export const getFilterFields = async () => {
   const data = await getData();
 
+  // 카테고리 데이터 가져오기
+  const { data: categories } = await supabase
+    .from('categories')
+    .select('*');
+
   return [
     {
-      label: "부제목",
-      value: "subtitle",
-      type: "input",
-      options: data.map(({ subtitle }) => ({ label: subtitle, value: subtitle })),
+      label: "카테고리",
+      value: "categories",
+      type: "select",
+      options: categories?.map(cat => ({
+        label: cat.name,
+        value: cat.id.toString()
+      })) || [],
+    },
+    {
+      label: "제품명",
+      value: "name",
+      type: "text",
+      options: data.map(({ name }) => ({ label: name, value: name })),
     },
     {
       label: "출력 수",
-      value: "number_of_outputs", 
-      type: "slider",
-      min: 1,
-      max: 8,
-      step: 1,
-      defaultValue: [1, 8],
-      options: data.map(({ number_of_outputs }) => ({ label: `${number_of_outputs}`, value: number_of_outputs })),
+      value: "channels",
+      type: "select", 
+      options: ['1', '2', '3', '4+'],
       defaultOpen: true,
     },
     {
       label: "입력 전압 범위",
-      value: "input_voltage_range",
+      value: "input_voltage",
       type: "range",
-      min: 0,
-      max: 1000,
-      step: 1,
-      defaultValue: [0, 1000],
-      options: data.map(({ input_voltage_range }) => {
-        const [min, max] = JSON.parse(input_voltage_range || "[0,0]");
-        return { label: `${min}V ~ ${max}V`, value: input_voltage_range };
-      }),
+      min: 3.3,
+      max: 60,
+      unit: "V",
+      defaultValue: [3.3, 60],
+    },
+    {
+      label: "출력 전압 범위", 
+      value: "output_voltage",
+      type: "range",
+      min: 1,
+      max: 60,
+      unit: "V", 
+      defaultValue: [1, 60],
     },
     {
       label: "출력 전류 범위",
-      value: "output_current_range",
-      type: "range", 
+      value: "output_current",
+      type: "range",
+      min: 20,
+      max: 1500,
+      unit: "mA",
+      defaultValue: [20, 1500],
+    },
+    {
+      label: "전류 정확도",
+      value: "current_accuracy",
+      type: "range",
       min: 0,
-      max: 5000,
-      step: 1,
-      defaultValue: [0, 5000],
-      options: data.map(({ output_current_range }) => {
-        const [min, max] = JSON.parse(output_current_range || "[0,0]");
-        return { label: `${min}mA ~ ${max}mA`, value: output_current_range };
-      }),
+      max: 10,
+      unit: "%",
+      defaultValue: [0, 10],
+    },
+    {
+      label: "스위칭 주파수",
+      value: "switching_frequency",
+      type: "range",
+      min: 0,
+      max: 2000,
+      unit: "kHz",
+      defaultValue: [0, 2000],
     },
     {
       label: "동작 온도",
@@ -196,82 +197,64 @@ export const getFilterFields = async () => {
       type: "range",
       min: -55,
       max: 150,
-      step: 1,
+      unit: "C",
       defaultValue: [-55, 150],
-      options: data.map(({ operating_temperature }) => {
-        const [min, max] = JSON.parse(operating_temperature || "[0,0]");
-        return { label: `${min}°C ~ ${max}°C`, value: operating_temperature };
-      }),
     },
     {
       label: "실장 방식",
-      value: "mounting_style",
-      type: "checkbox",
-      options: data.flatMap(({ options }) => 
-        options.map(({ mounting_style }) => ({ label: mounting_style, value: mounting_style }))
-      ).filter((v, i, a) => a.findIndex(t => t.value === v.value) === i),
+      value: "mounting_type",
+      type: "select",
+      options: ['SMD', 'Through Hole'],
     },
     {
-      label: "저장 타입",
-      value: "storage_type", 
-      type: "checkbox",
-      options: data.flatMap(({ options }) => 
-        options.map(({ storage_type }) => ({ label: storage_type, value: storage_type }))
-      ).filter((v, i, a) => a.findIndex(t => t.value === v.value) === i),
+      label: "보관 유형",
+      value: "storage_type_id",
+      type: "select",
+      options: ['Tape & Reel', 'Tube', 'Tray'],
     },
     {
       label: "패키지 타입",
       value: "package_type",
-      type: "checkbox",
-      options: data.flatMap(({ options }) => 
-        options.flatMap(({ package_types }) => 
-          package_types.map(({ package_type }) => ({ 
-            label: package_type.name, 
-            value: package_type.name 
-          }))
-        )
-      ).filter((v, i, a) => a.findIndex(t => t.value === v.value) === i),
+      type: "select",
+      options: ['SOP', 'SOIC', 'QFN', 'DIP'],
+    },
+    {
+      label: "써멀패드",
+      value: "thermal_pad",
+      type: "select",
+      options: ['Yes', 'No'],
+    },
+    {
+      label: "패키지 상세",
+      value: "package_detail",
+      type: "text",
     },
     {
       label: "토폴로지",
-      value: "topologies",
-      type: "checkbox",
+      value: "topology",
+      type: "select",
+      options: ['Buck', 'Boost', 'Buck-Boost', 'Charge Pump', 'Linear Regulator', 'SEPIC'],
       defaultOpen: true,
-      options: data.flatMap(({ topologies }) => 
-        topologies.map(topology => ({ label: topology, value: topology }))
-      ).filter((v, i, a) => a.findIndex(t => t.value === v.value) === i),
     },
     {
       label: "디밍 방식",
-      value: "dimming_methods",
-      type: "checkbox",
+      value: "dimming_method",
+      type: "select",
+      options: ['PWM', 'Analog'],
       defaultOpen: true,
-      options: data.flatMap(({ dimming_methods }) => 
-        dimming_methods.map(method => ({ label: method, value: method }))
-      ).filter((v, i, a) => a.findIndex(t => t.value === v.value) === i),
     },
     {
       label: "인증",
       value: "certifications",
-      type: "checkbox",
-      options: data.flatMap(({ certifications }) => 
-        certifications.map(cert => ({ 
-          label: cert.certification.name,
-          value: cert.certification.name 
-        }))
-      ).filter((v, i, a) => a.findIndex(t => t.value === v.value) === i),
+      type: "select",
+      options: ['UL', 'CE', 'KC', 'CCC'],
     },
     {
       label: "응용분야",
       value: "applications",
-      type: "checkbox",
+      type: "select",
+      options: ['Lighting', 'Automotive', 'Industrial', 'Consumer'],
       defaultOpen: true,
-      options: data.flatMap(({ applications }) => 
-        applications.map(app => ({
-          label: app.application.name,
-          value: app.application.name
-        }))
-      ).filter((v, i, a) => a.findIndex(t => t.value === v.value) === i),
     },
   ];
 };

@@ -1,6 +1,16 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import convert from 'convert-units';
+import React from 'react';
+import { Button } from "@/components/ui/button";
+import { FileSpreadsheet } from "lucide-react";
+import { ExternalLink } from "lucide-react";
+import { Building } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 interface Column {
   key: string;
@@ -9,6 +19,11 @@ interface Column {
   symbol?: React.ReactNode;
   filterType?: 'text' | 'range' | 'select';
   filterOptions?: string[];
+  unit?: {
+    current: string;
+    available: string[];
+    onChange: (unit: string) => void;
+  };
   render?: (row: any) => React.ReactNode;
   tooltip?: {
     title: string;
@@ -26,11 +41,46 @@ interface Column {
   };
 }
 
+export const UnitSelector = ({ currentUnit, availableUnits, onUnitChange }: {
+  currentUnit: string;
+  availableUnits: string[];
+  onUnitChange: (unit: string) => void;
+}) => (
+  <Select value={currentUnit} onValueChange={onUnitChange}>
+    <SelectTrigger className="w-[60px] h-[25px] bg-white/50 hover:bg-white/80 transition-colors">
+      <SelectValue>{currentUnit}</SelectValue>
+    </SelectTrigger>
+    <SelectContent>
+      {availableUnits.map(unit => (
+        <SelectItem key={unit} value={unit}>{unit}</SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+);
+
+const formatValue = (value: number | undefined, fromUnit: string, toUnit: string) => {
+  try {
+    if (value === undefined) return 'N/A';
+    if (fromUnit === toUnit) return value;
+    const converted = convert(value).from(fromUnit).to(toUnit);
+    return Number(converted.toFixed(2));
+  } catch (e) {
+    return value;
+  }
+};
+
 export const useColumns = (): Column[] => {
+  const [inputVoltageUnit, setInputVoltageUnit] = React.useState('V');
+  const [outputVoltageUnit, setOutputVoltageUnit] = React.useState('V');
+  const [currentUnit, setCurrentUnit] = React.useState('mA');
+  const [tempUnit, setTempUnit] = React.useState('C');
+  const [freqUnit, setFreqUnit] = React.useState('kHz');
+
   return [
     {
       key: "name",
-      header: "제품명",
+      header: "기본 정보", 
+      subheader: "제품명",
       filterType: 'text',
       tooltip: {
         title: "제품명",
@@ -41,9 +91,162 @@ export const useColumns = (): Column[] => {
         ]
       },
       render: (row) => (
-        <div className="flex flex-col bg-blue-50/20 p-2">
-          <div className="max-w-fit line-clamp-2 font-bold">{row.name}</div>
-          <span className="text-muted-foreground text-sm">{row.subtitle}</span>
+        <div className="flex w-full flex-col gap-1">
+          <div className="flex items-center justify-between w-full">
+            <Link 
+              href={`/partners/${row.manufacturer?.slug}`}
+              className="flex items-center gap-2 hover:bg-blue-100/50 p-2 rounded-md transition-colors w-1/2"
+            >
+              <Building className="w-5 h-5 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">
+                {row.manufacturer?.name || 'Unknown Manufacturer'}
+              </span>
+            </Link>
+
+            <div className="flex items-center gap-2 w-1/2 justify-end">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="hover:bg-blue-100/50 w-32"
+                  >
+                    <ExternalLink className="w-4 h-4 mr-1" />
+                    펼쳐보기
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="w-[400px]">
+                  <SheetHeader>
+                    <SheetTitle>{row.name}</SheetTitle>
+                    <SheetDescription>{row.subtitle}</SheetDescription>
+                  </SheetHeader>
+                  <div className="mt-6 space-y-6">
+                    <div className="space-y-2">
+                      <h3 className="font-medium">기본 정보</h3>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>제조사</div>
+                        <div>{row.manufacturer?.name}</div>
+                        <div>카테고리</div>
+                        <div>{row.categories?.map((cat: any) => cat.category.name).join(', ')}</div>
+                        <div>토폴로지</div>
+                        <div>{row.topologies?.join(', ')}</div>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="font-medium">전기적 특성</h3>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>입력 전압</div>
+                        <div>{row.input_voltage?.min} ~ {row.input_voltage?.max}V</div>
+                        <div>출력 전압</div>
+                        <div>{row.output_voltage?.min} ~ {row.output_voltage?.max}V</div>
+                        <div>출력 전류</div>
+                        <div>{row.output_current?.min} ~ {row.output_current?.max}mA</div>
+                      </div>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+          </div>
+          
+          <Link href={`/products/detail/${row.id}`}>
+            <div className="bg-blue-50/20 p-3 rounded-md shadow-lg w-full hover:bg-blue-100/30 cursor-pointer transition-colors">
+              <div className="flex flex-col">
+                <div className="line-clamp-2 font-bold text-lg">{row.name || 'N/A'}</div>
+                <span className="text-muted-foreground text-sm">{row.subtitle || 'N/A'}</span>
+              </div>
+            </div>
+          </Link>
+        </div>
+      )
+    },
+    {
+      key: "categories",
+      header: "기본 정보",
+      subheader: "카테고리",
+      filterType: 'select',
+      filterOptions: ['LED Driver', 'Power Management', 'Lighting Control'],
+      tooltip: {
+        title: "제품 카테고리",
+        description: "제품이 속한 카테고리 분류입니다.",
+      },
+      render: (row) => (
+        <div className="flex flex-wrap gap-1 justify-end">
+          {!row.categories || row.categories.length === 0 ? (
+            <Badge variant="outline" className="bg-blue-50/20">N/A</Badge>
+          ) : (
+            row.categories.map((cat: any) => {
+              const categoryPath = [
+                cat.category.parent?.parent?.name,
+                cat.category.parent?.name,
+                cat.category.name
+              ].filter(Boolean).join(' > ');
+              
+              return (
+                <Badge key={cat.category.name} variant="outline" className="bg-blue-50/20">
+                  {categoryPath}
+                </Badge>
+              );
+            })
+          )}
+        </div>
+      )
+    },
+    {
+      key: "topologies",
+      header: "기본 정보",
+      subheader: "토폴로지",
+      filterType: 'select',
+      filterOptions: ['Buck', 'Boost', 'Buck-Boost', 'Charge Pump', 'Linear Regulator', 'SEPIC'],
+      tooltip: {
+        title: "전력 변환 토폴로지",
+        description: "IC가 지원하는 전력 변환 방식입니다.",
+        specs: [
+          { label: "Buck", value: "강압형" },
+          { label: "Boost", value: "승압형" },
+          { label: "Buck-Boost", value: "승강압형" },
+          { label: "Charge Pump", value: "전하 펌프" }
+        ]
+      },
+      render: (row) => (
+        <div className="flex flex-wrap gap-2 justify-end p-1">
+          {!row.specifications?.topology || row.specifications.topology.length === 0 ? (
+            <Badge variant="outline" className="bg-amber-50/20 px-3 py-1">N/A</Badge>
+          ) : (
+            row.specifications.topology.map((topology: string) => (
+              <Badge key={topology} variant="outline" className="bg-amber-50/20 px-3 py-1">
+                {topology}
+              </Badge>
+            ))
+          )}
+        </div>
+      )
+    },
+    {
+      key: "dimming_methods",
+      header: "기본 정보",
+      subheader: "디밍 방식",
+      filterType: 'select',
+      filterOptions: ['PWM', 'Analog'],
+      tooltip: {
+        title: "밝기 조절 방식",
+        description: "LED 밝기를 제어하는 방식입니다.",
+        specs: [
+          { label: "PWM", value: "펄스 폭 변조" },
+          { label: "Analog", value: "아날로그 전류 제어" }
+        ]
+      },
+      render: (row) => (
+        <div className="flex flex-wrap gap-1 justify-end">
+          {!row.specifications?.dimming_method || row.specifications.dimming_method.length === 0 ? (
+            <Badge variant="outline" className="bg-amber-50/20">N/A</Badge>
+          ) : (
+            row.specifications.dimming_method.map((method: string) => (
+              <Badge key={method} variant="outline" className="bg-amber-50/20">
+                {method}
+              </Badge>
+            ))
+          )}
         </div>
       )
     },
@@ -64,8 +267,8 @@ export const useColumns = (): Column[] => {
         ]
       },
       render: (row) => (
-        <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 p-1 font-bold ml-auto">
-          {row.number_of_outputs}
+        <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 p-1 font-bold ml-auto rounded-md">
+          {row.specifications?.channels || 'N/A'}
         </div>
       )
     },
@@ -73,8 +276,13 @@ export const useColumns = (): Column[] => {
       key: "input_voltage_range",
       header: "전기적 특성",
       subheader: "입력 전압",
-      symbol: <div>V<sub>in</sub></div>,
+      symbol: <div>V<sub>IN</sub></div>,
       filterType: 'range',
+      unit: {
+        current: inputVoltageUnit,
+        available: ['V', 'mV', 'kV'],
+        onChange: setInputVoltageUnit
+      },
       tooltip: {
         title: "입력 전압 범위",
         description: "IC의 정상 작동을 위한 입력 전압 범위입니다.",
@@ -90,10 +298,83 @@ export const useColumns = (): Column[] => {
         }
       },
       render: (row) => {
-        const [min, max] = JSON.parse(row.input_voltage_range || "[0,0]");
+        const baseUnit = row.specifications?.input_voltage?.unit || 'V';
+        const minV = row.specifications?.input_voltage?.min !== undefined ? formatValue(row.specifications.input_voltage.min, baseUnit, inputVoltageUnit) : null;
+        const maxV = row.specifications?.input_voltage?.max !== undefined ? formatValue(row.specifications.input_voltage.max, baseUnit, inputVoltageUnit) : null;
+        const typV = row.specifications?.input_voltage?.typical !== undefined ? formatValue(row.specifications.input_voltage.typical, baseUnit, inputVoltageUnit) : null;
+        
+        let displayText = 'N/A';
+        if (minV !== null || maxV !== null) {
+          if (minV !== null && maxV !== null) {
+            displayText = `${minV} ~ ${maxV}`;
+          } else if (minV !== null) {
+            displayText = `>${minV}`;
+          } else if (maxV !== null) {
+            displayText = `<${maxV}`;
+          }
+          if (typV !== null) {
+            displayText += ` (typ. ${typV})`;
+          }
+        }
+
         return (
-          <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 p-1 ml-auto">
-            {min}V ~ {max}V
+          <div className="flex items-center gap-2 justify-end">
+            <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 p-1">
+              {displayText}
+            </div>
+          </div>
+        );
+      }
+    },
+    {
+      key: "output_voltage_range",
+      header: "전기적 특성",
+      subheader: "출력 전압",
+      symbol: <div>V<sub>OUT</sub></div>,
+      filterType: 'range',
+      unit: {
+        current: outputVoltageUnit,
+        available: ['V', 'mV', 'kV'],
+        onChange: setOutputVoltageUnit
+      },
+      tooltip: {
+        title: "출력 전압 범위",
+        description: "LED 구동을 위한 출력 전압 범위입니다.",
+        specs: [
+          { label: "최소 전압", value: "1", unit: "V" },
+          { label: "최대 전압", value: "60", unit: "V" }
+        ],
+        ranges: {
+          min: 1,
+          max: 60,
+          unit: "V"
+        }
+      },
+      render: (row) => {
+        const baseUnit = row.specifications?.output_voltage?.unit || 'V';
+        const minV = row.specifications?.output_voltage?.min !== undefined ? formatValue(row.specifications.output_voltage.min, baseUnit, outputVoltageUnit) : null;
+        const maxV = row.specifications?.output_voltage?.max !== undefined ? formatValue(row.specifications.output_voltage.max, baseUnit, outputVoltageUnit) : null;
+        const typV = row.specifications?.output_voltage?.typical !== undefined ? formatValue(row.specifications.output_voltage.typical, baseUnit, outputVoltageUnit) : null;
+        
+        let displayText = 'N/A';
+        if (minV !== null || maxV !== null) {
+          if (minV !== null && maxV !== null) {
+            displayText = `${minV} ~ ${maxV}`;
+          } else if (minV !== null) {
+            displayText = `>${minV}`;
+          } else if (maxV !== null) {
+            displayText = `<${maxV}`;
+          }
+          if (typV !== null) {
+            displayText += ` (typ. ${typV})`;
+          }
+        }
+
+        return (
+          <div className="flex items-center gap-2 justify-end">
+            <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 p-1">
+              {displayText}
+            </div>
           </div>
         );
       }
@@ -102,8 +383,13 @@ export const useColumns = (): Column[] => {
       key: "output_current_range",
       header: "전기적 특성",
       subheader: "출력 전류",
-      symbol: <div>I<sub>out</sub></div>,
+      symbol: <div>I<sub>OUT</sub></div>,
       filterType: 'range',
+      unit: {
+        current: currentUnit,
+        available: ['mA', 'A', 'µA'],
+        onChange: setCurrentUnit
+      },
       tooltip: {
         title: "출력 전류 범위",
         description: "IC가 제공할 수 있는 LED 구동 전류의 범위입니다.",
@@ -119,10 +405,105 @@ export const useColumns = (): Column[] => {
         }
       },
       render: (row) => {
-        const [min, max] = JSON.parse(row.output_current_range || "[0,0]");
+        const baseUnit = row.specifications?.output_current?.unit || 'mA';
+        const minA = row.specifications?.output_current?.min !== undefined ? formatValue(row.specifications.output_current.min, baseUnit, currentUnit) : null;
+        const maxA = row.specifications?.output_current?.max !== undefined ? formatValue(row.specifications.output_current.max, baseUnit, currentUnit) : null;
+        const typA = row.specifications?.output_current?.typical !== undefined ? formatValue(row.specifications.output_current.typical, baseUnit, currentUnit) : null;
+        
+        let displayText = 'N/A';
+        if (minA !== null || maxA !== null) {
+          if (minA !== null && maxA !== null) {
+            displayText = `${minA} ~ ${maxA}`;
+          } else if (minA !== null) {
+            displayText = `>${minA}`;
+          } else if (maxA !== null) {
+            displayText = `<${maxA}`;
+          }
+          if (typA !== null) {
+            displayText += ` (typ. ${typA})`;
+          }
+        }
+
         return (
-          <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 p-1 ml-auto">
-            {min}mA ~ {max}mA
+          <div className="flex items-center gap-2 justify-end">
+            <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 p-1">
+              {displayText}
+            </div>
+          </div>
+        );
+      }
+    },
+    {
+      key: "current_accuracy",
+      header: "전기적 특성",
+      subheader: "전류 정확도",
+      symbol: <div>ΔI<sub>OUT</sub></div>,
+      filterType: 'range',
+      tooltip: {
+        title: "전류 정확도",
+        description: "채널 간 및 IC 간의 전류 정확도입니다.",
+        specs: [
+          { label: "채널 간", value: "±3", unit: "%" },
+          { label: "IC 간", value: "±5", unit: "%" }
+        ]
+      },
+      render: (row) => (
+        <div className="flex flex-col items-end gap-1">
+          <div className="font-mono bg-green-50/20 p-1">
+            Ch: ±{row.specifications?.current_accuracy?.between_channels || 'N/A'}%
+          </div>
+          <div className="font-mono bg-green-50/20 p-1">
+            IC: ±{row.specifications?.current_accuracy?.between_ics || 'N/A'}%
+          </div>
+        </div>
+      )
+    },
+    {
+      key: "switching_frequency",
+      header: "전기적 특성",
+      subheader: "스위칭 주파수",
+      symbol: <div>f<sub>SW</sub></div>,
+      filterType: 'range',
+      unit: {
+        current: freqUnit,
+        available: ['Hz', 'kHz', 'MHz'],
+        onChange: setFreqUnit
+      },
+      tooltip: {
+        title: "스위칭 주파수",
+        description: "LED 드라이버의 동작 주파수입니다.",
+        specs: [
+          { label: "최소 주파수", value: "100", unit: "kHz" },
+          { label: "최대 주파수", value: "2000", unit: "kHz" }
+        ]
+      },
+      render: (row) => {
+        const baseUnit = row.specifications?.switching_frequency?.unit || 'kHz';
+        const minF = row.specifications?.switching_frequency?.min !== undefined ? formatValue(row.specifications.switching_frequency.min, baseUnit, freqUnit) : null;
+        const maxF = row.specifications?.switching_frequency?.max !== undefined ? formatValue(row.specifications.switching_frequency.max, baseUnit, freqUnit) : null;
+        const typF = row.specifications?.switching_frequency?.typical !== undefined ? formatValue(row.specifications.switching_frequency.typical, baseUnit, freqUnit) : null;
+        
+        let displayText = 'N/A';
+        if (minF !== null || maxF !== null || typF !== null) {
+          if (minF !== null && maxF !== null) {
+            displayText = `${minF} ~ ${maxF}`;
+          } else if (minF !== null) {
+            displayText = `>${minF}`;
+          } else if (maxF !== null) {
+            displayText = `<${maxF}`;
+          } else if (typF !== null) {
+            displayText = `${typF}`;
+          }
+          if (typF !== null && (minF !== null || maxF !== null)) {
+            displayText += ` (typ. ${typF})`;
+          }
+        }
+
+        return (
+          <div className="flex items-center gap-2 justify-end">
+            <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 p-1">
+              {displayText}
+            </div>
           </div>
         );
       }
@@ -131,8 +512,13 @@ export const useColumns = (): Column[] => {
       key: "operating_temperature",
       header: "전기적 특성", 
       subheader: "동작 온도",
-      symbol: <div>T<sub>op</sub></div>,
+      symbol: <div>T<sub>OPR</sub></div>,
       filterType: 'range',
+      unit: {
+        current: tempUnit,
+        available: ['C', 'F', 'K'],
+        onChange: setTempUnit
+      },
       tooltip: {
         title: "동작 온도 범위",
         description: "IC가 안정적으로 동작할 수 있는 온도 범위입니다.",
@@ -148,10 +534,30 @@ export const useColumns = (): Column[] => {
         }
       },
       render: (row) => {
-        const [min, max] = JSON.parse(row.operating_temperature || "[0,0]");
+        const baseUnit = (row.specifications?.operating_temperature?.unit || '°C').replace('°', '');
+        const minT = row.specifications?.operating_temperature?.min !== undefined ? formatValue(row.specifications.operating_temperature.min, baseUnit, tempUnit) : null;
+        const maxT = row.specifications?.operating_temperature?.max !== undefined ? formatValue(row.specifications.operating_temperature.max, baseUnit, tempUnit) : null;
+        const typT = row.specifications?.operating_temperature?.typical !== undefined ? formatValue(row.specifications.operating_temperature.typical, baseUnit, tempUnit) : null;
+        
+        let displayText = 'N/A';
+        if (minT !== null || maxT !== null) {
+          if (minT !== null && maxT !== null) {
+            displayText = `${minT} ~ ${maxT}`;
+          } else if (minT !== null) {
+            displayText = `>${minT}`;
+          } else if (maxT !== null) {
+            displayText = `<${maxT}`;
+          }
+          if (typT !== null) {
+            displayText += ` (typ. ${typT})`;
+          }
+        }
+
         return (
-          <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 p-1 ml-auto">
-            {min}°C ~ {max}°C
+          <div className="flex items-center gap-2 justify-end">
+            <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 p-1">
+              {displayText}
+            </div>
           </div>
         );
       }
@@ -173,7 +579,7 @@ export const useColumns = (): Column[] => {
       },
       render: (row) => (
         <div className="max-w-fit line-clamp-2 bg-purple-50/20 p-1 ml-auto">
-          {row.options[0]?.mounting_style}
+          {row.specifications?.mounting_type || 'N/A'}
         </div>
       )
     },
@@ -194,7 +600,7 @@ export const useColumns = (): Column[] => {
       },
       render: (row) => (
         <div className="max-w-fit line-clamp-2 bg-purple-50/20 p-1 ml-auto">
-          {row.options[0]?.storage_type}
+          {row.storage_types?.name || 'N/A'}
         </div>
       )
     },
@@ -216,7 +622,28 @@ export const useColumns = (): Column[] => {
       },
       render: (row) => (
         <div className="max-w-fit line-clamp-2 bg-purple-50/20 p-1 ml-auto">
-          {row.options[0]?.package_types?.[0]?.package_type?.name}
+          {row.specifications?.package_type || 'N/A'}
+        </div>
+      )
+    },
+    {
+      key: "thermal_pad",
+      header: "패키지 정보",
+      subheader: "써멀패드",
+      symbol: <div>T<sub>PAD</sub></div>,
+      filterType: 'select',
+      filterOptions: ['Yes', 'No'],
+      tooltip: {
+        title: "써멀패드 유무",
+        description: "열 방출을 위한 써멀패드 포함 여부입니다.",
+        specs: [
+          { label: "열 방출", value: "향상된 방열 성능" },
+          { label: "PCB 설계", value: "써멀패드 고려 필요" }
+        ]
+      },
+      render: (row) => (
+        <div className="max-w-fit line-clamp-2 bg-purple-50/20 p-1 ml-auto">
+          {row.specifications?.thermal_pad === undefined ? 'N/A' : (row.specifications.thermal_pad ? 'Yes' : 'No')}
         </div>
       )
     },
@@ -236,60 +663,11 @@ export const useColumns = (): Column[] => {
       },
       render: (row) => (
         <div className="max-w-fit line-clamp-2 bg-purple-50/20 p-1 ml-auto">
-          {row.options[0]?.package_detail}
+          {row.package_detail || 'N/A'}
         </div>
       )
     },
-    {
-      key: "topologies",
-      header: "기술 정보",
-      subheader: "토폴로지",
-      filterType: 'select',
-      filterOptions: ['Buck', 'Boost', 'Buck-Boost'],
-      tooltip: {
-        title: "전력 변환 토폴로지",
-        description: "IC가 지원하는 전력 변환 방식입니다.",
-        specs: [
-          { label: "Buck", value: "강압형" },
-          { label: "Boost", value: "승압형" },
-          { label: "Buck-Boost", value: "승강압형" }
-        ]
-      },
-      render: (row) => (
-        <div className="flex flex-wrap gap-1 justify-end">
-          {row.topologies?.map((topology: string) => (
-            <Badge key={topology} variant="outline" className="bg-amber-50/20">
-              {topology}
-            </Badge>
-          ))}
-        </div>
-      )
-    },
-    {
-      key: "dimming_methods",
-      header: "기술 정보",
-      subheader: "디밍 방식",
-      filterType: 'select',
-      filterOptions: ['PWM', 'Analog', 'Hybrid'],
-      tooltip: {
-        title: "밝기 조절 방식",
-        description: "LED 밝기를 제어하는 방식입니다.",
-        specs: [
-          { label: "PWM", value: "펄스 폭 변조" },
-          { label: "Analog", value: "아날로그 전류 제어" },
-          { label: "Hybrid", value: "PWM + Analog 복합" }
-        ]
-      },
-      render: (row) => (
-        <div className="flex flex-wrap gap-1 justify-end">
-          {row.dimming_methods?.map((method: string) => (
-            <Badge key={method} variant="outline" className="bg-amber-50/20">
-              {method}
-            </Badge>
-          ))}
-        </div>
-      )
-    },
+    
     {
       key: "certifications",
       header: "인증/응용",
@@ -308,11 +686,15 @@ export const useColumns = (): Column[] => {
       },
       render: (row) => (
         <div className="flex flex-wrap gap-1 justify-end">
-          {row.certifications?.map((cert: any) => (
-            <Badge key={cert.certification.name} variant="outline" className="bg-pink-50/20">
-              {cert.certification.name}
-            </Badge>
-          ))}
+          {!row.certifications || row.certifications.length === 0 ? (
+            <Badge variant="outline" className="bg-pink-50/20">N/A</Badge>
+          ) : (
+            row.certifications.map((cert: any) => (
+              <Badge key={cert.certification.name} variant="outline" className="bg-pink-50/20">
+                {cert.certification.name}
+              </Badge>
+            ))
+          )}
         </div>
       )
     },
@@ -334,11 +716,15 @@ export const useColumns = (): Column[] => {
       },
       render: (row) => (
         <div className="flex flex-wrap gap-1 justify-end">
-          {row.applications?.map((app: any) => (
-            <Badge key={app.application.name} variant="outline" className="bg-pink-50/20">
-              {app.application.name}
-            </Badge>
-          ))}
+          {!row.applications || row.applications.length === 0 ? (
+            <Badge variant="outline" className="bg-pink-50/20">N/A</Badge>
+          ) : (
+            row.applications.map((app: any) => (
+              <Badge key={app.application.name} variant="outline" className="bg-pink-50/20">
+                {app.application.name}
+              </Badge>
+            ))
+          )}
         </div>
       )
     }

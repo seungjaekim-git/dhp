@@ -7,6 +7,7 @@ import { Badge, Filter, Info, X, Copy, FileText, Scale, ArrowRight } from "lucid
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRouter } from "next/navigation";
+import { UnitSelector } from "./columns";
 
 interface DataTableProps<T> {
   data: T[];
@@ -179,9 +180,9 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
     }
   };
 
-  const handleRowClick = (id: number) => {
-    router.push(`/products/detail/${id}`);
-  };
+  // const handleRowClick = (id: number) => {
+  //   router.push(`/products/detail/${id}`);
+  // };
 
   const handleActionSelect = (action: ActionType) => {
     setSelectedAction(action);
@@ -359,8 +360,8 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
                   data-header={header}
                   colSpan={cols.length}
                   className={cn(
-                    "px-6 py-3 text-left text-sm font-semibold text-gray-900 border-b whitespace-nowrap min-w-[150px] hover:bg-gray-100 transition-colors cursor-pointer",
-                    index === 0 && "sticky left-12 z-40 bg-gray-50 border-r shadow-sm"
+                    "px-6 py-3 text-left text-sm font-semibold text-gray-900 border-b whitespace-nowrap min-w-[150px] hover:bg-gray-100 transition-colors cursor-pointer border-r",
+                    index === 0 && "sticky left-12 z-40 bg-gray-50 border-r shadow-md"
                   )}
                   onClick={() => handleHeaderClick(header)}
                 >
@@ -386,8 +387,8 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
                 <th
                   key={column.key}
                   className={cn(
-                    "px-6 py-3 text-left text-sm font-medium text-gray-500 whitespace-nowrap hover:bg-gray-100 transition-colors relative",
-                    index === 0 && "sticky left-12 z-40 bg-gray-50 border-r shadow-sm"
+                    "px-6 py-3 text-left text-sm font-medium text-gray-500 whitespace-nowrap hover:bg-gray-100 transition-colors relative border-r",
+                    index === 0 && "sticky left-12 z-40 bg-gray-50 border-r shadow-lg"
                   )}
                   style={{ 
                     width: columnWidths[column.key] || 150,
@@ -433,6 +434,13 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
                         </div>
                       )}
                       <span className="flex items-center gap-1">({column.symbol})</span>
+                      {column.unit && (
+                        <UnitSelector
+                          currentUnit={column.unit.current}
+                          availableUnits={column.unit.available}
+                          onUnitChange={column.unit.onChange}
+                        />
+                      )}
                     </div>
                     <div className="flex text-lg font-semibold items-center gap-2">
                       {sortConfig.column === column.key ? (
@@ -470,7 +478,7 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
                     selectedRows.has(row.id) && "bg-blue-50 hover:bg-blue-100",
                     rowIndex % 2 === 0 && "bg-gray-50/30"
                   )}
-                  onClick={() => handleRowClick(row.id)}
+                  // onClick={() => handleRowClick(row.id)}
                 >
                   <td
                     className={cn(
@@ -495,13 +503,13 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
                       key={column.key}
                       style={{ width: columnWidths[column.key] || 150 }}
                       className={cn(
-                        "px-6 py-4 text-sm text-gray-900 whitespace-nowrap transition-colors",
-                        index === 0 && "sticky left-12 z-30 bg-white border-r shadow-sm",
+                        "px-6 py-4 text-sm text-gray-900 whitespace-nowrap transition-colors border-r",
+                        index === 0 && "sticky left-12 z-30 bg-white border-r shadow-md",
                         "group-hover:bg-gray-50",
                         selectedRows.has(row.id) && index === 0 && "bg-blue-50 group-hover:bg-blue-100"
                       )}
                     >
-                      <div className="flex items-center gap-2">
+                      <div className="flex w-full items-center gap-2">
                         {column.render ? column.render(row) : (row as any)[column.key]}
                       </div>
                     </td>

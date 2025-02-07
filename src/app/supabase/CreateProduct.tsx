@@ -312,6 +312,43 @@ export default function CreateProduct() {
         };
       }));
 
+      // LEDDriverIC 스키마의 단위 기준으로 specifications 데이터 변환
+      const convert = require('convert-units');
+      let convertedSpecs = { ...data.specifications };
+      
+      if (convertedSpecs.input_voltage) {
+        ['min', 'max', 'typ'].forEach(key => {
+          if (convertedSpecs.input_voltage[key]) {
+            convertedSpecs.input_voltage[key] = convert(convertedSpecs.input_voltage[key])
+              .from(convertedSpecs.input_voltage.unit)
+              .to('V');
+          }
+        });
+        convertedSpecs.input_voltage.unit = 'V';
+      }
+
+      if (convertedSpecs.output_current) {
+        ['min', 'max', 'typ'].forEach(key => {
+          if (convertedSpecs.output_current[key]) {
+            convertedSpecs.output_current[key] = convert(convertedSpecs.output_current[key])
+              .from(convertedSpecs.output_current.unit)
+              .to('mA');
+          }
+        });
+        convertedSpecs.output_current.unit = 'mA';
+      }
+
+      if (convertedSpecs.switching_frequency) {
+        ['min', 'max', 'typ'].forEach(key => {
+          if (convertedSpecs.switching_frequency[key]) {
+            convertedSpecs.switching_frequency[key] = convert(convertedSpecs.switching_frequency[key])
+              .from(convertedSpecs.switching_frequency.unit)
+              .to('kHz');
+          }
+        });
+        convertedSpecs.switching_frequency.unit = 'kHz';
+      }
+
       // 제품 데이터 저장 (새로운 'tables' 필드 포함)
       const { data: product, error } = await supabase
         .from("products")
@@ -320,8 +357,8 @@ export default function CreateProduct() {
           subtitle: data.subtitle,
           manufacturer_id: data.manufacturer_id,
           part_number: data.part_number,
-          specifications: data.specifications,
-          tables: data.tables, // 새로 추가된 테이블 사양 정보
+          specifications: convertedSpecs,
+          tables: data.tables,
           description: data.description,
           storage_type_id: data.storage_type_id,
           updated_at: new Date().toISOString()

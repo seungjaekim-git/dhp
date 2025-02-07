@@ -48,9 +48,9 @@ export const LEDDriverICInfoSchema = z.object({
   switching_frequency: z.object({
     min: z.number().optional().describe("최소 스위칭 주파수 (kHz)"),
     max: z.number().optional().describe("최대 스위칭 주파수 (kHz)"),
-    typ: z.number().describe("일반 스위칭 주파수 (kHz)"),
+    typ: z.number().optional().describe("일반 스위칭 주파수 (kHz)"),
     unit: z.literal("kHz").describe("주파수 단위")
-  }).describe("스위칭 주파수"),
+  }).optional().describe("스위칭 주파수"),
   supply_package: z.string().describe("공급 장치 패키지"),
   package_case: z.string().describe("패키지/케이스"),
   mounting_type: z.string().describe("실장 유형"),
