@@ -98,6 +98,7 @@ export default function CreateProduct() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [certifications, setCertifications] = useState<Certification[]>([]);
   const [features, setFeatures] = useState<Feature[]>([]);
+  const [filteredFeatures, setFilteredFeatures] = useState<Feature[]>([]);
   const [loading, setLoading] = useState(false);
   const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([]);
 
@@ -142,7 +143,9 @@ export default function CreateProduct() {
       setApplications(applicationsData);
       setCertifications(certificationsData);
       setFeatures(featuresData);
+      setFilteredFeatures(featuresData);
       setDocumentTypes(documentTypesData);
+      
     };
 
     fetchData();
@@ -395,7 +398,8 @@ export default function CreateProduct() {
           table: "product_features",
           data: data.features?.map((featureId: string) => ({
             product_id: product.id,
-            feature_id: parseInt(featureId)
+            feature_id: parseInt(featureId),
+            description: data.featureDescriptions?.[featureId] || null
           })) || []
         }
       ];
@@ -719,88 +723,121 @@ export default function CreateProduct() {
 
             <FormField
               control={form.control}
-              name="applications" 
-              render={({ field }) => {
-                const [filteredApplications, setFilteredApplications] = useState(applications);
-                return (
+              name="applications"
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>응용 분야</FormLabel>
                   <FormControl>
-                    <div className="flex flex-wrap gap-2">
-                      {field.value?.map((appId: string) => {
-                        const app = applications.find(a => a.id.toString() === appId);
-                        return app ? (
-                          <Badge key={appId} variant="secondary" className="flex items-center gap-1">
-                            {app.name}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-4 w-4 p-0 hover:bg-transparent"
-                              onClick={() => {
-                                field.onChange(field.value.filter((id: string) => id !== appId));
-                              }}
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </Badge>
-                        ) : null;
-                      })}
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button variant="outline" size="sm" className="h-8">
-                            <Plus className="h-4 w-4" /> 응용 분야 선택
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-[400px] max-h-[600px] overflow-y-auto">
-                          <DialogHeader>
-                            <DialogTitle>응용 분야 선택</DialogTitle>
-                          </DialogHeader>
-                          <div className="py-4">
-                            <Input
-                              type="search"
-                              placeholder="응용 분야 검색..."
-                              className="mb-4"
-                              onChange={(e) => {
-                                const searchInput = e.target.value.toLowerCase();
-                                setFilteredApplications(
-                                  applications.filter(app =>
-                                    app.name.toLowerCase().includes(searchInput)
-                                  )
+                    <div className="space-y-4">
+                      <div className="flex flex-wrap gap-2">
+                        {field.value?.map((appId: string) => {
+                          const app = applications.find(a => a.id.toString() === appId);
+                          return app ? (
+                            <Badge key={appId} variant="secondary" className="flex items-center gap-1">
+                              {app.name}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-4 w-4 p-0 hover:bg-transparent"
+                                onClick={() => {
+                                  field.onChange(field.value.filter((id: string) => id !== appId));
+                                }}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </Badge>
+                          ) : null;
+                        })}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Textarea 
+                          placeholder="응용분야1,부모응용분야1&#10;응용분야2,부모응용분야2"
+                          onChange={async (e) => {
+                            const text = e.target.value;
+                            const rows = text.split('\n');
+                            const newApplications: Application[] = [];
+
+                            for (const row of rows) {
+                              const [appName, parentName, description] = row.split(',').map(s => s.trim());
+                              if (appName && parentName && !appName.toLowerCase().startsWith('name')) {
+                                let app = applications.find(a => a.name === appName);
+                                let parentApp = applications.find(a => a.name === parentName);
+
+                                // 부모 응용분야가 없는 경우에만 새로 생성
+                                if (!parentApp) {
+                                  try {
+                                    const { data: parentData, error: parentError } = await supabase
+                                      .from('applications')
+                                      .insert([{ name: parentName }])
+                                      .select()
+                                      .single();
+
+                                    if (parentError) throw parentError;
+                                    parentApp = parentData;
+                                    setApplications(prev => [...prev, parentData]);
+                                  } catch (error) {
+                                    console.error('부모 응용분야 추가 중 오류 발생:', error);
+                                    continue;
+                                  }
+                                }
+
+                                if (!app && parentApp) {
+                                  try {
+                                    const { data: appData, error: appError } = await supabase
+                                      .from('applications')
+                                      .insert([{ 
+                                        name: appName,
+                                        parent_id: parentApp.id,
+                                        description: description 
+                                      }])
+                                      .select()
+                                      .single();
+
+                                    if (appError) throw appError;
+                                    app = appData;
+                                    setApplications(prev => [...prev, appData]);
+                                    newApplications.push(appData);
+                                  } catch (error) {
+                                    console.error('응용분야 추가 중 오류 발생:', error);
+                                    continue;
+                                  }
+                                } else if (app) {
+                                  newApplications.push(app);
+                                }
+                              }
+                            }
+
+                            if (newApplications.length > 0) {
+                              const dialog = window.confirm(
+                                `다음 응용분야들을 추가하시겠습니까?\n${newApplications.map(app => app.name).join(', ')}`
+                              );
+
+                              if (dialog) {
+                                const newIds = newApplications.map(app => app.id.toString());
+                                const existingIds = field.value || [];
+                                const uniqueNewIds = newIds.filter(id => !existingIds.includes(id));
+                                field.onChange([...existingIds, ...uniqueNewIds]);
+                                
+                                console.log('새로 추가된 응용분야:', 
+                                  newApplications
+                                    .filter(app => !existingIds.includes(app.id.toString()))
+                                    .map(app => `${app.name} (ID: ${app.id})`)
+                                    .join(', ')
                                 );
-                              }}
-                            />
-                            <div className="space-y-2">
-                              {filteredApplications.map((app) => (
-                                <div key={app.id} className="flex items-center gap-2">
-                                  <input
-                                    type="checkbox"
-                                    id={`app-${app.id}`}
-                                    checked={field.value?.includes(app.id.toString())}
-                                    onChange={(e) => {
-                                      const appId = app.id.toString();
-                                      if (e.target.checked) {
-                                        field.onChange([...(field.value || []), appId]);
-                                      } else {
-                                        field.onChange(field.value?.filter((id: string) => id !== appId));
-                                      }
-                                    }}
-                                  />
-                                  <label htmlFor={`app-${app.id}`}>{app.name}</label>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                          <DialogFooter>
-                            <Button type="button" variant="secondary" onClick={() => field.onChange([])}>
-                              초기화
-                            </Button>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
+                              }
+                            }
+                          }}
+                          className="min-h-[100px]"
+                        />
+                        <p className="text-sm text-gray-500">
+                          각 줄에 &quot;응용분야이름,부모응용분야이름&quot; 형식으로 입력하세요
+                        </p>
+                      </div>
                     </div>
                   </FormControl>
                 </FormItem>
-              )}}
+              )}
             />
 
             <FormField
@@ -888,91 +925,171 @@ export default function CreateProduct() {
                 </FormItem>
               )}}
             />
-
             <FormField
               control={form.control}
               name="features"
-              render={({ field }) => {
-                const [filteredFeatures, setFilteredFeatures] = useState(features);
-                return (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>특징</FormLabel>
                   <FormControl>
-                    <div className="flex flex-wrap gap-2">
-                      {field.value?.map((featureId: string) => {
-                        const feature = features.find(f => f.id.toString() === featureId);
-                        return feature ? (
-                          <Badge key={featureId} variant="secondary" className="flex items-center gap-1">
-                            {feature.name}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-4 w-4 p-0 hover:bg-transparent"
-                              onClick={() => {
-                                field.onChange(field.value.filter((id: string) => id !== featureId));
-                              }}
-                            >
-                              <X className="h-3 w-3" />
+                    <div className="space-y-4">
+                      <div className="flex flex-wrap gap-2">
+                        {field.value?.map((featureId: string) => {
+                          const feature = features.find(f => f.id.toString() === featureId);
+                          return feature ? (
+                            <Badge key={featureId} variant="secondary" className="flex items-center gap-1">
+                              {feature.name}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-4 w-4 p-0 hover:bg-transparent"
+                                onClick={() => {
+                                  field.onChange(field.value.filter((id: string) => id !== featureId));
+                                }}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </Badge>
+                          ) : null;
+                        })}
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm" className="h-8">
+                              <Plus className="h-4 w-4" /> 특징 추가
                             </Button>
-                          </Badge>
-                        ) : null;
-                      })}
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button variant="outline" size="sm" className="h-8">
-                            <Plus className="h-4 w-4" /> 특징 선택
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-[400px] max-h-[600px] overflow-y-auto">
-                          <DialogHeader>
-                            <DialogTitle>특징 선택</DialogTitle>
-                          </DialogHeader>
-                          <div className="py-4">
-                            <Input
-                              type="search"
-                              placeholder="특징 검색..."
-                              className="mb-4"
-                              onChange={(e) => {
-                                const searchInput = e.target.value.toLowerCase();
-                                setFilteredFeatures(
-                                  features.filter(feature =>
-                                    feature.name.toLowerCase().includes(searchInput)
-                                  )
-                                );
-                              }}
-                            />
-                            <div className="space-y-2">
-                              {filteredFeatures.map((feature) => (
-                                <div key={feature.id} className="flex items-center gap-2">
-                                  <input
-                                    type="checkbox"
-                                    id={`feature-${feature.id}`}
-                                    checked={field.value?.includes(feature.id.toString())}
-                                    onChange={(e) => {
-                                      const featureId = feature.id.toString();
-                                      if (e.target.checked) {
-                                        field.onChange([...(field.value || []), featureId]);
-                                      } else {
-                                        field.onChange(field.value?.filter((id: string) => id !== featureId));
-                                      }
-                                    }}
-                                  />
-                                  <label htmlFor={`feature-${feature.id}`}>{feature.name}</label>
-                                </div>
-                              ))}
+                          </DialogTrigger>
+                          <DialogContent className="max-w-[400px] max-h-[600px] overflow-y-auto">
+                            <DialogHeader>
+                              <DialogTitle>특징 추가</DialogTitle>
+                            </DialogHeader>
+                            <div className="py-4">
+                              <Input
+                                type="search"
+                                placeholder="특징 검색..."
+                                className="mb-4"
+                                onChange={(e) => {
+                                  const searchInput = e.target.value.toLowerCase();
+                                  setFilteredFeatures(
+                                    features.filter(feature =>
+                                      feature.name.toLowerCase().includes(searchInput)
+                                    )
+                                  );
+                                }}
+                              />
+                              <div className="space-y-2">
+                                {filteredFeatures.map((feature) => (
+                                  <div key={feature.id} className="flex flex-col gap-2">
+                                    <div className="flex items-center gap-2">
+                                      <input
+                                        type="checkbox"
+                                        id={`feature-${feature.id}`}
+                                        checked={field.value?.includes(feature.id.toString())}
+                                        onChange={(e) => {
+                                          const featureId = feature.id.toString();
+                                          if (e.target.checked) {
+                                            field.onChange([...(field.value || []), featureId]);
+                                          } else {
+                                            field.onChange(field.value?.filter((id: string) => id !== featureId));
+                                          }
+                                        }}
+                                      />
+                                      <label htmlFor={`feature-${feature.id}`}>{feature.name}</label>
+                                    </div>
+                                    {field.value?.includes(feature.id.toString()) && (
+                                      <Input
+                                        type="text"
+                                        placeholder="특징 설명"
+                                        onChange={(e) => {
+                                          form.setValue(`featureDescriptions.${feature.id}`, e.target.value);
+                                        }}
+                                      />
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
                             </div>
-                          </div>
-                          <DialogFooter>
-                            <Button type="button" variant="secondary" onClick={() => field.onChange([])}>
-                              초기화
-                            </Button>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
+                            <DialogFooter>
+                              <Button type="button" variant="secondary" onClick={() => field.onChange([])}>
+                                초기화
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+
+                      <div className="space-y-2">
+                        <FormLabel>CSV로 특징 추가</FormLabel>
+                        <Textarea 
+                          placeholder="특징이름,설명&#10;특징이름2,설명2"
+                          onChange={async (e) => {
+                            const csvText = e.target.value;
+                            const rows = csvText.split('\n');
+                            
+                            const newFeatures: {id: string, description: string}[] = [];
+                            const addedFeatures: {name: string, id: string}[] = [];
+                            
+                            for (const row of rows) {
+                              const [featureName, description] = row.split(',').map(s => s.trim());
+                              if (featureName && featureName.toLowerCase() !== 'name') {
+                                let feature = features.find(f => f.name === featureName);
+                                
+                                if (!feature) {
+                                  try {
+                                    const { data: newFeature, error } = await supabase
+                                      .from('features')
+                                      .insert([{ name: featureName }])
+                                      .select()
+                                      .single();
+                                      
+                                    if (error) throw error;
+                                    if (!newFeature) throw new Error('Failed to create feature');
+                                    
+                                    feature = newFeature;
+                                    setFeatures(prev => [...prev, newFeature]);
+                                    setFilteredFeatures(prev => [...prev, newFeature]);
+                                    addedFeatures.push({name: featureName, id: newFeature.id.toString()});
+                                  } catch (error) {
+                                    console.error('특징 추가 중 오류 발생:', error);
+                                    continue;
+                                  }
+                                }
+
+                                if (feature) {
+                                  const featureId = feature.id.toString();
+                                  if (!field.value?.includes(featureId)) {
+                                    newFeatures.push({id: featureId, description: description || ''});
+                                  }
+                                }
+                              }
+                            }
+
+                            if (newFeatures.length > 0) {
+                              const updatedFeatures = [...(field.value || [])];
+                              newFeatures.forEach(({id, description}) => {
+                                if (!updatedFeatures.includes(id)) {
+                                  updatedFeatures.push(id);
+                                  if (description) {
+                                    form.setValue(`featureDescriptions.${id}`, description);
+                                  }
+                                }
+                              });
+                              field.onChange(updatedFeatures);
+                            }
+
+                            if (addedFeatures.length > 0) {
+                              console.log('새로 추가된 특징:', addedFeatures.map(f => `${f.name} (ID: ${f.id})`).join(', '));
+                            }
+                          }}
+                          className="min-h-[100px]"
+                        />
+                        <p className="text-sm text-gray-500">
+                          각 줄에 &quot;특징이름,설명&quot; 형식으로 입력하세요
+                        </p>
+                      </div>
                     </div>
                   </FormControl>
                 </FormItem>
-              )}}/>
+              )}/>
           </CardContent>
         </Card>
 

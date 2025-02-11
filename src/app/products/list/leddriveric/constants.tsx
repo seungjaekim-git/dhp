@@ -79,38 +79,45 @@ export const getData = async () => {
 
   // 제품 데이터를 스키마에 맞게 변환합니다
   const mergedData = products.map(product => {
-    const specs = LEDDriverICInfoSchema.parse(product.specifications);
-    
-    // specifications JSON 데이터 정규화
-    const ledDriverIC = {
-      ...product,
-      ...specs,
+    try {
+      console.log("Raw specifications:", product.specifications); // 원본 데이터 로깅
+      const specs = LEDDriverICInfoSchema.parse(product.specifications);
       
-      // 배열 데이터 정규화
-      categories: product.product_categories.map(cat => ({
-        category: cat.categories
-      })),
+      // specifications JSON 데이터 정규화
+      const ledDriverIC = {
+        ...product,
+        ...specs,
+        
+        // 배열 데이터 정규화
+        categories: product.product_categories.map(cat => ({
+          category: cat.categories
+        })),
 
-      certifications: product.product_certifications.map(cert => ({
-        certification: cert.certifications
-      })),
+        certifications: product.product_certifications.map(cert => ({
+          certification: cert.certifications
+        })),
 
-      features: product.product_features.map(feat => feat.features),
+        features: product.product_features.map(feat => feat.features),
 
-      applications: product.product_applications.map(app => ({
-        application: app.applications
-      })),
+        applications: product.product_applications.map(app => ({
+          application: app.applications
+        })),
 
-      documents: product.product_documents.map(doc => ({
-        document: {
-          ...doc.documents,
-          type: doc.documents.document_types
-        }
-      }))
-    };
-    console.log(ledDriverIC);
-    return ledDriverIC as unknown as LEDDriverICColumnSchema;
-  });
+        documents: product.product_documents.map(doc => ({
+          document: {
+            ...doc.documents,
+            type: doc.documents.document_types
+          }
+        }))
+      };
+      console.log("Parsed ledDriverIC:", ledDriverIC); // 파싱된 데이터 로깅
+      return ledDriverIC as unknown as LEDDriverICColumnSchema;
+    } catch (error) {
+      console.error('데이터 파싱 오류:', error);
+      console.error('문제가 발생한 제품:', product);
+      return null;
+    }
+  }).filter(Boolean); // null 값 제거
 
   return mergedData;
 };
