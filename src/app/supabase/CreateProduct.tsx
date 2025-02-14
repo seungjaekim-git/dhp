@@ -733,105 +733,123 @@ export default function CreateProduct() {
                         {field.value?.map((appId: string) => {
                           const app = applications.find(a => a.id.toString() === appId);
                           return app ? (
-                            <Badge key={appId} variant="secondary" className="flex items-center gap-1">
+                            <Button
+                              key={appId}
+                              variant="outline"
+                              size="sm"
+                              className="h-8 flex items-center gap-1"
+                              onClick={() => {
+                                const newValue = field.value.filter((id: string) => id !== appId);
+                                field.onChange(newValue);
+                                form.setValue('applications', newValue);
+                              }}
+                            >
                               {app.name}
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-4 w-4 p-0 hover:bg-transparent"
-                                onClick={() => {
-                                  field.onChange(field.value.filter((id: string) => id !== appId));
-                                }}
-                              >
-                                <X className="h-3 w-3" />
-                              </Button>
-                            </Badge>
+                              <X className="h-3 w-3" />
+                            </Button>
                           ) : null;
                         })}
                       </div>
 
                       <div className="space-y-2">
                         <Textarea 
-                          placeholder="응용분야1,부모응용분야1&#10;응용분야2,부모응용분야2"
+                          placeholder="응용분야1,부모응용분야ID1&#10;응용분야2,부모응용분야ID2"
                           onChange={async (e) => {
                             const text = e.target.value;
                             const rows = text.split('\n');
-                            const newApplications: Application[] = [];
+                            const allApplicationIds: string[] = [];
+                            const newFeatures: {name: string, parent_id: number | null}[] = [];
+                            const invalidRows: string[] = [];
 
                             for (const row of rows) {
-                              const [appName, parentName, description] = row.split(',').map(s => s.trim());
-                              if (appName && parentName && !appName.toLowerCase().startsWith('name')) {
-                                let app = applications.find(a => a.name === appName);
-                                let parentApp = applications.find(a => a.name === parentName);
+                              const [appName, parentId] = row.split(',').map(s => s.trim());
+                              if (!appName || appName.toLowerCase().startsWith('name')) continue;
 
-                                // 부모 응용분야가 없는 경우에만 새로 생성
-                                if (!parentApp) {
-                                  try {
-                                    const { data: parentData, error: parentError } = await supabase
-                                      .from('applications')
-                                      .insert([{ name: parentName }])
-                                      .select()
-                                      .single();
+                              if (parentId) {
+                                const parentExists = applications.some(a => a.id.toString() === parentId);
+                                if (!parentExists) {
+                                  invalidRows.push(`${appName}: 존재하지 않는 부모 ID (${parentId})`);
+                                  continue;
+                                }
+                              }
 
-                                    if (parentError) throw parentError;
-                                    parentApp = parentData;
-                                    setApplications(prev => [...prev, parentData]);
-                                  } catch (error) {
-                                    console.error('부모 응용분야 추가 중 오류 발생:', error);
-                                    continue;
-                                  }
+                              const app = applications.find(a => 
+                                a.name.toLowerCase() === appName.toLowerCase()
+                              );
+                              
+                              if (app) {
+                                allApplicationIds.push(app.id.toString());
+                              } else {
+                                const { data: existingApps } = await supabase
+                                  .from('applications')
+                                  .select('name')
+                                  .ilike('name', appName);
+
+                                if (existingApps && existingApps.length > 0) {
+                                  invalidRows.push(`${appName}: 이미 존재하는 응용분야 (대소문자 구분 없음)`);
+                                  continue;
                                 }
 
-                                if (!app && parentApp) {
-                                  try {
-                                    const { data: appData, error: appError } = await supabase
-                                      .from('applications')
-                                      .insert([{ 
-                                        name: appName,
-                                        parent_id: parentApp.id,
-                                        description: description 
-                                      }])
-                                      .select()
-                                      .single();
-
-                                    if (appError) throw appError;
-                                    app = appData;
-                                    setApplications(prev => [...prev, appData]);
-                                    newApplications.push(appData);
-                                  } catch (error) {
-                                    console.error('응용분야 추가 중 오류 발생:', error);
-                                    continue;
-                                  }
-                                } else if (app) {
-                                  newApplications.push(app);
-                                }
+                                newFeatures.push({
+                                  name: appName,
+                                  parent_id: parentId ? parseInt(parentId) : null
+                                });
                               }
                             }
 
-                            if (newApplications.length > 0) {
-                              const dialog = window.confirm(
-                                `다음 응용분야들을 추가하시겠습니까?\n${newApplications.map(app => app.name).join(', ')}`
+                            if (invalidRows.length > 0) {
+                              alert(`다음 항목들에 문제가 있습니다:\n\n${invalidRows.join('\n')}`);
+                              return;
+                            }
+
+                            if (allApplicationIds.length > 0 || newFeatures.length > 0) {
+                              const existingIds = field.value || [];
+                              const uniqueAllIds = Array.from(new Set([...existingIds, ...allApplicationIds]));
+                              
+                              const appsToAdd = applications.filter(app => 
+                                allApplicationIds.includes(app.id.toString())
                               );
+                              
+                              let confirmMessage = '';
+                              if (appsToAdd.length > 0) {
+                                confirmMessage += `[기존 응용분야]\n${appsToAdd.map(app => `- ${app.name}`).join('\n')}\n\n`;
+                              }
+                              if (newFeatures.length > 0) {
+                                confirmMessage += `[새로운 응용분야]\n${newFeatures.map(f => `- ${f.name} ${f.parent_id ? `(부모ID: ${f.parent_id})` : ''}`).join('\n')}`;
+                              }
+
+                              const dialog = window.confirm(`다음 응용분야들을 추가하시겠습니까?\n\n${confirmMessage}`);
 
                               if (dialog) {
-                                const newIds = newApplications.map(app => app.id.toString());
-                                const existingIds = field.value || [];
-                                const uniqueNewIds = newIds.filter(id => !existingIds.includes(id));
-                                field.onChange([...existingIds, ...uniqueNewIds]);
-                                
-                                console.log('새로 추가된 응용분야:', 
-                                  newApplications
-                                    .filter(app => !existingIds.includes(app.id.toString()))
-                                    .map(app => `${app.name} (ID: ${app.id})`)
-                                    .join(', ')
-                                );
+                                if (newFeatures.length > 0) {
+                                  const newFeatureIds = await Promise.all(newFeatures.map(async (feature) => {
+                                    const { data, error } = await supabase
+                                      .from('applications')
+                                      .insert([feature])
+                                      .select('id');
+                                    if (error) {
+                                      console.error('새 응용분야 추가 실패:', error);
+                                      alert(`새 응용분야 추가 실패: ${error.message}`);
+                                      return null;
+                                    }
+                                    return data[0].id.toString();
+                                  }));
+                                  
+                                  const validNewIds = newFeatureIds.filter(id => id !== null) as string[];
+                                  const newValue = [...uniqueAllIds, ...validNewIds];
+                                  field.onChange(newValue);
+                                  form.setValue('applications', newValue);
+                                } else {
+                                  field.onChange(uniqueAllIds);
+                                  form.setValue('applications', uniqueAllIds);
+                                }
                               }
                             }
                           }}
                           className="min-h-[100px]"
                         />
                         <p className="text-sm text-gray-500">
-                          각 줄에 &quot;응용분야이름,부모응용분야이름&quot; 형식으로 입력하세요
+                          각 줄에 &quot;응용분야이름,부모응용분야ID&quot; 형식으로 입력하세요
                         </p>
                       </div>
                     </div>
@@ -1025,59 +1043,103 @@ export default function CreateProduct() {
                             const csvText = e.target.value;
                             const rows = csvText.split('\n');
                             
-                            const newFeatures: {id: string, description: string}[] = [];
-                            const addedFeatures: {name: string, id: string}[] = [];
+                            const newFeatures: {name: string, description: string}[] = [];
+                            const existingFeatures: {name: string, description: string}[] = [];
+                            const invalidRows: string[] = [];
                             
                             for (const row of rows) {
                               const [featureName, description] = row.split(',').map(s => s.trim());
-                              if (featureName && featureName.toLowerCase() !== 'name') {
-                                let feature = features.find(f => f.name === featureName);
+                              if (!featureName || featureName.toLowerCase() === 'name') continue;
+
+                              const feature = features.find(f => 
+                                f.name.toLowerCase() === featureName.toLowerCase()
+                              );
+
+                              if (feature) {
+                                existingFeatures.push({
+                                  name: feature.name,
+                                  description: description || ''
+                                });
+                              } else {
+                                // 특징 이름 유효성 검사
+                                if (featureName.length < 2) {
+                                  invalidRows.push(`${featureName}: 특징 이름이 너무 짧습니다`);
+                                  continue;
+                                }
+                                newFeatures.push({
+                                  name: featureName,
+                                  description: description || ''
+                                });
+                              }
+                            }
+
+                            if (invalidRows.length > 0) {
+                              alert(`다음 항목들에 문제가 있습니다:\n\n${invalidRows.join('\n')}`);
+                              return;
+                            }
+
+                            if (newFeatures.length > 0 || existingFeatures.length > 0) {
+                              let confirmMessage = '';
+                              if (existingFeatures.length > 0) {
+                                confirmMessage += `[기존 특징]\n${existingFeatures.map(f => 
+                                  `- ${f.name}${f.description ? `: ${f.description}` : ''}`
+                                ).join('\n')}\n\n`;
+                              }
+                              if (newFeatures.length > 0) {
+                                confirmMessage += `[새로운 특징]\n${newFeatures.map(f => 
+                                  `- ${f.name}${f.description ? `: ${f.description}` : ''}`
+                                ).join('\n')}`;
+                              }
+
+                              const dialog = window.confirm(`다음 특징들을 추가하시겠습니까?\n\n${confirmMessage}`);
+
+                              if (dialog) {
+                                const updatedFeatures = [...(field.value || [])];
                                 
-                                if (!feature) {
+                                // 기존 특징 처리
+                                for (const {name, description} of existingFeatures) {
+                                  const feature = features.find(f => 
+                                    f.name.toLowerCase() === name.toLowerCase()
+                                  );
+                                  if (feature) {
+                                    const featureId = feature.id.toString();
+                                    if (!updatedFeatures.includes(featureId)) {
+                                      updatedFeatures.push(featureId);
+                                      if (description) {
+                                        form.setValue(`featureDescriptions.${featureId}`, description);
+                                      }
+                                    }
+                                  }
+                                }
+
+                                // 새로운 특징 추가
+                                for (const {name, description} of newFeatures) {
                                   try {
                                     const { data: newFeature, error } = await supabase
                                       .from('features')
-                                      .insert([{ name: featureName }])
+                                      .insert([{ name }])
                                       .select()
                                       .single();
                                       
                                     if (error) throw error;
                                     if (!newFeature) throw new Error('Failed to create feature');
                                     
-                                    feature = newFeature;
+                                    const featureId = newFeature.id.toString();
+                                    updatedFeatures.push(featureId);
+                                    if (description) {
+                                      form.setValue(`featureDescriptions.${featureId}`, description);
+                                    }
+                                    
                                     setFeatures(prev => [...prev, newFeature]);
                                     setFilteredFeatures(prev => [...prev, newFeature]);
-                                    addedFeatures.push({name: featureName, id: newFeature.id.toString()});
                                   } catch (error) {
                                     console.error('특징 추가 중 오류 발생:', error);
-                                    continue;
+                                    alert(`'${name}' 특징 추가 실패: ${error}`);
                                   }
                                 }
 
-                                if (feature) {
-                                  const featureId = feature.id.toString();
-                                  if (!field.value?.includes(featureId)) {
-                                    newFeatures.push({id: featureId, description: description || ''});
-                                  }
-                                }
+                                field.onChange(updatedFeatures);
                               }
-                            }
-
-                            if (newFeatures.length > 0) {
-                              const updatedFeatures = [...(field.value || [])];
-                              newFeatures.forEach(({id, description}) => {
-                                if (!updatedFeatures.includes(id)) {
-                                  updatedFeatures.push(id);
-                                  if (description) {
-                                    form.setValue(`featureDescriptions.${id}`, description);
-                                  }
-                                }
-                              });
-                              field.onChange(updatedFeatures);
-                            }
-
-                            if (addedFeatures.length > 0) {
-                              console.log('새로 추가된 특징:', addedFeatures.map(f => `${f.name} (ID: ${f.id})`).join(', '));
                             }
                           }}
                           className="min-h-[100px]"
