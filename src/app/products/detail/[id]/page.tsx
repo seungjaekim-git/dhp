@@ -19,21 +19,30 @@ export default async function ProductDetail({ params }: { params: { id: string }
   const { data: product, error } = await supabase
     .from("products")
     .select(`
+      *,
+      manufacturers (
         *,
-        led_driver_ic!inner (
-          *,
-          led_driver_ic_certifications (certification_id),
-          led_driver_ic_features (feature_id),
-          led_driver_ic_applications (application_id),
-          led_driver_ic_options (
-            *,
-            led_driver_ic_option_package_types (package_type_id)
-          )
-        ),
-        images (*),
+        manufacturer_emails (*),
+        manufacturer_phones (*),
+        manufacturer_faxes (*),
+        manufacturer_branches (*),
+        manufacturer_images (*)
+      ),
+      images (*),
+      product_documents (
         documents (*)
-      `)
-      .eq('id', params.id)
+      ),
+      product_features (
+        features (*)
+      ),
+      product_applications (
+        applications (*)
+      ),
+      product_certifications (
+        certifications (*)
+      )
+    `)
+    .eq('id', params.id)
     .single();
 
   if (error || !product) {
