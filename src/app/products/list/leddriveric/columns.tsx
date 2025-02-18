@@ -5,19 +5,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import convert from 'convert-units';
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { FileSpreadsheet } from "lucide-react";
 import { ExternalLink } from "lucide-react";
 import { Building } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { TextFilter, SingleSliderFilter, DualSliderFilter, CheckboxFilter, SelectFilter, ComboboxFilter } from "./filter";
 
 interface Column {
   key: string;
   header: string;
   subheader?: string;
   symbol?: React.ReactNode;
-  filterType?: 'text' | 'range' | 'select';
+  filterType?: 'text' | 'single-slider' | 'dual-slider' | 'checkbox' | 'select' | 'combobox';
   filterOptions?: string[];
   unit?: {
     current: string;
@@ -69,7 +68,20 @@ const formatValue = (value: number | undefined, fromUnit: string, toUnit: string
   }
 };
 
-export const useColumns = (): Column[] => {
+interface FilterOptions {
+  categories?: string[];
+  certifications?: string[];
+  applications?: string[];
+  topologies?: string[];
+  dimmingMethods?: string[];
+  mountingStyles?: string[];
+  storageTypes?: string[];
+  packageTypes?: string[];
+  thermalPadOptions?: string[];
+  numberOfOutputs?: string[];
+}
+
+export const useColumns = (filterOptions: FilterOptions = {}): Column[] => {
   const [inputVoltageUnit, setInputVoltageUnit] = React.useState('V');
   const [outputVoltageUnit, setOutputVoltageUnit] = React.useState('V');
   const [currentUnit, setCurrentUnit] = React.useState('mA');
@@ -150,10 +162,10 @@ export const useColumns = (): Column[] => {
           </div>
           
           <Link href={`/products/detail/${row.id}`}>
-            <div className="bg-blue-50/20 p-3 rounded-md shadow-lg w-full hover:bg-blue-100/30 cursor-pointer transition-colors">
+            <div className="bg-blue-50/20 p-3 rounded-md shadow-lg max-w-sm hover:bg-blue-100/30 cursor-pointer transition-colors">
               <div className="flex flex-col">
-                <div className="line-clamp-2 font-bold text-lg">{row.name || 'N/A'}</div>
-                <span className="text-muted-foreground text-sm">{row.subtitle || 'N/A'}</span>
+                <div className="line-clamp-1 font-bold text-lg">{row.name || 'N/A'}</div>
+                <span className="text-muted-foreground text-sm truncate">{row.subtitle || 'N/A'}</span>
               </div>
             </div>
           </Link>
@@ -163,41 +175,62 @@ export const useColumns = (): Column[] => {
     {
       key: "categories",
       header: "기본 정보",
-      subheader: "카테고리",
-      filterType: 'select',
-      filterOptions: ['LED Driver', 'Power Management', 'Lighting Control'],
+      subheader: "카테고리", 
+      filterType: 'combobox',
+      filterOptions: filterOptions.categories || [],
       tooltip: {
         title: "제품 카테고리",
         description: "제품이 속한 카테고리 분류입니다.",
       },
-      render: (row) => (
-        <div className="flex flex-wrap gap-1 justify-end">
-          {!row.categories || row.categories.length === 0 ? (
-            <Badge variant="outline" className="bg-blue-50/20">N/A</Badge>
-          ) : (
-            row.categories.map((cat: any) => {
-              const categoryPath = [
-                cat.category.parent?.parent?.name,
-                cat.category.parent?.name,
-                cat.category.name
-              ].filter(Boolean).join(' > ');
-              
-              return (
-                <Badge key={cat.category.name} variant="outline" className="bg-blue-50/20">
-                  {categoryPath}
-                </Badge>
-              );
-            })
-          )}
-        </div>
-      )
+      render: (row) => {
+        const validCategories = row.categories?.filter((cat: any) => cat.category?.name && cat.category?.parent_id != null) || [];
+        
+        if (validCategories.length === 0) {
+          return (
+            <div className="flex items-center h-[28px] px-1">
+              <Badge 
+                variant="outline" 
+                className="bg-gray-50/50 text-gray-400 h-[24px] min-w-[60px] flex items-center justify-center"
+              >
+                N/A
+              </Badge>
+            </div>
+          );
+        }
+
+        return (
+          <div className="flex flex-wrap gap-1.5 px-1">
+            {validCategories.map((cat: any) => (
+              <Badge 
+                key={cat.category.name}
+                variant="outline"
+                className="bg-blue-50/30 hover:bg-blue-100/40 text-blue-700 
+                          transition-all duration-200 cursor-pointer
+                          h-[24px] min-w-[80px] flex items-center justify-center
+                          border border-blue-200 shadow-sm
+                          font-medium text-xs"
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('setFilter', {
+                    detail: {
+                      key: 'categories',
+                      value: cat.category.name
+                    }
+                  }));
+                }}
+              >
+                {cat.category.name}
+              </Badge>
+            ))}
+          </div>
+        );
+      }
     },
     {
       key: "topologies",
-      header: "기본 정보",
+      header: "기본 정보", 
       subheader: "토폴로지",
-      filterType: 'select',
-      filterOptions: ['Buck', 'Boost', 'Buck-Boost', 'Charge Pump', 'Linear Regulator', 'SEPIC'],
+      filterType: 'checkbox',
+      filterOptions: filterOptions.topologies || [],
       tooltip: {
         title: "전력 변환 토폴로지",
         description: "IC가 지원하는 전력 변환 방식입니다.",
@@ -211,10 +244,10 @@ export const useColumns = (): Column[] => {
       render: (row) => (
         <div className="flex flex-wrap gap-2 justify-end p-1">
           {!row.specifications?.topology || row.specifications.topology.length === 0 ? (
-            <Badge variant="outline" className="bg-amber-50/20 px-3 py-1">N/A</Badge>
+            <Badge variant="outline" className="bg-amber-50/20 hover:bg-amber-100/30 transition-colors px-3 py-1">N/A</Badge>
           ) : (
             row.specifications.topology.map((topology: string) => (
-              <Badge key={topology} variant="outline" className="bg-amber-50/20 px-3 py-1">
+              <Badge key={topology} variant="outline" className="bg-amber-50/20 hover:bg-amber-100/30 transition-colors px-3 py-1">
                 {topology}
               </Badge>
             ))
@@ -226,8 +259,8 @@ export const useColumns = (): Column[] => {
       key: "dimming_methods",
       header: "기본 정보",
       subheader: "디밍 방식",
-      filterType: 'select',
-      filterOptions: ['PWM', 'Analog'],
+      filterType: 'checkbox', 
+      filterOptions: filterOptions.dimmingMethods || [],
       tooltip: {
         title: "밝기 조절 방식",
         description: "LED 밝기를 제어하는 방식입니다.",
@@ -239,10 +272,10 @@ export const useColumns = (): Column[] => {
       render: (row) => (
         <div className="flex flex-wrap gap-1 justify-end">
           {!row.specifications?.dimming_method || row.specifications.dimming_method.length === 0 ? (
-            <Badge variant="outline" className="bg-amber-50/20">N/A</Badge>
+            <Badge variant="outline" className="bg-amber-50/20 hover:bg-amber-100/30 transition-colors">N/A</Badge>
           ) : (
             row.specifications.dimming_method.map((method: string) => (
-              <Badge key={method} variant="outline" className="bg-amber-50/20">
+              <Badge key={method} variant="outline" className="bg-amber-50/20 hover:bg-amber-100/30 transition-colors">
                 {method}
               </Badge>
             ))
@@ -256,7 +289,7 @@ export const useColumns = (): Column[] => {
       subheader: "출력 수",
       symbol: <div>N<sub>ch</sub></div>,
       filterType: 'select',
-      filterOptions: ['1', '2', '3', '4+'],
+      filterOptions: filterOptions.numberOfOutputs || [],
       tooltip: {
         title: "출력 채널 수",
         description: "LED 드라이버 IC가 지원하는 독립적인 출력 채널의 수입니다.",
@@ -267,7 +300,7 @@ export const useColumns = (): Column[] => {
         ]
       },
       render: (row) => (
-        <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 p-1 font-bold ml-auto rounded-md">
+        <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 hover:bg-green-100/30 transition-colors p-2 font-bold ml-auto rounded-md">
           {row.specifications?.channels || 'N/A'}
         </div>
       )
@@ -277,7 +310,7 @@ export const useColumns = (): Column[] => {
       header: "전기적 특성",
       subheader: "입력 전압",
       symbol: <div>V<sub>IN</sub></div>,
-      filterType: 'range',
+      filterType: 'dual-slider',
       unit: {
         current: inputVoltageUnit,
         available: ['V', 'mV', 'kV'],
@@ -319,7 +352,7 @@ export const useColumns = (): Column[] => {
 
         return (
           <div className="flex items-center gap-2 justify-end">
-            <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 p-1">
+            <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 hover:bg-green-100/30 transition-colors p-2 rounded-md">
               {displayText}
             </div>
           </div>
@@ -331,7 +364,7 @@ export const useColumns = (): Column[] => {
       header: "전기적 특성",
       subheader: "출력 전압",
       symbol: <div>V<sub>OUT</sub></div>,
-      filterType: 'range',
+      filterType: 'dual-slider',
       unit: {
         current: outputVoltageUnit,
         available: ['V', 'mV', 'kV'],
@@ -372,7 +405,7 @@ export const useColumns = (): Column[] => {
 
         return (
           <div className="flex items-center gap-2 justify-end">
-            <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 p-1">
+            <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 hover:bg-green-100/30 transition-colors p-2 rounded-md">
               {displayText}
             </div>
           </div>
@@ -384,7 +417,7 @@ export const useColumns = (): Column[] => {
       header: "전기적 특성",
       subheader: "출력 전류",
       symbol: <div>I<sub>OUT</sub></div>,
-      filterType: 'range',
+      filterType: 'dual-slider',
       unit: {
         current: currentUnit,
         available: ['mA', 'A', 'µA'],
@@ -426,7 +459,7 @@ export const useColumns = (): Column[] => {
 
         return (
           <div className="flex items-center gap-2 justify-end">
-            <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 p-1">
+            <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 hover:bg-green-100/30 transition-colors p-2 rounded-md">
               {displayText}
             </div>
           </div>
@@ -438,7 +471,7 @@ export const useColumns = (): Column[] => {
       header: "전기적 특성",
       subheader: "전류 정확도",
       symbol: <div>ΔI<sub>OUT</sub></div>,
-      filterType: 'range',
+      filterType: 'single-slider',
       tooltip: {
         title: "전류 정확도",
         description: "채널 간 및 IC 간의 전류 정확도입니다.",
@@ -448,11 +481,11 @@ export const useColumns = (): Column[] => {
         ]
       },
       render: (row) => (
-        <div className="flex flex-col items-end gap-1">
-          <div className="font-mono bg-green-50/20 p-1">
+        <div className="flex flex-col items-end gap-2">
+          <div className="font-mono bg-green-50/20 hover:bg-green-100/30 transition-colors p-2 rounded-md">
             Ch: ±{row.specifications?.current_accuracy?.between_channels || 'N/A'}%
           </div>
-          <div className="font-mono bg-green-50/20 p-1">
+          <div className="font-mono bg-green-50/20 hover:bg-green-100/30 transition-colors p-2 rounded-md">
             IC: ±{row.specifications?.current_accuracy?.between_ics || 'N/A'}%
           </div>
         </div>
@@ -463,7 +496,7 @@ export const useColumns = (): Column[] => {
       header: "전기적 특성",
       subheader: "스위칭 주파수",
       symbol: <div>f<sub>SW</sub></div>,
-      filterType: 'range',
+      filterType: 'dual-slider',
       unit: {
         current: freqUnit,
         available: ['Hz', 'kHz', 'MHz'],
@@ -501,7 +534,7 @@ export const useColumns = (): Column[] => {
 
         return (
           <div className="flex items-center gap-2 justify-end">
-            <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 p-1">
+            <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 hover:bg-green-100/30 transition-colors p-2 rounded-md">
               {displayText}
             </div>
           </div>
@@ -510,10 +543,10 @@ export const useColumns = (): Column[] => {
     },
     {
       key: "operating_temperature",
-      header: "전기적 특성", 
+      header: "전기적 특성",
       subheader: "동작 온도",
       symbol: <div>T<sub>OPR</sub></div>,
-      filterType: 'range',
+      filterType: 'dual-slider',
       unit: {
         current: tempUnit,
         available: ['C', 'F', 'K'],
@@ -555,7 +588,7 @@ export const useColumns = (): Column[] => {
 
         return (
           <div className="flex items-center gap-2 justify-end">
-            <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 p-1">
+            <div className="font-mono max-w-fit line-clamp-2 bg-green-50/20 hover:bg-green-100/30 transition-colors p-2 rounded-md">
               {displayText}
             </div>
           </div>
@@ -567,7 +600,7 @@ export const useColumns = (): Column[] => {
       header: "패키지 정보",
       subheader: "실장 방식",
       filterType: 'select',
-      filterOptions: ['SMD', 'Through Hole'],
+      filterOptions: filterOptions.mountingStyles || [],
       tooltip: {
         title: "실장 방식",
         description: "IC의 PCB 장착 방식입니다.",
@@ -578,17 +611,17 @@ export const useColumns = (): Column[] => {
         ]
       },
       render: (row) => (
-        <div className="max-w-fit line-clamp-2 bg-purple-50/20 p-1 ml-auto">
+        <div className="max-w-fit line-clamp-2 bg-purple-50/20 hover:bg-purple-100/30 transition-colors p-2 ml-auto rounded-md">
           {row.specifications?.mounting_type || 'N/A'}
         </div>
       )
     },
     {
       key: "storage_type",
-      header: "패키지 정보",
+      header: "패키지 정보", 
       subheader: "보관 유형",
       filterType: 'select',
-      filterOptions: ['Tape & Reel', 'Tube', 'Tray'],
+      filterOptions: filterOptions.storageTypes || [],
       tooltip: {
         title: "보관 및 운송 방식",
         description: "IC의 패키징 및 운송을 위한 보관 방식입니다.",
@@ -599,8 +632,8 @@ export const useColumns = (): Column[] => {
         ]
       },
       render: (row) => (
-        <div className="max-w-fit line-clamp-2 bg-purple-50/20 p-1 ml-auto">
-          {row.storage_types?.name || 'N/A'}
+        <div className="max-w-fit line-clamp-2 bg-purple-50/20 hover:bg-purple-100/30 transition-colors p-2 ml-auto rounded-md">
+          {row.supply_package || 'N/A'}
         </div>
       )
     },
@@ -609,7 +642,7 @@ export const useColumns = (): Column[] => {
       header: "패키지 정보",
       subheader: "패키지 타입",
       filterType: 'select',
-      filterOptions: ['SOP', 'SOIC', 'QFN', 'DIP'],
+      filterOptions: filterOptions.packageTypes || [],
       tooltip: {
         title: "패키지 유형",
         description: "IC의 물리적 패키지 형태입니다.",
@@ -621,8 +654,8 @@ export const useColumns = (): Column[] => {
         ]
       },
       render: (row) => (
-        <div className="max-w-fit line-clamp-2 bg-purple-50/20 p-1 ml-auto">
-          {row.specifications?.package_type || 'N/A'}
+        <div className="max-w-fit line-clamp-2 bg-purple-50/20 hover:bg-purple-100/30 transition-colors p-2 ml-auto rounded-md">
+          {row.package_type || 'N/A'}
         </div>
       )
     },
@@ -632,7 +665,7 @@ export const useColumns = (): Column[] => {
       subheader: "써멀패드",
       symbol: <div>T<sub>PAD</sub></div>,
       filterType: 'select',
-      filterOptions: ['Yes', 'No'],
+      filterOptions: filterOptions.thermalPadOptions || [],
       tooltip: {
         title: "써멀패드 유무",
         description: "열 방출을 위한 써멀패드 포함 여부입니다.",
@@ -642,7 +675,7 @@ export const useColumns = (): Column[] => {
         ]
       },
       render: (row) => (
-        <div className="max-w-fit line-clamp-2 bg-purple-50/20 p-1 ml-auto">
+        <div className="max-w-fit line-clamp-2 bg-purple-50/20 hover:bg-purple-100/30 transition-colors p-2 ml-auto rounded-md">
           {row.specifications?.thermal_pad === undefined ? 'N/A' : (row.specifications.thermal_pad ? 'Yes' : 'No')}
         </div>
       )
@@ -662,12 +695,11 @@ export const useColumns = (): Column[] => {
         ]
       },
       render: (row) => (
-        <div className="max-w-fit line-clamp-2 bg-purple-50/20 p-1 ml-auto">
-          {row.package_detail || 'N/A'}
+        <div className="max-w-fit line-clamp-2 bg-purple-50/20 hover:bg-purple-100/30 transition-colors p-2 ml-auto rounded-md">
+          {row.package_case || 'N/A'}
         </div>
       )
     },
-    
     {
       key: "certifications",
       header: "인증/응용",
@@ -687,10 +719,10 @@ export const useColumns = (): Column[] => {
       render: (row) => (
         <div className="flex flex-wrap gap-1 justify-end">
           {!row.certifications || row.certifications.length === 0 ? (
-            <Badge variant="outline" className="bg-pink-50/20">N/A</Badge>
+            <Badge variant="outline" className="bg-pink-50/20 hover:bg-pink-100/30 transition-colors">N/A</Badge>
           ) : (
             row.certifications.map((cert: any) => (
-              <Badge key={cert.certification.name} variant="outline" className="bg-pink-50/20">
+              <Badge key={cert.certification.name} variant="outline" className="bg-pink-50/20 hover:bg-pink-100/30 transition-colors">
                 {cert.certification.name}
               </Badge>
             ))
@@ -701,7 +733,7 @@ export const useColumns = (): Column[] => {
     {
       key: "applications",
       header: "인증/응용",
-      subheader: "응용분야",
+      subheader: "응용분야", 
       filterType: 'select',
       filterOptions: ['Lighting', 'Automotive', 'Industrial', 'Consumer'],
       tooltip: {
@@ -717,13 +749,20 @@ export const useColumns = (): Column[] => {
       render: (row) => (
         <div className="flex flex-wrap gap-1 justify-end">
           {!row.applications || row.applications.length === 0 ? (
-            <Badge variant="outline" className="bg-pink-50/20">N/A</Badge>
+            <Badge variant="outline" className="bg-pink-50/20 hover:bg-pink-100/30 transition-colors">N/A</Badge>
           ) : (
-            row.applications.map((app: any) => (
-              <Badge key={app.application.name} variant="outline" className="bg-pink-50/20">
-                {app.application.name}
-              </Badge>
-            ))
+            <>
+              {row.applications.slice(0, 2).map((app: any) => (
+                <Badge key={app.application.name} variant="outline" className="bg-pink-50/20 hover:bg-pink-100/30 transition-colors">
+                  {app.application.name}
+                </Badge>
+              ))}
+              {row.applications.length > 2 && (
+                <Badge variant="outline" className="bg-pink-50/20 hover:bg-pink-100/30 transition-colors">
+                  +{row.applications.length - 2}
+                </Badge>
+              )}
+            </>
           )}
         </div>
       )

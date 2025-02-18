@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRouter } from "next/navigation";
 import { UnitSelector } from "./columns";
+import { TextFilter, SingleSliderFilter, DualSliderFilter, CheckboxFilter, SelectFilter, ComboboxFilter } from "./filter";
 
 interface DataTableProps<T> {
   data: T[];
@@ -15,7 +16,7 @@ interface DataTableProps<T> {
     key: string;
     header: string;
     subheader?: string;
-    filterType?: 'text' | 'range' | 'select';
+    filterType?: 'text' | 'single-slider' | 'dual-slider' | 'checkbox' | 'select' | 'combobox';
     filterOptions?: string[];
     render?: (row: T) => React.ReactNode;
     symbol?: string;
@@ -90,7 +91,7 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
     if (!columnKey) return;
 
     const diff = e.pageX - startX;
-    const newWidth = Math.max(150, startWidth + diff); // Minimum width of 150px
+    const newWidth = Math.max(150, startWidth + diff);
 
     setColumnWidths(prev => ({
       ...prev,
@@ -104,7 +105,6 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
     document.removeEventListener('mouseup', stopResizing);
   };
 
-  // 검색 및 필터링 로직
   useEffect(() => {
     let filteredData = [...initialData];
 
@@ -180,21 +180,14 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
     }
   };
 
-  // const handleRowClick = (id: number) => {
-  //   router.push(`/products/detail/${id}`);
-  // };
-
   const handleActionSelect = (action: ActionType) => {
     setSelectedAction(action);
     switch (action) {
       case 'compare':
-        // 비교 로직
         break;
       case 'quote':
-        // 견적서 추가 로직
         break;
       case 'copy':
-        // 복사 로직
         break;
     }
   };
@@ -213,9 +206,8 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
 
   return (
     <div className="flex flex-col w-max" ref={tableRef}>
-      {/* 상단 고정 헤더 */}
       <div className="sticky top-0 z-50 shadow-sm bg-white">
-        <div className="flex items-center justify-between p-4">
+        <div className="flex flex-col gap-4 p-4">
           <div className="sticky left-2 z-40 flex items-center gap-4">
             <input
               type="text"
@@ -230,9 +222,9 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
                   <Filter size={16} />
                   필터
                   {Object.keys(filters).length > 0 && (
-                    <Badge variant="secondary" className="ml-2">
+                    <div className="ml-2 px-2 py-0.5 text-xs bg-blue-100 text-blue-600 rounded-full">
                       {Object.keys(filters).length}
-                    </Badge>
+                    </div>
                   )}
                 </Button>
               </SheetTrigger>
@@ -246,36 +238,55 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
                   <div className="bg-white rounded-xl shadow-sm p-6 space-y-6">
                     {columns.map(column => (
                       <div key={column.key} className="space-y-2">
-                        <label className="text-sm font-medium text-blue-900">
-                          {column.header}
-                          {column.subheader && (
-                            <span className="text-xs text-blue-400 ml-2">
-                              ({column.subheader})
-                            </span>
-                          )}
-                        </label>
-                        {column.filterType === 'select' && column.filterOptions ? (
-                          <select
-                            onChange={(e) => setFilters(prev => ({
-                              ...prev,
-                              [column.key]: e.target.value
-                            }))}
-                            className="w-full px-4 py-2 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all"
-                          >
-                            <option value="">전체</option>
-                            {column.filterOptions.map(option => (
-                              <option key={option} value={option}>{option}</option>
-                            ))}
-                          </select>
-                        ) : (
-                          <input
-                            type={column.filterType === 'range' ? 'number' : 'text'}
-                            placeholder={`${column.header} 필터...`}
-                            onChange={(e) => setFilters(prev => ({
-                              ...prev,
-                              [column.key]: e.target.value
-                            }))}
-                            className="w-full px-4 py-2 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all"
+                        {column.filterType === 'text' && (
+                          <TextFilter
+                            label={`${column.header}${column.subheader ? ` (${column.subheader})` : ''}`}
+                            value={filters[column.key] || ''}
+                            onChange={(value) => setFilters(prev => ({ ...prev, [column.key]: value }))}
+                          />
+                        )}
+                        {column.filterType === 'single-slider' && column.tooltip?.ranges && (
+                          <SingleSliderFilter
+                            label={`${column.header}${column.subheader ? ` (${column.subheader})` : ''}`}
+                            value={filters[column.key] || column.tooltip.ranges.min}
+                            onChange={(value) => setFilters(prev => ({ ...prev, [column.key]: value }))}
+                            min={column.tooltip.ranges.min}
+                            max={column.tooltip.ranges.max}
+                            unit={column.tooltip.ranges.unit}
+                          />
+                        )}
+                        {column.filterType === 'dual-slider' && column.tooltip?.ranges && (
+                          <DualSliderFilter
+                            label={`${column.header}${column.subheader ? ` (${column.subheader})` : ''}`}
+                            value={filters[column.key] || [column.tooltip.ranges.min, column.tooltip.ranges.max]}
+                            onChange={(value) => setFilters(prev => ({ ...prev, [column.key]: value }))}
+                            min={column.tooltip.ranges.min}
+                            max={column.tooltip.ranges.max}
+                            unit={column.tooltip.ranges.unit}
+                          />
+                        )}
+                        {column.filterType === 'checkbox' && column.filterOptions && (
+                          <CheckboxFilter
+                            label={`${column.header}${column.subheader ? ` (${column.subheader})` : ''}`}
+                            value={filters[column.key] || []}
+                            onChange={(value) => setFilters(prev => ({ ...prev, [column.key]: value }))}
+                            options={column.filterOptions}
+                          />
+                        )}
+                        {column.filterType === 'select' && column.filterOptions && (
+                          <SelectFilter
+                            label={`${column.header}${column.subheader ? ` (${column.subheader})` : ''}`}
+                            value={filters[column.key] || ''}
+                            onChange={(value) => setFilters(prev => ({ ...prev, [column.key]: value }))}
+                            options={column.filterOptions}
+                          />
+                        )}
+                        {column.filterType === 'combobox' && column.filterOptions && (
+                          <ComboboxFilter
+                            label={`${column.header}${column.subheader ? ` (${column.subheader})` : ''}`}
+                            value={filters[column.key] || ''}
+                            onChange={(value) => setFilters(prev => ({ ...prev, [column.key]: value }))}
+                            options={column.filterOptions}
                           />
                         )}
                       </div>
@@ -308,32 +319,42 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
               {Object.entries(filters).map(([key, value]) => {
                 const column = columns.find(col => col.key === key);
                 return (
-                  <Badge key={key} variant="secondary" className="px-3 py-1">
-                    {column?.header}: {value}
+                  <div key={key} className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-lg text-sm">
+                    <span className="font-medium text-blue-700">{column?.header}</span>
+                    <span className="text-blue-500">{column?.subheader}</span>
+                    <span className="text-blue-900">: {value}</span>
                     <button
                       onClick={() => removeFilter(key)}
-                      className="ml-2 hover:text-red-500"
+                      className="ml-2 p-1 hover:bg-blue-100 rounded-full transition-colors"
                     >
-                      <X size={14} />
+                      <X size={14} className="text-blue-600" />
                     </button>
-                  </Badge>
+                  </div>
                 );
               })}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setFilters({})}
+                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+              >
+                모든 필터 지우기
+              </Button>
             </div>
           )}
         </div>
       </div>
 
       {/* 테이블 컨테이너 */}
-      <div className="sticky top-[72px] z-40 shadow-sm pb-[72px]">
-        <table className="w-max min-w-full divide-y divide-gray-200 table-auto">
-          <thead className="sticky top-[72px] bg-gray-50 z-40 shadow-sm">
-            <tr>
-              <th className="sticky left-0 z-40 bg-gray-50 px-3 py-2 hover:bg-gray-100 transition-colors border-r">
-                <div className="flex items-center gap-2 whitespace-nowrap">
+      <div className="sticky top-[72px] z-40 shadow-lg border-b border-gray-300 pb-[60px]">
+        <table className="w-max min-w-full divide-y divide-gray-200 table-auto text-[11px]">
+          <thead className=" sticky top-[72px] bg-gray-50 z-40 shadow-md">
+            <tr className="border-b border-gray-300">
+              <th className="sticky left-0 z-40 bg-gray-50 px-2 py-1.5 hover:bg-gray-100 transition-colors border-r border-gray-200 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+                <div className="flex items-center gap-1 whitespace-nowrap">
                   <input
                     type="checkbox"
-                    className="w-4 h-4 cursor-pointer"
+                    className="w-2.5 h-2.5 cursor-pointer"
                     onChange={(e) => {
                       if (e.target.checked) {
                         setSelectedRows(new Set(data.map(row => row.id)));
@@ -342,7 +363,7 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
                       }
                     }}
                   />
-                  <span className="text-xs text-gray-500">전체</span>
+                  <span className="text-[9px] text-gray-500 font-medium">전체</span>
                 </div>
               </th>
               {Object.entries(
@@ -354,65 +375,71 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
                   acc[header].push(column);
                   return acc;
                 }, {} as Record<string, typeof columns>)
-              ).map(([header, cols], index) => (
-                <th
-                  key={header}
-                  data-header={header}
-                  colSpan={cols.length}
-                  className={cn(
-                    "px-6 py-3 text-left text-sm font-semibold text-gray-900 border-b whitespace-nowrap min-w-[150px] hover:bg-gray-100 transition-colors cursor-pointer border-r",
-                    index === 0 && "sticky left-12 z-40 bg-gray-50 border-r shadow-md"
-                  )}
-                  onClick={() => handleHeaderClick(header)}
-                >
-                  <div className="flex items-center gap-2">
-                    {header}
-                    <span className="text-xs text-gray-400">({cols.length})</span>
-                  </div>
-                </th>
-              ))}
+              ).map(([header, cols], index) => {
+                const totalWidth = cols.reduce((sum, col) => {
+                  return sum + (columnWidths[col.key] || 120);
+                }, 0);
+
+                return (
+                  <th
+                    key={header}
+                    data-header={header}
+                    colSpan={cols.length}
+                    className={cn(
+                      "px-3 py-2 text-left text-[11px] font-semibold text-gray-900 whitespace-nowrap hover:bg-gray-100 transition-colors cursor-pointer border-r border-gray-200"
+                    )}
+                    style={{ width: totalWidth }}
+                    onClick={() => handleHeaderClick(header)}
+                  >
+                    <div className="flex items-center gap-1">
+                      {header}
+                      <span className="text-[9px] text-gray-400">({cols.length})</span>
+                    </div>
+                  </th>
+                );
+              })}
             </tr>
-            <tr>
-              <th className="sticky left-0 z-40 bg-gray-50 px-3 py-2 border-r">
-                <div className="flex items-center gap-2">
+            <tr className="border-b border-gray-300">
+              <th className="sticky left-0 z-40 bg-gray-50 px-2 py-1.5 border-r border-gray-200 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+                <div className="flex items-center gap-1">
                   <input
                     type="checkbox"
                     disabled
-                    className="w-4 h-4 cursor-not-allowed opacity-50"
+                    className="w-2.5 h-2.5 cursor-not-allowed opacity-50"
                   />
-                  <span className="text-xs text-gray-400">선택</span>
+                  <span className="text-[9px] text-gray-400 font-medium">선택</span>
                 </div>
               </th>
               {columns.map((column, index) => (
                 <th
                   key={column.key}
                   className={cn(
-                    "px-6 py-3 text-left text-sm font-medium text-gray-500 whitespace-nowrap hover:bg-gray-100 transition-colors relative border-r",
-                    index === 0 && "sticky left-12 z-40 bg-gray-50 border-r shadow-lg"
+                    "px-3 py-2 text-left text-[11px] font-medium text-gray-500 whitespace-nowrap hover:bg-gray-100 transition-colors relative border-r border-gray-200",
+                    index === 0 && "sticky left-12 z-40 bg-gray-50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]"
                   )}
                   style={{ 
-                    width: columnWidths[column.key] || 150,
-                    minWidth: index === 0 ? 150 : undefined
+                    width: columnWidths[column.key] || 120,
+                    minWidth: index === 0 ? 120 : undefined
                   }}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       {column.subheader && (
                         <div className="flex items-center gap-1">
                           {column.tooltip && (
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger>
-                                  <Info size={14} className="text-gray-400" />
+                                  <Info size={11} className="text-gray-400" />
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                  <div className="space-y-2 z-50">
-                                    <h4 className="font-medium">{column.tooltip.title}</h4>
-                                    <p className="text-sm text-gray-500">{column.tooltip.description}</p>
+                                  <div className="space-y-1 z-50">
+                                    <h4 className="font-medium text-[11px]">{column.tooltip.title}</h4>
+                                    <p className="text-[9px] text-gray-500">{column.tooltip.description}</p>
                                     {column.tooltip.specs && (
                                       <div className="space-y-1">
                                         {column.tooltip.specs.map((spec, i) => (
-                                          <div key={i} className="flex justify-between text-sm">
+                                          <div key={i} className="flex justify-between text-[9px]">
                                             <span className="text-gray-500">{spec.label}:</span>
                                             <span>{spec.value}{spec.unit}</span>
                                           </div>
@@ -420,7 +447,7 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
                                       </div>
                                     )}
                                     {column.tooltip.ranges && (
-                                      <div className="mt-2 text-sm">
+                                      <div className="mt-1 text-[9px]">
                                         <div className="text-gray-500">범위:</div>
                                         <div>{column.tooltip.ranges.min} ~ {column.tooltip.ranges.max} {column.tooltip.ranges.unit}</div>
                                       </div>
@@ -430,10 +457,10 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
                               </Tooltip>
                             </TooltipProvider>
                           )}
-                          <span className="text-xs text-gray-400">{column.subheader}</span>
+                          <span className="text-[9px] text-gray-400">{column.subheader}</span>
                         </div>
                       )}
-                      <span className="flex items-center gap-1">({column.symbol})</span>
+                      <span className="flex items-center gap-1 text-[9px]">({column.symbol})</span>
                       {column.unit && (
                         <UnitSelector
                           currentUnit={column.unit.current}
@@ -442,7 +469,7 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
                         />
                       )}
                     </div>
-                    <div className="flex text-lg font-semibold items-center gap-2">
+                    <div className="flex text-[11px] font-semibold items-center gap-1">
                       {sortConfig.column === column.key ? (
                         <span className="text-blue-500">
                           {sortConfig.direction === 'asc' ? '↑' : '↓'}
@@ -465,7 +492,7 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
           <tbody className="bg-white divide-y divide-gray-200">
             {paginatedData.length === 0 ? (
               <tr>
-                <td colSpan={columns.length + 1} className="px-6 py-8 text-center text-gray-500">
+                <td colSpan={columns.length + 1} className="px-3 py-6 text-center text-gray-500 text-[11px]">
                   데이터가 없습니다
                 </td>
               </tr>
@@ -478,11 +505,10 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
                     selectedRows.has(row.id) && "bg-blue-50 hover:bg-blue-100",
                     rowIndex % 2 === 0 && "bg-gray-50/30"
                   )}
-                  // onClick={() => handleRowClick(row.id)}
                 >
                   <td
                     className={cn(
-                      "sticky left-0 z-30 w-12 p-3 bg-white transition-colors border-r",
+                      "sticky left-0 z-30 w-10 p-2 bg-white transition-colors border-r border-gray-200 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]",
                       "group-hover:bg-gray-50",
                       selectedRows.has(row.id) && "bg-blue-50 group-hover:bg-blue-100"
                     )}
@@ -493,7 +519,7 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
                   >
                     <input
                       type="checkbox"
-                      className="w-4 h-4 cursor-pointer"
+                      className="w-2.5 h-2.5 cursor-pointer"
                       checked={selectedRows.has(row.id)}
                       onChange={() => { }}
                     />
@@ -501,15 +527,15 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
                   {columns.map((column, index) => (
                     <td
                       key={column.key}
-                      style={{ width: columnWidths[column.key] || 150 }}
+                      style={{ width: columnWidths[column.key] || 120 }}
                       className={cn(
-                        "px-6 py-4 text-sm text-gray-900 whitespace-nowrap transition-colors border-r",
-                        index === 0 && "sticky left-12 z-30 bg-white border-r shadow-md",
+                        "px-3 py-2 text-[11px] text-gray-900 whitespace-nowrap transition-colors border-r border-gray-200",
+                        index === 0 && "sticky left-12 z-30 bg-white shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]",
                         "group-hover:bg-gray-50",
                         selectedRows.has(row.id) && index === 0 && "bg-blue-50 group-hover:bg-blue-100"
                       )}
                     >
-                      <div className="flex w-full items-center gap-2">
+                      <div className="flex w-full items-center gap-1">
                         {column.render ? column.render(row) : (row as any)[column.key]}
                       </div>
                     </td>
@@ -591,10 +617,7 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
                 </Button>
               </div>
             )}
-
           </div>
-
-
 
           <div className="flex items-center gap-4 sticky right-4 z-40">
             <Button

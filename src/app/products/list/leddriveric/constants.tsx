@@ -25,8 +25,32 @@ export const getData = async () => {
         description,
         category
       ),
-      manufacturer:manufacturers(id, name),
-      images(id, title, url, description),
+      manufacturer:manufacturers(
+        id,
+        name,
+        website,
+        established,
+        headquarters,
+        business_type,
+        company_overview,
+        business_overview,
+        key_milestones,
+        annual_revenue,
+        sales_markets,
+        logo,
+        building,
+        linkedin_link,
+        facebook_link,
+        role
+      ),
+      images(
+        id,
+        title,
+        url,
+        description,
+        created_at,
+        updated_at
+      ),
       product_categories(
         categories(
           id,
@@ -35,15 +59,18 @@ export const getData = async () => {
           parent_id
         )
       ),
-      product_documents:product_documents(
+      product_documents(
         documents(
           id,
           title,
           url,
           type_id,
+          created_at,
+          updated_at,
           document_types(
             id,
             name,
+            description,
             category
           )
         )
@@ -52,7 +79,8 @@ export const getData = async () => {
         applications(
           id,
           name,
-          description
+          description,
+          parent_id
         )
       ),
       product_features(
@@ -60,13 +88,16 @@ export const getData = async () => {
           id,
           name,
           description
-        )
+        ),
+        description
       ),
       product_certifications(
         certifications(
           id,
           name,
           description,
+          applicable_categories,
+          certification_body,
           certification_type
         )
       )
@@ -74,196 +105,113 @@ export const getData = async () => {
 
   if (productsError) {
     console.error('제품 데이터 가져오기 오류:', productsError);
-    return [];
+    return {
+      products: [],
+      filterOptions: {
+        categories: [],
+        storageTypes: [],
+        certifications: [], 
+        applications: [],
+        topologies: [],
+        mountingStyles: [],
+        packageTypes: [],
+        voltageRange: {
+          input: { min: 3.3, max: 60, step: 0.1 },
+          output: { min: 1, max: 60, step: 0.1 }
+        },
+        currentRange: {
+          output: { min: 20, max: 1500, step: 10 }
+        }
+      }
+    };
   }
 
-  // 제품 데이터를 스키마에 맞게 변환합니다
+  // 필터 옵션용 고유 값들을 추출
+  const categories = new Set<string>();
+  const storageTypes = new Set<string>();
+  const certifications = new Set<string>();
+  const applications = new Set<string>();
+  const topologies = new Set<string>();
+  const mountingStyles = new Set<string>();
+  const packageTypes = new Set<string>();
+
+  // 제품 데이터를 스키마에 맞게 변환하고 필터 옵션도 추출합니다
   const mergedData = products.map(product => {
     try {
-      console.log("Raw specifications:", product.specifications); // 원본 데이터 로깅
+      // 필터 옵션 추출
+      product.product_categories?.forEach(pc => {
+        if (pc.categories?.name) categories.add(pc.categories.name);
+      });
+
+      if (product.storage_types?.name) {
+        storageTypes.add(product.storage_types.name);
+      }
+
+      product.product_certifications?.forEach(cert => {
+        if (cert.certifications?.name) certifications.add(cert.certifications.name);
+      });
+
+      product.product_applications?.forEach(app => {
+        if (app.applications?.name) applications.add(app.applications.name);
+      });
+
       const specs = LEDDriverICInfoSchema.parse(product.specifications);
+      if (specs?.topology) {
+        specs.topology.forEach(t => topologies.add(t));
+      }
+      if (specs?.mounting_type) mountingStyles.add(specs.mounting_type);
+      if (specs?.package_type) packageTypes.add(specs.package_type);
       
-      // specifications JSON 데이터 정규화
       const ledDriverIC = {
         ...product,
         ...specs,
-        
-        // 배열 데이터 정규화
-        categories: product.product_categories.map(cat => ({
-          category: cat.categories
-        })),
-
-        certifications: product.product_certifications.map(cert => ({
+        categories: product.product_categories?.map(pc => ({
+          category: pc.categories
+        })) || [],
+        certifications: product.product_certifications?.map(cert => ({
           certification: cert.certifications
-        })),
-
-        features: product.product_features.map(feat => feat.features),
-
-        applications: product.product_applications.map(app => ({
+        })) || [],
+        features: product.product_features?.map(feat => ({
+          ...feat.features,
+          description: feat.description
+        })) || [],
+        applications: product.product_applications?.map(app => ({
           application: app.applications
-        })),
-
-        documents: product.product_documents.map(doc => ({
+        })) || [],
+        documents: product.product_documents?.map(doc => ({
           document: {
             ...doc.documents,
             type: doc.documents.document_types
           }
-        }))
+        })) || []
       };
-      console.log("Parsed ledDriverIC:", ledDriverIC); // 파싱된 데이터 로깅
-      return ledDriverIC as unknown as LEDDriverICColumnSchema;
+      return ledDriverIC;
     } catch (error) {
       console.error('데이터 파싱 오류:', error);
       console.error('문제가 발생한 제품:', product);
       return null;
     }
-  }).filter(Boolean); // null 값 제거
+  }).filter(Boolean);
 
-  return mergedData;
+  return {
+    products: mergedData,
+    filterOptions: {
+      categories: Array.from(categories),
+      storageTypes: Array.from(storageTypes), 
+      certifications: Array.from(certifications),
+      applications: Array.from(applications),
+      topologies: Array.from(topologies),
+      mountingStyles: Array.from(mountingStyles),
+      packageTypes: Array.from(packageTypes),
+      voltageRange: {
+        input: { min: 3.3, max: 60, step: 0.1 },
+        output: { min: 1, max: 60, step: 0.1 }
+      },
+      currentRange: {
+        output: { min: 20, max: 1500, step: 10 }
+      }
+    }
+  };
 };
 
-export const getFilterFields = async () => {
-  const data = await getData();
-
-  // 카테고리 데이터 가져오기
-  const { data: categories } = await supabase
-    .from('categories')
-    .select('*');
-
-  return [
-    {
-      label: "카테고리",
-      value: "categories",
-      type: "select",
-      options: categories?.map(cat => ({
-        label: cat.name,
-        value: cat.id.toString()
-      })) || [],
-    },
-    {
-      label: "제품명",
-      value: "name",
-      type: "text",
-      options: data.map(({ name }) => ({ label: name, value: name })),
-    },
-    {
-      label: "출력 수",
-      value: "channels",
-      type: "select", 
-      options: ['1', '2', '3', '4+'],
-      defaultOpen: true,
-    },
-    {
-      label: "입력 전압 범위",
-      value: "input_voltage",
-      type: "range",
-      min: 3.3,
-      max: 60,
-      unit: "V",
-      defaultValue: [3.3, 60],
-    },
-    {
-      label: "출력 전압 범위", 
-      value: "output_voltage",
-      type: "range",
-      min: 1,
-      max: 60,
-      unit: "V", 
-      defaultValue: [1, 60],
-    },
-    {
-      label: "출력 전류 범위",
-      value: "output_current",
-      type: "range",
-      min: 20,
-      max: 1500,
-      unit: "mA",
-      defaultValue: [20, 1500],
-    },
-    {
-      label: "전류 정확도",
-      value: "current_accuracy",
-      type: "range",
-      min: 0,
-      max: 10,
-      unit: "%",
-      defaultValue: [0, 10],
-    },
-    {
-      label: "스위칭 주파수",
-      value: "switching_frequency",
-      type: "range",
-      min: 0,
-      max: 2000,
-      unit: "kHz",
-      defaultValue: [0, 2000],
-    },
-    {
-      label: "동작 온도",
-      value: "operating_temperature",
-      type: "range",
-      min: -55,
-      max: 150,
-      unit: "C",
-      defaultValue: [-55, 150],
-    },
-    {
-      label: "실장 방식",
-      value: "mounting_type",
-      type: "select",
-      options: ['SMD', 'Through Hole'],
-    },
-    {
-      label: "보관 유형",
-      value: "storage_type_id",
-      type: "select",
-      options: ['Tape & Reel', 'Tube', 'Tray'],
-    },
-    {
-      label: "패키지 타입",
-      value: "package_type",
-      type: "select",
-      options: ['SOP', 'SOIC', 'QFN', 'DIP'],
-    },
-    {
-      label: "써멀패드",
-      value: "thermal_pad",
-      type: "select",
-      options: ['Yes', 'No'],
-    },
-    {
-      label: "패키지 상세",
-      value: "package_detail",
-      type: "text",
-    },
-    {
-      label: "토폴로지",
-      value: "topology",
-      type: "select",
-      options: ['Buck', 'Boost', 'Buck-Boost', 'Charge Pump', 'Linear Regulator', 'SEPIC'],
-      defaultOpen: true,
-    },
-    {
-      label: "디밍 방식",
-      value: "dimming_method",
-      type: "select",
-      options: ['PWM', 'Analog'],
-      defaultOpen: true,
-    },
-    {
-      label: "인증",
-      value: "certifications",
-      type: "select",
-      options: ['UL', 'CE', 'KC', 'CCC'],
-    },
-    {
-      label: "응용분야",
-      value: "applications",
-      type: "select",
-      options: ['Lighting', 'Automotive', 'Industrial', 'Consumer'],
-      defaultOpen: true,
-    },
-  ];
-};
-
-export const data: LEDDriverICColumnSchema[] = [];
+export const data: any[] = [];

@@ -16,6 +16,7 @@ export async function generateStaticParams() {
 }
 
 export default async function ProductDetail({ params }: { params: { id: string } }) {
+
   const { data: product, error } = await supabase
     .from("products")
     .select(`
@@ -50,7 +51,34 @@ export default async function ProductDetail({ params }: { params: { id: string }
     notFound();
   }
   console.log(product);
+
+  // 카테고리 데이터 조회
+  const { data: categoryData } = await supabase
+    .from('product_categories')
+    .select(`
+      *,
+      categories (
+        id,
+        name
+      )
+    `)
+    .eq('product_id', params.id);
+
+  // 제조사의 국가 정보 조회
+  const { data: countryData } = await supabase
+    .from('countries')
+    .select('name')
+    .eq('id', product.manufacturers.country_id)
+    .single();
+
+  // 데이터 병합
+  const productWithExtra = {
+    ...product,
+    categories: categoryData?.map(item => item.categories) || [],
+    country: countryData?.name || null
+  };
+
   return (
-    <ProductDetailClient product={product} />
+    <ProductDetailClient product={productWithExtra} />
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { z } from "zod";
-import { getData, getFilterFields } from "./constants";
+import { getData } from "./constants";
 import { DataTable } from "./data-table";
 import { searchParamsCache } from "./search-params";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -51,6 +51,8 @@ type ProductSchema = {
 
 export default function LEDDriverICListPage() {
   const [search, setSearch] = React.useState({});
+  const [data, setData] = React.useState<ProductSchema[]>([]);
+  const [filterOptions, setFilterOptions] = React.useState<any>({});
 
   React.useEffect(() => {
     if (typeof window !== "undefined") {
@@ -61,53 +63,51 @@ export default function LEDDriverICListPage() {
     }
   }, []);
 
-  const [data, setData] = React.useState<ProductSchema[]>([]);
-  const [filterFields, setFilterFields] = React.useState<any[]>([]);
-
   React.useEffect(() => {
     const fetchData = async () => {
       const result = await getData();
-      const fields = await getFilterFields();
-      setData(result);
-      setFilterFields(fields);
+      setData(result.products);
+      setFilterOptions(result.filterOptions);
     };
     fetchData();
   }, []);
 
-  const createFilterOptions = React.useCallback((item: ProductSchema, field: string) => {
-    const filterMap = {
-      certifications: () => item.certifications?.map(cert => ({
-        label: cert.certification.name,
-        value: cert.certification.name
-      })),
-      applications: () => item.applications?.map(app => ({
-        label: app.application.name,
-        value: app.application.name
-      }))
-    };
-
-    return filterMap[field as keyof typeof filterMap]?.() || [];
-  }, []);
-
   const categoryFilterFields = React.useMemo(() => {
-    return filterFields.map(field => {
-      const options = data
-        .flatMap(item => createFilterOptions(item, field.value))
-        .filter((v, i, a) => a.findIndex(t => t.value === v.value) === i);
-
-      return {
-        ...field,
-        options
-      };
-    });
-  }, [data, filterFields, createFilterOptions]);
+    return [
+      {
+        id: 'categories',
+        label: '카테고리',
+        options: filterOptions.categories?.map((cat: string) => ({
+          label: cat,
+          value: cat
+        })) || []
+      },
+      {
+        id: 'certifications',
+        label: '인증',
+        options: filterOptions.certifications?.map((cert: string) => ({
+          label: cert,
+          value: cert
+        })) || []
+      },
+      {
+        id: 'applications',
+        label: '응용분야',
+        options: filterOptions.applications?.map((app: string) => ({
+          label: app,
+          value: app
+        })) || []
+      }
+    ];
+  }, [filterOptions]);
 
   const checkFilterCondition = React.useCallback((item: ProductSchema, key: string, value: any) => {
     if (!value) return true;
 
     const filterConditions = {
       certifications: () => item.certifications?.some(c => c.certification.name === value),
-      applications: () => item.applications?.some(a => a.application.name === value)
+      applications: () => item.applications?.some(a => a.application.name === value),
+      categories: () => item.category?.name === value
     };
 
     return filterConditions[key as keyof typeof filterConditions]?.() ?? true;
@@ -133,7 +133,7 @@ export default function LEDDriverICListPage() {
   return (
     <React.Suspense fallback={<Skeleton />}>
       <DataTable
-        columns={useColumns()}
+        columns={useColumns(filterOptions)}
         data={filteredData}
         filterFields={categoryFilterFields}
         defaultColumnFilters={searchFilters}

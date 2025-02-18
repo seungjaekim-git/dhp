@@ -1,21 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import { Star, Share, Download, MessageSquare, CircuitBoard, Book, Briefcase, Package, Building2, Globe, Calendar, Mail, Phone, Link2 } from "lucide-react";
+import { Star, Share, Download, MessageSquare, CircuitBoard, Book, Briefcase, Package, Building2, Globe, Calendar, Mail, Phone, Link2, BookOpen, FileText, Cpu, Gauge, Layers, Puzzle } from "lucide-react";
 import {
   Tabs,
   TabsList,
-  TabsTrigger, 
+  TabsTrigger,
   TabsContent,
 } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import ProductCard from "./ProductCard";
 import { LEDDriverICInfoSchema } from "@/app/supabase/LEDDriverIC";
@@ -28,6 +22,10 @@ import ProductMainSpecs from "./ProductMainSpecs";
 import ProductTechnicalInfo from "./ProductTechnicalInfo";
 import ProductDocument from "./ProductDocument";
 import ProductPost from "./ProductPost";
+import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Heart } from "lucide-react";
+import { supabase } from "@/lib/supabase-client";
 
 interface Document {
   id: number;
@@ -68,6 +66,11 @@ interface ProductProps {
   product_documents: {
     documents: Document;
   }[];
+  categories: {
+    id: number;
+    name: string;
+  }[];
+  country: string;
 }
 
 export default function ProductDetailPage({
@@ -80,9 +83,8 @@ export default function ProductDetailPage({
   const [isFeaturesExpanded, setIsFeaturesExpanded] = useState(false);
   const [isApplicationsExpanded, setIsApplicationsExpanded] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  const [previewFeature, setPreviewFeature] = useState<{x: number, y: number, feature: any} | null>(null);
+  const [previewFeature, setPreviewFeature] = useState<{ x: number, y: number, feature: any } | null>(null);
 
-  console.log(product)
   const handleBookmarkToggle = () => {
     setIsBookmarked((prev) => !prev);
     alert(isBookmarked ? "북마크 해제됨!" : "북마크 추가됨!");
@@ -107,6 +109,68 @@ export default function ProductDetailPage({
       <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 py-6 md:py-8 lg:py-10 px-4">
         {/* Left Section */}
         <div className="col-span-1 md:col-span-2 space-y-4 md:space-y-6">
+          <div className="flex justify-between">
+            {/* 왼쪽 섹션 - 카테고리, 제품명, 부제목 */}
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-wrap gap-2">
+                {product.categories.map((category, index) => (
+                  <Badge
+                    key={index}
+                    variant="secondary"
+                    className="text-sm rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 active:bg-slate-300 transition-colors duration-200"
+                  >
+                    {category.name}
+                  </Badge>
+                ))}
+              </div>
+              
+              <h3 className="text-2xl font-bold tracking-tight hover:text-blue-600 transition-colors duration-200">
+                {product.name}
+              </h3>
+
+              <div className="text-sm text-slate-600">
+                {product.subtitle}
+              </div>
+            </div>
+
+            {/* 오른쪽 섹션 - 좋아요/공유 버튼 */}
+            <div className="flex gap-2">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="rounded-xl hover:bg-slate-100 active:bg-slate-200"
+                    >
+                      <Heart className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>관심 제품에 추가</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm" 
+                      className="rounded-xl hover:bg-slate-100 active:bg-slate-200"
+                    >
+                      <Share className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>제품 링크 공유</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </div>
+
+          <Separator className="my-6" />
           {/* Image Gallery */}
           <div className="space-y-3 md:space-y-4">
             <div className="w-full h-[300px] md:h-[350px] lg:h-[400px] bg-white rounded-lg overflow-hidden">
@@ -138,8 +202,8 @@ export default function ProductDetailPage({
           <div className="md:hidden bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all">
             <div className="flex items-center gap-4">
               {product.manufacturers.logo && (
-                <img 
-                  src={product.manufacturers.logo} 
+                <img
+                  src={product.manufacturers.logo}
                   alt={product.manufacturers.name}
                   className="w-16 h-16 object-contain rounded-lg border border-gray-100"
                 />
@@ -190,34 +254,36 @@ export default function ProductDetailPage({
             </div>
           </div>
 
+          <Separator className="my-6" />
+
           {/* Product Features & Applications */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 lg:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Features */}
-            <div className="bg-white rounded-lg p-3 md:p-4 lg:p-6 shadow-sm hover:shadow-md transition-all duration-300">
-              <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4 flex items-center">
-                <span className="bg-blue-100 p-1.5 md:p-2 rounded-lg mr-2">
-                  <Package className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
+            <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg border-2 border-slate-100 hover:border-blue-100 transition-all duration-300">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <span className="bg-blue-100 p-2.5 rounded-xl mr-2">
+                  <Package className="w-5 h-5 text-blue-600" />
                 </span>
                 주요 특징
               </h3>
-              <div className="relative">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {product.product_features.slice(0, isFeaturesExpanded ? undefined : 6).map((item, index) => (
-                    <div 
+              <div className="relative max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="space-y-2">
+                  {product.product_features.map((item, index) => (
+                    <div
                       key={index}
-                      className="group relative bg-gray-50 rounded-lg p-2 transition-all duration-200 hover:bg-blue-50 hover:shadow-md"
+                      className="group relative bg-slate-50 rounded-xl p-3 transition-all duration-200 hover:bg-blue-50 hover:shadow-md border border-slate-200 hover:border-blue-200"
                       onMouseEnter={(e) => handleFeatureMouseEnter(e, item.features)}
                       onMouseLeave={() => setPreviewFeature(null)}
                     >
-                      <span className="text-sm md:text-base text-gray-700 group-hover:text-blue-600">
+                      <span className="text-base text-gray-700 group-hover:text-blue-600 font-medium">
                         {item.features.name}
                       </span>
                     </div>
                   ))}
                 </div>
                 {previewFeature && (
-                  <div 
-                    className="fixed bg-white border border-gray-200 rounded-lg shadow-xl p-4 z-20 w-64"
+                  <div
+                    className="fixed bg-white border-2 border-blue-100 rounded-xl shadow-xl p-4 z-20 w-64"
                     style={{
                       top: `${previewFeature.y}px`,
                       left: `${previewFeature.x}px`
@@ -227,75 +293,50 @@ export default function ProductDetailPage({
                     <p className="text-sm text-gray-600 mt-2">{previewFeature.feature.description}</p>
                   </div>
                 )}
-                {product.product_features.length > 6 && (
-                  <div className="text-center mt-4">
-                    <Button
-                      variant="outline"
-                      onClick={() => setIsFeaturesExpanded(!isFeaturesExpanded)}
-                      className="text-sm"
-                    >
-                      {isFeaturesExpanded ? '접기' : `더보기 (${product.product_features.length - 6}개)`}
-                    </Button>
-                  </div>
-                )}
               </div>
             </div>
 
             {/* Applications */}
-            <div className="bg-white rounded-lg p-3 md:p-4 lg:p-6 shadow-sm hover:shadow-md transition-all duration-300">
-              <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4 flex items-center">
-                <span className="bg-green-100 p-1.5 md:p-2 rounded-lg mr-2">
-                  <Briefcase className="w-4 h-4 md:w-5 md:h-5 text-green-600" />
+            <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg border-2 border-slate-100 hover:border-green-100 transition-all duration-300">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <span className="bg-green-100 p-2.5 rounded-xl mr-2">
+                  <Briefcase className="w-5 h-5 text-green-600" />
                 </span>
                 응용 분야
               </h3>
-              <div className="space-y-3">
-                {product.product_applications.slice(0, isApplicationsExpanded ? undefined : 4).map((item, index) => (
-                  <div 
-                    key={index}
-                    className="group relative bg-gray-50 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-lg"
-                  >
-                    <div className="flex items-center">
-                      <div className="w-1/3 aspect-square">
+              <div className="max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="grid grid-cols-2 gap-3">
+                  {product.product_applications.map((item, index) => (
+                    <div
+                      key={index}
+                      className="group relative bg-slate-50 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg border border-slate-200 hover:border-green-200"
+                    >
+                      <div className="aspect-square w-full">
                         {item.applications.image ? (
-                          <img 
-                            src={item.applications.image} 
+                          <img
+                            src={item.applications.image}
                             alt={item.applications.name}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-green-100">
-                            <Briefcase className="w-8 h-8 text-green-600" />
+                          <div className="w-full h-full flex items-center justify-center bg-green-50">
+                            <Briefcase className="w-10 h-10 text-green-500" />
                           </div>
                         )}
                       </div>
-                      <div className="flex-1 p-3">
-                        <h4 className="font-medium text-gray-900 group-hover:text-green-700 transition-colors">
+                      <div className="p-3">
+                        <h4 className="font-medium text-gray-900 group-hover:text-green-700 transition-colors line-clamp-1">
                           {item.applications.name}
                         </h4>
-                        {item.applications.description && (
-                          <p className="text-sm text-gray-600 mt-1 line-clamp-2 group-hover:line-clamp-none">
-                            {item.applications.description}
-                          </p>
-                        )}
                       </div>
                     </div>
-                  </div>
-                ))}
-                {product.product_applications.length > 4 && (
-                  <div className="text-center">
-                    <Button
-                      variant="outline"
-                      onClick={() => setIsApplicationsExpanded(!isApplicationsExpanded)}
-                      className="text-sm"
-                    >
-                      {isApplicationsExpanded ? '접기' : `더보기 (${product.product_applications.length - 4}개)`}
-                    </Button>
-                  </div>
-                )}
+                  ))}
+                </div>
               </div>
             </div>
           </div>
+          <Separator className="my-6" />
+
 
           {/* Product Description */}
           <Card className="w-full transition-shadow hover:shadow-lg">
@@ -318,15 +359,15 @@ export default function ProductDetailPage({
                   [&>table]:border-collapse [&>table]:w-full hover:[&>table]:shadow-sm
                   [&>th]:bg-gray-100 hover:[&>th]:bg-gray-200 [&>th]:p-2 [&>th]:border [&>th]:border-gray-200
                   [&>td]:p-2 [&>td]:border [&>td]:border-gray-200 hover:[&>td]:bg-gray-50`}
-                  style={{ 
-                    maxHeight: isDescriptionExpanded ? '100%' : '400px', 
+                  style={{
+                    maxHeight: isDescriptionExpanded ? '100%' : '400px',
                     overflow: 'hidden'
                   }}
                 >
-                  <Markdown 
+                  <Markdown
                     remarkPlugins={[remarkGfm]}
                     components={{
-                      code: ({className, children}) => {
+                      code: ({ className, children }) => {
                         const match = /language-(\w+)/.exec(className || '');
                         return match ? (
                           <SyntaxHighlighter
@@ -349,10 +390,10 @@ export default function ProductDetailPage({
                           </code>
                         );
                       },
-                      p: ({children}) => (
+                      p: ({ children }) => (
                         <p className="mb-4 transition-colors duration-200 hover:text-gray-800">{children}</p>
                       ),
-                      table: ({children}) => (
+                      table: ({ children }) => (
                         <div className="overflow-x-auto my-6 rounded-lg border transition-all duration-200 hover:shadow-md">
                           <table className="min-w-full divide-y divide-gray-200">
                             {children}
@@ -367,8 +408,8 @@ export default function ProductDetailPage({
                     <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent pointer-events-none" />
                   )}
                 </div>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="w-full mt-4 z-10 transition-all duration-200 hover:bg-gray-100 active:bg-gray-200 hover:border-gray-400"
                   onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
                 >
@@ -378,40 +419,123 @@ export default function ProductDetailPage({
             </CardContent>
           </Card>
 
+          <Separator className="my-6" />
+
           {/* Tabs Section */}
-          <Tabs defaultValue="mainSpecs" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="mainSpecs">주요사양</TabsTrigger>
-              <TabsTrigger value="technical">기술정보</TabsTrigger>
-              <TabsTrigger value="documents">문서</TabsTrigger>
-              <TabsTrigger value="posts">관련 글 모음</TabsTrigger>
+          <Tabs defaultValue="mainSpecs" className="w-full mt-6">
+            <TabsList className="flex w-full gap-1 rounded-xl bg-slate-50 p-2">
+              <TabsTrigger
+                value="mainSpecs"
+                className="group flex-1 flex items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium text-slate-600 transition-all duration-300 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-md hover:bg-slate-100"
+              >
+                <Gauge className="h-4 w-4 transition-transform duration-300 group-data-[state=active]:scale-110" />
+                주요사양
+              </TabsTrigger>
+              <TabsTrigger
+                value="technical"
+                className="group flex-1 flex items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium text-slate-600 transition-all duration-300 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-md hover:bg-slate-100"
+              >
+                <Cpu className="h-4 w-4 transition-transform duration-300 group-data-[state=active]:scale-110" />
+                기술정보
+              </TabsTrigger>
+              <TabsTrigger
+                value="documents"
+                className="group flex-1 flex items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium text-slate-600 transition-all duration-300 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-md hover:bg-slate-100"
+              >
+                <FileText className="h-4 w-4 transition-transform duration-300 group-data-[state=active]:scale-110" />
+                문서
+              </TabsTrigger>
+              <TabsTrigger
+                value="posts"
+                className="group flex-1 flex items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium text-slate-600 transition-all duration-300 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-md hover:bg-slate-100"
+              >
+                <BookOpen className="h-4 w-4 transition-transform duration-300 group-data-[state=active]:scale-110" />
+                관련 글 모음
+              </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="mainSpecs">
-                <ProductMainSpecs product={product} />
+            <TabsContent
+              value="mainSpecs"
+              className="mt-6 animate-in slide-in-from-right-4 duration-300"
+            >
+              <ProductMainSpecs product={product} />
             </TabsContent>
 
-            <TabsContent value="technical">
+            <TabsContent
+              value="technical"
+              className="mt-6 animate-in slide-in-from-right-4 duration-300"
+            >
               <ProductTechnicalInfo product={product} />
             </TabsContent>
 
-            <TabsContent value="documents">
+            <TabsContent
+              value="documents"
+              className="mt-6 animate-in slide-in-from-right-4 duration-300"
+            >
               <ProductDocument product={product} />
             </TabsContent>
 
-            <TabsContent value="posts">
+            <TabsContent
+              value="posts"
+              className="mt-6 animate-in slide-in-from-right-4 duration-300"
+            >
               <ProductPost product={product} />
             </TabsContent>
           </Tabs>
         </div>
-
         {/* Right Section */}
-        <div className="sticky top-16 h-fit">
-          <div className="w-[400px] rounded-2xl border border-gray-200 bg-white shadow-lg">
-            <ProductCard partner={product.manufacturer} product={product} />
-          </div>
+        <div className="hidden lg:block sticky top-16 h-[calc(100vh-4rem)] max-w-[400px] overflow-y-auto">
+          {/* Product Card */}
+          <ProductCard partner={product.manufacturers} product={product} />
         </div>
       </div>
+
+      <Separator className="my-6" />
+
+      <div className="container mx-auto space-y-12 py-6">
+        {/* 주변 소자 섹션 */}
+        <section className="space-y-6">
+          <div className="flex items-center gap-3">
+            <Puzzle className="w-6 h-6 text-emerald-500" />
+            <h2 className="text-2xl font-bold">주변 소자</h2>
+          </div>
+          <p className="text-slate-600">이 제품과 함께 사용되는 주요 주변 소자들입니다.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <ProductCard partner={product.manufacturers} product={product} />
+            <ProductCard partner={product.manufacturers} product={product} />
+            <ProductCard partner={product.manufacturers} product={product} />
+          </div>
+        </section>
+
+        {/* 비슷한 스펙의 제품 섹션 */}
+        <section className="space-y-6">
+          <div className="flex items-center gap-3">
+            <Layers className="w-6 h-6 text-blue-500" />
+            <h2 className="text-2xl font-bold">비슷한 스펙의 제품</h2>
+          </div>
+          <p className="text-slate-600">유사한 성능과 특성을 가진 대체 가능한 제품들입니다.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <ProductCard partner={product.manufacturers} product={product} />
+            <ProductCard partner={product.manufacturers} product={product} />
+            <ProductCard partner={product.manufacturers} product={product} />
+          </div>
+        </section>
+
+        {/* 추천 제품 섹션 */}
+        <section className="space-y-6">
+          <div className="flex items-center gap-3">
+            <Star className="w-6 h-6 text-yellow-500" />
+            <h2 className="text-2xl font-bold">추천 제품</h2>
+          </div>
+          <p className="text-slate-600">더 나은 성능이나 가격 경쟁력을 가진 추천 제품들입니다.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <ProductCard partner={product.manufacturers} product={product} />
+            <ProductCard partner={product.manufacturers} product={product} />
+            <ProductCard partner={product.manufacturers} product={product} />
+          </div>
+        </section>
+      </div>
+      
     </div>
   );
 }
