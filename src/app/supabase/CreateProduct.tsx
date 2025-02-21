@@ -1051,8 +1051,11 @@ export default function CreateProduct() {
                               const [featureName, description] = row.split(',').map(s => s.trim());
                               if (!featureName || featureName.toLowerCase() === 'name') continue;
 
+                              // 따옴표 제거
+                              const cleanedFeatureName = featureName.replace(/^"|"$/g, '');
+
                               const feature = features.find(f => 
-                                f.name.toLowerCase() === featureName.toLowerCase()
+                                f.name.toLowerCase() === cleanedFeatureName.toLowerCase()
                               );
 
                               if (feature) {
@@ -1062,12 +1065,12 @@ export default function CreateProduct() {
                                 });
                               } else {
                                 // 특징 이름 유효성 검사
-                                if (featureName.length < 2) {
-                                  invalidRows.push(`${featureName}: 특징 이름이 너무 짧습니다`);
+                                if (cleanedFeatureName.length < 2) {
+                                  invalidRows.push(`${cleanedFeatureName}: 특징 이름이 너무 짧습니다`);
                                   continue;
                                 }
                                 newFeatures.push({
-                                  name: featureName,
+                                  name: cleanedFeatureName,
                                   description: description || ''
                                 });
                               }

@@ -28,6 +28,7 @@ import { debounce } from "lodash";
 import { navigationConfig } from "@/config/navigation";
 import { useCallback } from "react";
 import { useSearchStore } from "@/store/SearchStore"; // Import search store
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 // Reusable components with React.memo for performance optimization
 const CategoryLink = React.memo(({ href, title, description }: { href: string, title: string, description: string }) => (
@@ -297,42 +298,60 @@ const Navigation = () => {
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="text-gray-700 hover:text-blue-600">{navigationConfig.products.title}</NavigationMenuTrigger>
                 <NavigationMenuContent asChild>
-                  <div className="flex overflow-y-auto mx-auto">
-                    <div className="w-1/5 lg:w-1/4 rounded-lg bg-gradient-to-b from-gray-50 to-white shadow-sm">
-                      {navigationConfig.products.categories.map((category) => (
-                        <Link
-                          href={category.link}
-                          key={category.title}
-                          onMouseEnter={() => setSelectedCategory(category.title)}
-                          className={`block p-4 cursor-pointer hover:bg-gradient-to-r from-blue-500 to-blue-400 text-xs sm:text-sm md:text-base font-semibold text-gray-700 hover:text-white transition-all duration-300 ${selectedCategory === category.title ? "bg-gradient-to-r from-blue-500 to-blue-400 text-white" : ""}`}
-                        >
-                          {category.title}
-                        </Link>
-                      ))}
-                    </div>
-                    <div className="w-4/5 lg:w-4/5 bg-white p-4 shadow-lg rounded-lg">
-                      <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
-                        {navigationConfig.products.categories
-                          .filter((category) => category.title === selectedCategory)
-                          .flatMap((category) =>
-                            category.content.map((contentItem) => (
-                              <div key={contentItem.title} className="space-y-4">
-                                <Link href={contentItem.link}>
-                                  <h2 className="text-xs sm:text-sm font-bold hover:text-blue-500 transition-colors duration-300">{contentItem.title}</h2>
-                                </Link>
-                                <div className="space-y-2">
-                                  {contentItem.children.map((child) => (
-                                    <Link key={child.title} href={child.link} className="flex items-center space-x-2 rounded-md p-2 hover:bg-gray-50 transition-colors duration-300">
-                                      <span className="h-6 w-6 sm:w-1 flex-shrink-0 text-gray-400"></span>
-                                      <span className="text-xs text-gray-600">{child.title}</span>
-                                    </Link>
-                                  ))}
-                                </div>
-                              </div>
-                            ))
-                          )}
-                      </div>
-                    </div>
+                  <div className="w-full p-4">
+                    <Tabs defaultValue="category" className="w-full">
+                      <TabsList className="w-full flex p-1 bg-transparent">
+                        <TabsTrigger value="category" className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 data-[state=active]:border-t data-[state=active]:border-x data-[state=active]:border-gray-200 data-[state=active]:border-b-0 data-[state=active]:bg-white data-[state=active]:text-blue-600 rounded-t-md transition-all duration-300">카테고리별</TabsTrigger>
+                        <TabsTrigger value="application" className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 data-[state=active]:border-t data-[state=active]:border-x data-[state=active]:border-gray-200 data-[state=active]:border-b-0 data-[state=active]:bg-white data-[state=active]:text-blue-600 rounded-t-md transition-all duration-300">적용분야별</TabsTrigger>
+                        <TabsTrigger value="manufacturer" className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 data-[state=active]:border-t data-[state=active]:border-x data-[state=active]:border-gray-200 data-[state=active]:border-b-0 data-[state=active]:bg-white data-[state=active]:text-blue-600 rounded-t-md transition-all duration-300">제조사별</TabsTrigger>
+                        <TabsTrigger value="new" className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 data-[state=active]:border-t data-[state=active]:border-x data-[state=active]:border-gray-200 data-[state=active]:border-b-0 data-[state=active]:bg-white data-[state=active]:text-blue-600 rounded-t-md transition-all duration-300">신제품</TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value="category">
+                        <div className="grid grid-cols-3 lg:grid-cols-5 gap-4">
+                          {navigationConfig.products.categories.map((category) => (
+                            <div key={category.title} className="flex flex-col mx-8">
+                              <Link
+                                href={category.link}
+                                className="group flex flex-col items-center p-4 rounded-lg bg-white hover:bg-gray-50 transition-all duration-300 border border-gray-100 hover:border-blue-200 active:scale-95 text-center h-48"
+                              >
+                                {category.icon && (
+                                  <div className="w-20 h-20 rounded-lg bg-blue-50 flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-blue-100 transition-all duration-300">
+                                    {React.createElement(category.icon, {
+                                      className: "w-10 h-10 text-blue-600 group-hover:text-blue-700"
+                                    })}
+                                  </div>
+                                )}
+                                <h3 className="text-sm font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-300 mb-2">
+                                  {category.title}
+                                </h3>
+                                <p className="text-xs text-gray-500 line-clamp-2">
+                                  {category.seo.description}
+                                </p>
+                              </Link>
+                            </div>
+                          ))}
+                        </div>
+                      </TabsContent>
+
+                      <TabsContent value="application">
+                        <div className="grid grid-cols-3 gap-4">
+
+                        </div>
+                      </TabsContent>
+
+                      <TabsContent value="manufacturer">
+                        <div className="grid grid-cols-4 gap-4">
+
+                        </div>
+                      </TabsContent>
+
+                      <TabsContent value="new">
+                        <div className="grid grid-cols-3 gap-4">
+
+                        </div>
+                      </TabsContent>
+                    </Tabs>
                   </div>
                 </NavigationMenuContent>
               </NavigationMenuItem>

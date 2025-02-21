@@ -9,8 +9,6 @@ import { ExternalLink } from "lucide-react";
 import { Building } from "lucide-react";
 import Link from "next/link";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { TextFilter, SingleSliderFilter, DualSliderFilter, CheckboxFilter, SelectFilter, ComboboxFilter } from "./filter";
-
 interface Column {
   key: string;
   header: string;
@@ -38,6 +36,9 @@ interface Column {
       unit: string;
     };
   };
+  isVisible?: boolean; // 컬럼 표시 여부
+  group?: string; // 컬럼 그룹
+  order?: number; // 컬럼 순서
 }
 
 export const UnitSelector = ({ currentUnit, availableUnits, onUnitChange }: {
@@ -81,12 +82,14 @@ interface FilterOptions {
   numberOfOutputs?: string[];
 }
 
-export const useColumns = (filterOptions: FilterOptions = {}): Column[] => {
+export const useColumns = (filterOptions: FilterOptions = {}) => {
   const [inputVoltageUnit, setInputVoltageUnit] = React.useState('V');
   const [outputVoltageUnit, setOutputVoltageUnit] = React.useState('V');
   const [currentUnit, setCurrentUnit] = React.useState('mA');
   const [tempUnit, setTempUnit] = React.useState('C');
   const [freqUnit, setFreqUnit] = React.useState('kHz');
+  const [columnVisibility, setColumnVisibility] = React.useState<Record<string, boolean>>({});
+  const [columnOrder, setColumnOrder] = React.useState<string[]>([]);
 
   return [
     {
@@ -94,6 +97,7 @@ export const useColumns = (filterOptions: FilterOptions = {}): Column[] => {
       header: "기본 정보", 
       subheader: "제품명",
       filterType: 'text',
+      enableSorting: true,
       tooltip: {
         title: "제품명",
         description: "제품의 공식 모델명과 부제목입니다.",
@@ -177,6 +181,7 @@ export const useColumns = (filterOptions: FilterOptions = {}): Column[] => {
       header: "기본 정보",
       subheader: "카테고리", 
       filterType: 'combobox',
+      enableSorting: true,
       filterOptions: filterOptions.categories || [],
       tooltip: {
         title: "제품 카테고리",
@@ -230,6 +235,7 @@ export const useColumns = (filterOptions: FilterOptions = {}): Column[] => {
       header: "기본 정보", 
       subheader: "토폴로지",
       filterType: 'checkbox',
+      enableSorting: true,
       filterOptions: filterOptions.topologies || [],
       tooltip: {
         title: "전력 변환 토폴로지",

@@ -1,3 +1,15 @@
+import { 
+  Cpu, 
+  Microchip, 
+  Power, 
+  Aperture, 
+  Plug, 
+  Link, 
+  Layers, 
+  Package,
+  LucideIcon  
+} from "lucide-react";
+
 interface SEOMetadata {
   title: string;
   description: string;
@@ -8,7 +20,7 @@ interface SubCategory {
   title: string;
   link: string;
   seo: SEOMetadata;
-  children: {
+  children?: {
     title: string;
     link: string;
     seo: SEOMetadata;
@@ -19,7 +31,8 @@ interface ProductCategory {
   title: string;
   link: string;
   seo: SEOMetadata;
-  content: SubCategory[];
+  icon?: LucideIcon;
+  content?: SubCategory[];
 }
 
 interface Partner {
@@ -151,8 +164,19 @@ export const navigationConfig: NavigationConfig = {
     },
     categories: [
       {
+        title: "전체제품",
+        link: "/products",
+        icon: Package,
+        seo: {
+          title: "전체제품 | 대한플러스전자",
+          description: "대한플러스전자의 모든 제품을 한눈에 살펴보실 수 있습니다.",
+          keywords: ["전체제품", "제품목록", "전자부품", "반도체"]
+        },
+      },
+      {
         title: "LED Driver IC",
         link: "/products/led-driver",
+        icon: Cpu,
         seo: {
           title: "LED Driver IC | 대한플러스전자",
           description: "고효율 LED Driver IC 제품군을 소개합니다. DC-DC, AC-DC, 매트릭스 드라이버 등 다양한 제품이 있습니다.",
@@ -332,6 +356,7 @@ export const navigationConfig: NavigationConfig = {
       {
         title: "다이오드",
         link: "/products/diode",
+        icon: Microchip,    
         seo: {
           title: "다이오드 제품군 | 대한플러스전자",
           description: "다양한 용도의 고품질 다이오드 제품을 제공합니다.",
@@ -511,6 +536,7 @@ export const navigationConfig: NavigationConfig = {
       {
         title: "전원관리 IC",
         link: "/products/power-ic",
+        icon: Power,  
         seo: {
           title: "전원관리 IC | 대한플러스전자",
           description: "고효율 전원관리 IC 제품군을 제공합니다.",
@@ -628,6 +654,174 @@ export const navigationConfig: NavigationConfig = {
                 }
               }
             ]
+          }
+        ]
+      },
+      {
+        title: "센서",
+        link: "/products/sensors",
+        icon: Aperture,
+        seo: {
+          title: "센서 제품 | 대한플러스전자",
+          description: "다양한 용도의 고성능 센서 제품을 제공합니다.",
+          keywords: ["센서", "감지기", "측정장치"]
+        },
+        content: [
+          {
+            title: "온도 센서",
+            link: "/products/sensors/temperature",
+            seo: {
+              title: "온도 센서 | 대한플러스전자",
+              description: "정밀한 온도 측정이 가능한 센서입니다.",
+              keywords: ["온도센서", "열감지", "온도측정"]
+            },
+          },
+          {
+            title: "압력 센서",
+            link: "/products/sensors/pressure",
+            seo: {
+              title: "압력 센서 | 대한플러스전자",
+              description: "다양한 압력 측정용 센서입니다.",
+              keywords: ["압력센서", "압력측정", "하중감지"]
+            }
+          },
+          {
+            title: "가속도 센서",
+            link: "/products/sensors/accelerometer",
+            seo: {
+              title: "가속도 센서 | 대한플러스전자",
+              description: "움직임과 진동을 감지하는 센서입니다.",
+              keywords: ["가속도센서", "진동감지", "모션센서"]
+            }
+          }
+        ]
+      },
+      {
+        title: "케이블",
+        link: "/products/cables",
+        icon: Plug,
+        seo: {
+          title: "케이블 제품 | 대한플러스전자",
+          description: "다양한 용도의 고품질 케이블을 제공합니다.",
+          keywords: ["케이블", "전선", "배선"]
+        },
+        content: [
+          {
+            title: "전원 케이블",
+            link: "/products/cables/power",
+            seo: {
+              title: "전원 케이블 | 대한플러스전자",
+              description: "안정적인 전원 공급을 위한 케이블입니다.",
+              keywords: ["전원케이블", "전력선", "전기배선"]
+            }
+          },
+          {
+            title: "통신 케이블",
+            link: "/products/cables/communication",
+            seo: {
+              title: "통신 케이블 | 대한플러스전자",
+              description: "데이터 전송용 고성능 케이블입니다.",
+              keywords: ["통신케이블", "데이터케이블", "신호선"]
+            }
+          }
+        ]
+      },
+      {
+        title: "커넥터",
+        link: "/products/connectors",
+        icon: Link,
+        seo: {
+          title: "커넥터 제품 | 대한플러스전자",
+          description: "다양한 연결용 커넥터를 제공합니다.",
+          keywords: ["커넥터", "연결단자", "접속부품"]
+        },
+        content: [
+          {
+            title: "전원 커넥터",
+            link: "/products/connectors/power",
+            seo: {
+              title: "전원 커넥터 | 대한플러스전자",
+              description: "전원 연결용 고품질 커넥터입니다.",
+              keywords: ["전원커넥터", "전원단자", "전기연결"]  
+            }
+          },
+          {
+            title: "신호 커넥터",
+            link: "/products/connectors/signal",
+            seo: {
+              title: "신호 커넥터 | 대한플러스전자",
+              description: "신호 전송용 정밀 커넥터입니다.",
+              keywords: ["신호커넥터", "데이터커넥터", "통신단자"]
+            }
+          }
+        ]
+      },
+      {
+        title: "수동 소자",
+        link: "/products/passive",
+        icon: Layers,
+        seo: {
+          title: "수동 소자 | 대한플러스전자",
+          description: "고품질 수동 전자부품을 제공합니다.",
+          keywords: ["수동소자", "저항", "커패시터"]
+        },
+        content: [
+          {
+            title: "저항",
+            link: "/products/passive/resistors",
+            seo: {
+              title: "저항 제품 | 대한플러스전자",
+              description: "다양한 용도의 정밀 저항입니다.",
+              keywords: ["저항", "저항기", "전기저항"]
+            }
+          },
+          {
+            title: "커패시터",
+            link: "/products/passive/capacitors",
+            seo: {
+              title: "커패시터 | 대한플러스전자",
+              description: "고품질 커패시터 제품입니다.",
+              keywords: ["커패시터", "축전기", "콘덴서"]
+            }
+          },
+          {
+            title: "인덕터",
+            link: "/products/passive/inductors",
+            seo: {
+              title: "인덕터 | 대한플러스전자",
+              description: "다양한 용도의 인덕터입니다.",
+              keywords: ["인덕터", "코일", "초크"]
+            }
+          }
+        ]
+      },
+      {
+        title: "기타 부품",
+        link: "/products/others",
+        icon: Package,
+        seo: {
+          title: "기타 전자부품 | 대한플러스전자",
+          description: "다양한 전자부품을 제공합니다.",
+          keywords: ["전자부품", "기타부품", "전자소자"]
+        },
+        content: [
+          {
+            title: "스위치",
+            link: "/products/others/switches",
+            seo: {
+              title: "스위치 제품 | 대한플러스전자",
+              description: "다양한 용도의 스위치입니다.",
+              keywords: ["스위치", "토글", "푸시버튼"]
+            }
+          },
+          {
+            title: "릴레이",
+            link: "/products/others/relays",
+            seo: {
+              title: "릴레이 | 대한플러스전자",
+              description: "신뢰성 높은 릴레이 제품입니다.",
+              keywords: ["릴레이", "계전기", "스위칭"]
+            }
           }
         ]
       }
