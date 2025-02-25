@@ -4,17 +4,7 @@ import { ShoppingCart, PlusCircle, MinusCircle, Mail, MessageSquare, Send } from
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-
-interface Product {
-  id: number;
-  name: string;
-  subtitle?: string;
-  manufacturer?: string;
-  category: string;
-  price?: number;
-  quantity?: number;
-  note?: string;
-}
+import { Product } from './types';
 
 interface QuoteSummaryProps {
   cart: Product[];
@@ -39,10 +29,11 @@ export default function QuoteSummary({
 
   // 카테고리별로 제품 그룹화
   const groupedItems = cart.reduce((acc, item) => {
-    if (!acc[item.category]) {
-      acc[item.category] = [];
+    const category = item.category || '기타';
+    if (!acc[category]) {
+      acc[category] = [];
     }
-    acc[item.category].push(item);
+    acc[category].push(item);
     return acc;
   }, {} as Record<string, Product[]>);
 
@@ -69,7 +60,11 @@ export default function QuoteSummary({
                       <div className="flex justify-between">
                         <div>
                           <span className="font-medium">{item.name}</span>
-                          {item.manufacturer && <span className="text-gray-500 ml-1">({item.manufacturer})</span>}
+                          {item.manufacturer && (
+                            <span className="text-gray-500 ml-1">
+                              ({item.manufacturer.name})
+                            </span>
+                          )}
                         </div>
                         {item.quantity && <span className="text-gray-600">수량: {item.quantity}</span>}
                       </div>
