@@ -5,16 +5,24 @@ import Image from 'next/image';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Star, Trash2, Info } from 'lucide-react';
+import { Star, Trash2, Info, X, Check, Plus, Minus } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import Markdown from 'react-markdown';
 import { Product } from './types';
 
 interface QuoteListProps {
   products: Product[];
   addToCart: (product: Product) => void;
+  selectedProducts: number[];
+  onSelectionChange: (productIds: number[]) => void;
 }
 
-export default function QuoteList({ products, addToCart }: QuoteListProps) {
+export default function QuoteList({ 
+  products, 
+  addToCart, 
+  selectedProducts, 
+  onSelectionChange 
+}: QuoteListProps) {
   const [favorites, setFavorites] = useState<number[]>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('favoriteProducts');
@@ -42,122 +50,194 @@ export default function QuoteList({ products, addToCart }: QuoteListProps) {
       const removedProducts = savedProducts ? JSON.parse(savedProducts) : [];
       localStorage.setItem('removedProducts', JSON.stringify([...removedProducts, productId]));
     }
-    // 여기서 상태 업데이트나 다른 로직을 추가할 수 있습니다
   };
 
-  // 카테고리별로 제품 그룹화
-  const groupedProducts = products.reduce((acc, product) => {
-    const category = product.category || '기타';
-    if (!acc[category]) {
-      acc[category] = [];
+  const toggleSelectAll = () => {
+    if (selectedProducts.length === products.length) {
+      onSelectionChange([]);
+    } else {
+      onSelectionChange(products.map(p => p.id));
     }
-    acc[category].push(product);
-    return acc;
-  }, {} as Record<string, Product[]>);
+  };
+
+  const toggleSelect = (productId: number) => {
+    onSelectionChange(
+      selectedProducts.includes(productId) 
+        ? selectedProducts.filter(id => id !== productId)
+        : [...selectedProducts, productId]
+    );
+  };
+
+  // 카테고리 계층 구조 생성
+  const categorizeProducts = () => {
+    const categoryTree: Record<string, Record<string, Record<string, Product[]>>> = {};
+    
+    products.forEach(product => {
+      const parentCategory = product.category?.split(' > ')[0] || '기타';
+      const childCategory = product.category?.split(' > ')[1] || '일반';
+      const grandChildCategory = product.category?.split(' > ')[2] || '기본';
+      
+      if (!categoryTree[parentCategory]) categoryTree[parentCategory] = {};
+      if (!categoryTree[parentCategory][childCategory]) categoryTree[parentCategory][childCategory] = {};
+      if (!categoryTree[parentCategory][childCategory][grandChildCategory]) categoryTree[parentCategory][childCategory][grandChildCategory] = [];
+      
+      categoryTree[parentCategory][childCategory][grandChildCategory].push(product);
+    });
+    
+    return categoryTree;
+  };
+
+  const categoryTree = categorizeProducts();
 
   return (
-    <div className="space-y-8">
-      {Object.entries(groupedProducts).map(([category, categoryProducts]) => (
-        <div key={category} className="border border-blue-100 rounded-lg p-4 bg-white shadow-sm">
-          <h2 className="text-xl font-semibold mb-4 text-blue-800 border-b pb-2">{category}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {categoryProducts.map(product => (
-              <Card key={product.id} className="overflow-hidden border border-gray-200 hover:border-blue-300 transition-all">
-                <CardHeader className="bg-gray-50 p-4">
-                  <CardTitle className="text-lg font-medium text-blue-700">{product.name}</CardTitle>
-                  {product.subtitle && <p className="text-sm text-gray-600">{product.subtitle}</p>}
-                </CardHeader>
-                <CardContent className="p-4">
-                  <div className="flex items-center space-x-4">
-                    <div className="relative w-24 h-24 bg-gray-100 rounded-md overflow-hidden">
-                      <Image
-                        src={product.images && product.images.length > 0 
-                          ? product.images[0].url 
-                          : '/placeholder-image.jpg'}
-                        alt={product.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      {product.manufacturer && (
-                        <p className="text-sm text-gray-700 mb-1">
-                          <span className="font-medium">제조사:</span> {product.manufacturer.name}
-                        </p>
-                      )}
-                      <p className="text-sm text-gray-700">
-                        <span className="font-medium">카테고리:</span> {product.category || '기타'}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="bg-gray-50 p-3 flex justify-between">
-                  <div className="flex space-x-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className={favorites.includes(product.id) 
-                        ? "text-yellow-500 border-yellow-500" 
-                        : "text-gray-500 border-gray-300"}
-                      onClick={() => toggleFavorite(product.id)}
-                    >
-                      <Star className="h-4 w-4 mr-1" />
-                      {favorites.includes(product.id) ? '즐겨찾기 해제' : '즐겨찾기'}
-                    </Button>
-                    
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="text-red-500 border-red-300"
-                      onClick={() => removeProduct(product.id)}
-                    >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      삭제
-                    </Button>
-                  </div>
-                  
-                  <Sheet>
-                    <SheetTrigger asChild>
-                      <Button variant="outline" size="sm" className="text-blue-600 border-blue-300">
-                        <Info className="h-4 w-4 mr-1" />
-                        상세정보
-                      </Button>
-                    </SheetTrigger>
-                    <SheetContent className="w-[90%] sm:w-[540px] overflow-y-auto">
-                      <SheetHeader>
-                        <SheetTitle className="text-blue-700">{product.name}</SheetTitle>
-                        <SheetDescription>
-                          {product.subtitle && <p className="text-gray-600 mb-2">{product.subtitle}</p>}
-                          {product.manufacturer && <p className="text-sm text-gray-700">제조사: {product.manufacturer.name}</p>}
-                        </SheetDescription>
-                      </SheetHeader>
-                      <div className="mt-6 space-y-4">
-                        {product.specifications && (
-                          <div className="border-t pt-4">
-                            <h3 className="font-medium text-blue-700 mb-2">제품 사양</h3>
-                            <div className="bg-gray-50 p-3 rounded-md text-sm">
-                              <pre className="whitespace-pre-wrap">{JSON.stringify(product.specifications, null, 2)}</pre>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {product.description && (
-                          <div className="border-t pt-4">
-                            <h3 className="font-medium text-blue-700 mb-2">제품 설명</h3>
-                            <div className="prose prose-sm max-w-none">
-                              <Markdown>{product.description}</Markdown>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </SheetContent>
-                  </Sheet>
-                </CardFooter>
-              </Card>
-            ))}
+    <div className="w-full min-h-screen bg-gray-50 p-6">
+      <div className="max-w-3xl mx-auto">
+        <div className="flex items-center justify-between px-5 mb-3">
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="selectAll" 
+              checked={selectedProducts.length === products.length}
+              onCheckedChange={toggleSelectAll}
+            />
+            <label htmlFor="selectAll" className="text-sm">
+              모두선택
+            </label>
           </div>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => selectedProducts.forEach(removeProduct)}
+          >
+            선택삭제
+          </Button>
         </div>
-      ))}
+
+        <div className="flex items-center justify-between bg-white shadow-sm rounded-md p-3 mb-4 border border-blue-400">
+          <p className="text-sm text-blue-500 font-medium">
+            견적 요청 시 상세 가격 확인 가능
+          </p>
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {Object.entries(categoryTree).map(([parentCategory, childCategories]) => (
+          <Card key={parentCategory} className="mb-6">
+            <div className="bg-blue-50 text-center py-3 border-b border-blue-200">
+              <h2 className="text-lg font-bold text-blue-800">{parentCategory}</h2>
+            </div>
+            
+            {Object.entries(childCategories).map(([childCategory, grandChildCategories]) => (
+              <div key={childCategory} className="border-b border-gray-200 last:border-b-0">
+                <div className="bg-gray-50 px-4 py-2">
+                  <h3 className="text-md font-semibold text-gray-700">{childCategory}</h3>
+                </div>
+                
+                {Object.entries(grandChildCategories).map(([grandChildCategory, categoryProducts]) => (
+                  <div key={grandChildCategory} className="px-4 py-2 border-t border-gray-100 first:border-t-0">
+                    <h4 className="text-sm font-medium text-gray-600 mb-2">{grandChildCategory}</h4>
+                    
+                    {categoryProducts.map(product => (
+                      <div 
+                        key={product.id} 
+                        className="p-4 mb-3 bg-white rounded-lg transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:border"
+                      >
+                        <div className="relative pl-10">
+                          <Checkbox 
+                            className="absolute left-0 top-0"
+                            checked={selectedProducts.includes(product.id)}
+                            onCheckedChange={() => toggleSelect(product.id)}
+                          />
+                          <div className="flex space-x-3 mb-4">
+                            <div className="w-[70px] h-[70px] rounded-md overflow-hidden bg-gray-100">
+                              <Image
+                                src={product.images && product.images.length > 0 
+                                  ? product.images[0].url 
+                                  : '/placeholder-image.jpg'}
+                                alt={product.name}
+                                width={70}
+                                height={70}
+                                className="object-cover"
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-xs text-gray-500 mb-1">
+                                {product.manufacturer?.name} | {product.category || '기타'}
+                              </p>
+                              <h3 className="text-base font-bold text-gray-800 mb-1">{product.name}</h3>
+                              {product.subtitle && (
+                                <p className="text-sm text-gray-600 italic">{product.subtitle}</p>
+                              )}
+                              <div className="flex items-center mt-2 text-sm">
+                                <span className="font-medium text-gray-700 mr-4">단위: {product.unit || '개'}</span>
+                                <span className="font-medium text-gray-700">패키지 수량: {product.packageQuantity || 1}</span>
+                              </div>
+                            </div>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8"
+                              onClick={() => removeProduct(product.id)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+
+                          <div className="flex items-center justify-between mt-4">
+                            <Sheet>
+                              <SheetTrigger asChild>
+                                <Button variant="ghost" size="sm">상세정보</Button>
+                              </SheetTrigger>
+                              <SheetContent className="w-[90%] sm:w-[540px] overflow-y-auto">
+                                <SheetHeader>
+                                  <SheetTitle className="text-blue-700">{product.name}</SheetTitle>
+                                  <SheetDescription>
+                                    {product.subtitle && <p className="text-gray-600 mb-2">{product.subtitle}</p>}
+                                    {product.manufacturer && <p className="text-sm text-gray-700">제조사: {product.manufacturer.name}</p>}
+                                  </SheetDescription>
+                                </SheetHeader>
+                                <div className="mt-6 space-y-4">
+                                  {product.specifications && (
+                                    <div className="border-t pt-4">
+                                      <h3 className="font-medium text-blue-700 mb-2">제품 사양</h3>
+                                      <div className="bg-gray-50 p-3 rounded-md text-sm">
+                                        <pre className="whitespace-pre-wrap">{JSON.stringify(product.specifications, null, 2)}</pre>
+                                      </div>
+                                    </div>
+                                  )}
+                                  {product.description && (
+                                    <div className="border-t pt-4">
+                                      <h3 className="font-medium text-blue-700 mb-2">제품 설명</h3>
+                                      <div className="prose prose-sm max-w-none">
+                                        <Markdown>{product.description}</Markdown>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </SheetContent>
+                            </Sheet>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className={favorites.includes(product.id) 
+                                ? "text-yellow-500 border-yellow-500" 
+                                : "text-gray-500 border-gray-300"}
+                              onClick={() => toggleFavorite(product.id)}
+                            >
+                              <Star className="h-4 w-4 mr-1" />
+                              {favorites.includes(product.id) ? '즐겨찾기 해제' : '즐겨찾기'}
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }
