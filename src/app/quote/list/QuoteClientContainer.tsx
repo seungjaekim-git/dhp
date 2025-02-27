@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import QuoteList from './QuoteList';
@@ -19,13 +19,7 @@ export default function QuoteClientContainer({
   initialProducts = [], 
   initialSimilarProducts = [] 
 }: QuoteClientContainerProps) {
-  const [cart, setCart] = useState<CartItem[]>(() => {
-    if (typeof window !== 'undefined') {
-      const savedCart = localStorage.getItem('quoteCart');
-      return savedCart ? JSON.parse(savedCart) : [];
-    }
-    return [];
-  });
+  const [cart, setCart] = useState<CartItem[]>([]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [activeTab, setActiveTab] = useState('products');
@@ -35,22 +29,32 @@ export default function QuoteClientContainer({
   const safeSimilarProducts = initialSimilarProducts || [];
   
   // 선택된 제품 상태 관리 추가
-  const [selectedProducts, setSelectedProducts] = useState<number[]>(() => {
-    // 기본적으로 모든 제품 선택
-    return [...safeProducts, ...safeSimilarProducts].map(product => product.id);
-  });
+  const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
+  
+  // 클라이언트 사이드에서만 실행되는 초기화 로직
+  useEffect(() => {
+    // 장바구니 초기화
+    const savedCart = localStorage.getItem('quoteCart');
+    if (savedCart) {
+      setCart(JSON.parse(savedCart));
+    }
+    
+    // 선택된 제품 초기화
+    setSelectedProducts([...safeProducts, ...safeSimilarProducts].map(product => product.id));
+  }, [safeProducts, safeSimilarProducts]);
   
   // localStorage에서 제거된 제품 필터링
-  const filteredProducts = safeProducts.filter(product => {
-    if (typeof window !== 'undefined') {
-      const removedProducts = localStorage.getItem('removedProducts');
-      if (removedProducts) {
-        const removedIds = JSON.parse(removedProducts);
-        return !removedIds.includes(product.id);
-      }
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(safeProducts);
+  
+  useEffect(() => {
+    const removedProducts = localStorage.getItem('removedProducts');
+    if (removedProducts) {
+      const removedIds = JSON.parse(removedProducts);
+      setFilteredProducts(safeProducts.filter(product => !removedIds.includes(product.id)));
+    } else {
+      setFilteredProducts(safeProducts);
     }
-    return true;
-  });
+  }, [safeProducts]);
   
   const addToCart = (product: Product) => {
     if (!product || product.id === undefined) {

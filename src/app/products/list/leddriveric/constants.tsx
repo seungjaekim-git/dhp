@@ -2,7 +2,7 @@
 
 import { supabase } from "@/lib/supabase-client";
 import { ENUMS } from "@/constants/enum";
-import { LEDDriverICInfoSchema } from "@/app/supabase/LEDDriverIC";
+import { LEDDriverICInfoSchema } from "@/app/supabase/schemas/LEDDriverIC";
 
 export const getData = async () => {
   // Enum 데이터를 가져옵니다

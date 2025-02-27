@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,13 +25,14 @@ interface QuoteRecommendationProps {
 }
 
 export default function QuoteRecommendation({ similarProducts, addToCart }: QuoteRecommendationProps) {
-  const [favorites, setFavorites] = useState<number[]>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('favoriteProducts');
-      return saved ? JSON.parse(saved) : [];
+  const [favorites, setFavorites] = useState<number[]>([]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('favoriteProducts');
+    if (saved) {
+      setFavorites(JSON.parse(saved));
     }
-    return [];
-  });
+  }, []);
 
   const toggleFavorite = (productId: number) => {
     setFavorites(prev => {
@@ -39,9 +40,7 @@ export default function QuoteRecommendation({ similarProducts, addToCart }: Quot
         ? prev.filter(id => id !== productId)
         : [...prev, productId];
       
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('favoriteProducts', JSON.stringify(newFavorites));
-      }
+      localStorage.setItem('favoriteProducts', JSON.stringify(newFavorites));
       return newFavorites;
     });
   };

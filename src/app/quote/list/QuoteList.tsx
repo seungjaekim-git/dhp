@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -23,13 +23,14 @@ export default function QuoteList({
   selectedProducts, 
   onSelectionChange 
 }: QuoteListProps) {
-  const [favorites, setFavorites] = useState<number[]>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('favoriteProducts');
-      return saved ? JSON.parse(saved) : [];
+  const [favorites, setFavorites] = useState<number[]>([]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('favoriteProducts');
+    if (saved) {
+      setFavorites(JSON.parse(saved));
     }
-    return [];
-  });
+  }, []);
 
   const toggleFavorite = (productId: number) => {
     setFavorites(prev => {
@@ -37,19 +38,15 @@ export default function QuoteList({
         ? prev.filter(id => id !== productId)
         : [...prev, productId];
       
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('favoriteProducts', JSON.stringify(newFavorites));
-      }
+      localStorage.setItem('favoriteProducts', JSON.stringify(newFavorites));
       return newFavorites;
     });
   };
 
   const removeProduct = (productId: number) => {
-    if (typeof window !== 'undefined') {
-      const savedProducts = localStorage.getItem('removedProducts');
-      const removedProducts = savedProducts ? JSON.parse(savedProducts) : [];
-      localStorage.setItem('removedProducts', JSON.stringify([...removedProducts, productId]));
-    }
+    const savedProducts = localStorage.getItem('removedProducts');
+    const removedProducts = savedProducts ? JSON.parse(savedProducts) : [];
+    localStorage.setItem('removedProducts', JSON.stringify([...removedProducts, productId]));
   };
 
   const toggleSelectAll = () => {

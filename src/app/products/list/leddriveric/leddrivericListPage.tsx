@@ -6,7 +6,7 @@ import { DataTable } from "./data-table";
 import { searchParamsCache } from "./search-params";
 import { Skeleton } from "@/components/ui/skeleton";
 import * as React from "react";
-import { LEDDriverICInfoSchema } from "@/app/supabase/LEDDriverIC";
+import { LEDDriverICInfoSchema } from "@/app/supabase/schemas/LEDDriverIC";
 import { useColumns } from "./columns";
 
 type ProductSchema = {

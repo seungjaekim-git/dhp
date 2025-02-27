@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableBody, TableRow, TableCell, TableHead } from "@/components/ui/table";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { z } from "zod";
-import { LEDDriverICInfoSchema } from './LEDDriverIC';
+import { LEDDriverICInfoSchema } from './schemas/LEDDriverIC';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
