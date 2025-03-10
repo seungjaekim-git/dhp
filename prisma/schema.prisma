@@ -141,7 +141,7 @@ model manufacturer_phones {
 model manufacturers {
   id                    BigInt                  @id @default(autoincrement())
   name                  String                  @unique
-  website               String?
+  website_url               String?
   established           String?
   headquarters          String?
   business_type         String?
@@ -288,7 +288,6 @@ model products {
   manufacturer_id        BigInt?
   part_number            String?                  @unique
   specifications         Json
-  tables                 Json?
   description            String?
   storage_type_id        BigInt?
   created_at             DateTime?                @default(now()) @db.Timestamp(6)

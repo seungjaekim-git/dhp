@@ -101,7 +101,8 @@ export const getData = async () => {
           certification_type
         )
       )
-    `);
+    `)
+    .order('name', { ascending: true });
 
   if (productsError) {
     console.error('제품 데이터 가져오기 오류:', productsError);

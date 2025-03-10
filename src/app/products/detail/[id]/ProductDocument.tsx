@@ -77,6 +77,8 @@ export default function ProductDocument({ product }: ProductDocumentProps) {
     return acc;
   }, {} as Record<string, Document[]>);
 
+  const documents = product.product_documents.map(item => item.documents);
+
   if (!product.product_documents.length) {
     return (
       <Card className="bg-gray-50">
@@ -95,59 +97,11 @@ export default function ProductDocument({ product }: ProductDocumentProps) {
         <CardTitle className="text-2xl font-bold text-gray-800">문서 자료</CardTitle>
       </CardHeader>
       <CardContent className="p-6">
-        {Object.entries(groupedByCategory).map(([category, documents]) => (
-          <div key={category} className="mb-10 last:mb-0">
-            <h3 className="text-xl font-bold text-gray-700 mb-6 flex items-center">
-              {documentTypeIcons[category] && (
-                <span className="mr-2">{documentTypeIcons[category]}</span>
-              )}
-              {category}
-            </h3>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {documents.map((doc) => (
-                <div 
-                  key={doc.id}
-                  className={cn(
-                    "group relative p-4 rounded-xl border border-gray-200",
-                    "hover:border-blue-300 hover:shadow-md transition-all duration-200",
-                    "bg-gradient-to-br from-white to-gray-50"
-                  )}
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-gray-900 mb-2 line-clamp-1 group-hover:text-blue-600">
-                        {doc.title}
-                      </h4>
-                      {doc.document_types?.description && (
-                        <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                          {doc.document_types.description}
-                        </p>
-                      )}
-                      <div className="flex items-center text-xs text-gray-500 gap-2">
-                        <span>{doc.document_types?.name || '기타'}</span>
-                        <span>•</span>
-                        <span>{new Date(doc.created_at).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className={cn(
-                        "ml-2 transition-all duration-200",
-                        "hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200",
-                        "focus:ring-2 focus:ring-blue-100"
-                      )}
-                      onClick={() => window.open(doc.url, '_blank')}
-                    >
-                      <Download className="w-4 h-4 mr-1" />
-                      다운로드
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
+        <div className="space-y-4">
+          {documents.map((doc, idx) => (
+            <DocumentCard key={idx} document={doc} />
+          ))}
+        </div>
       </CardContent>
     </Card>
   );

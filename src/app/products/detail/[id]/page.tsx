@@ -20,27 +20,45 @@ export default async function ProductDetail({ params }: { params: { id: string }
   const { data: product, error } = await supabase
     .from("products")
     .select(`
-      *,
-      manufacturers (
-        *,
-        manufacturer_emails (*),
-        manufacturer_phones (*),
-        manufacturer_faxes (*),
-        manufacturer_branches (*),
-        manufacturer_images (*)
+      id,
+      name,
+      manufacturer_id,
+      part_number,
+      specifications,
+      description,
+      storage_type_id,
+      created_at,
+      updated_at,
+      subtitle,
+      manufacturers(
+        id, name, website_url, established, headquarters, business_type, 
+        company_overview, business_overview, key_milestones, 
+        annual_revenue, sales_markets, logo, building, 
+        linkedin_link, facebook_link, country_id, role,
+        manufacturer_images(image_url, description),
+        countries(id, name)
       ),
-      images (*),
-      product_documents (
-        documents (*)
+      images(id, url, title, description),
+      product_documents(
+        document_id,
+        documents(id, title, url, type_id, created_at, updated_at)
       ),
-      product_features (
-        features (*)
+      product_features(
+        feature_id,
+        description,
+        features(id, name, description)
       ),
-      product_applications (
-        applications (*)
+      product_applications(
+        application_id,
+        applications(id, name, description)
       ),
-      product_certifications (
-        certifications (*)
+      product_certifications(
+        certification_id,
+        certifications(id, name, description)
+      ),
+      product_categories(
+        category_id,
+        categories(id, name)
       )
     `)
     .eq('id', params.id)
@@ -50,32 +68,16 @@ export default async function ProductDetail({ params }: { params: { id: string }
     console.error("Error fetching product:", error);
     notFound();
   }
-  console.log(product);
-
-  // 카테고리 데이터 조회
-  const { data: categoryData } = await supabase
-    .from('product_categories')
-    .select(`
-      *,
-      categories (
-        id,
-        name
-      )
-    `)
-    .eq('product_id', params.id);
-
-  // 제조사의 국가 정보 조회
-  const { data: countryData } = await supabase
-    .from('countries')
-    .select('name')
-    .eq('id', product.manufacturers.country_id)
-    .single();
 
   // 데이터 병합
   const productWithExtra = {
     ...product,
-    categories: categoryData?.map(item => item.categories) || [],
-    country: countryData?.name || null
+    categories: product.product_categories?.map(item => item.categories) || [],
+    country: product.manufacturers?.countries?.name || null,
+    product_features: product.product_features || [],
+    product_applications: product.product_applications || [],
+    product_certifications: product.product_certifications || [],
+    images: product.images || []
   };
 
   return (
