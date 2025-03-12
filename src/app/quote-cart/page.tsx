@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import QuoteCartClient from "./components/QuoteCartClient";
+import QuoteCartClient from "./QuoteCartClient";
 
 export const metadata: Metadata = {
   title: "견적 장바구니 | DHP 전자부품",

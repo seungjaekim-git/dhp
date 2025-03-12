@@ -13,6 +13,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useBookmarks, useQuoteCart } from "@/hooks/useClientStore";
+import { Heart, ShoppingCart, BarChart2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import Link from "next/link";
+
 interface DataTableProps<T> {
   data: T[];
   columns: {
@@ -229,6 +234,100 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
       acc[group].push(column);
       return acc;
     }, {} as Record<string, Array<(typeof columns)[number]>>);
+  };
+
+  // 북마크 및 장바구니 스토어 훅 사용
+  const { isBookmarked, toggleBookmark } = useBookmarks();
+  const { addToCart } = useQuoteCart();
+  const { toast } = useToast();
+  
+  // 선택된 항목 중 비교 목록에 추가할 항목 관리
+  const [compareItems, setCompareItems] = useState<number[]>([]);
+  
+  // 북마크 전환 함수
+  const handleToggleBookmark = (row: T) => {
+    const bookmarkItem = {
+      id: row.id,
+      name: row.name || `Product ${row.id}`,
+      subtitle: row.subtitle || "",
+      manufacturerName: row.manufacturer?.name || "Unknown",
+      manufacturerId: row.manufacturer_id || 0,
+      addedAt: new Date().toISOString(),
+      imageUrl: row.images?.[0]?.url || "",
+      packageType: row.package_type || "",
+      category: row.category?.name || "기타"
+    };
+    
+    const isNowBookmarked = toggleBookmark(bookmarkItem);
+    
+    toast({
+      title: isNowBookmarked ? "북마크에 추가되었습니다" : "북마크가 해제되었습니다",
+      description: isNowBookmarked 
+        ? "관심제품 목록에서 확인하실 수 있습니다."
+        : "관심제품 목록에서 제거되었습니다.",
+    });
+  };
+  
+  // 견적 장바구니에 추가 함수
+  const handleAddToQuoteCart = (row: T) => {
+    const cartItem = {
+      id: row.id,
+      name: row.name || `Product ${row.id}`,
+      quantity: 1,
+      subtitle: row.subtitle || "",
+      manufacturerName: row.manufacturer?.name || "Unknown",
+      manufacturerId: row.manufacturer_id || 0,
+      addedAt: new Date().toISOString(),
+      imageUrl: row.images?.[0]?.url || "",
+      packageType: row.package_type || "",
+      category: row.category?.name || "기타"
+    };
+    
+    addToCart(cartItem);
+    
+    toast({
+      title: "견적 장바구니에 추가되었습니다",
+      description: "견적 요청 목록에 제품이 추가되었습니다.",
+      action: (
+        <Button variant="outline" size="sm" asChild>
+          <Link href="/quote-cart">견적함 보기</Link>
+        </Button>
+      ),
+    });
+  };
+  
+  // 선택된 항목을 비교 목록에 추가/제거
+  const toggleCompareItem = (id: number) => {
+    if (compareItems.includes(id)) {
+      setCompareItems(compareItems.filter(item => item !== id));
+    } else {
+      // 최대 4개까지만 비교 가능
+      if (compareItems.length < 4) {
+        setCompareItems([...compareItems, id]);
+      } else {
+        toast({
+          title: "비교 항목 초과",
+          description: "최대 4개 제품만 비교할 수 있습니다.",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+  
+  // 비교하기 버튼 클릭 처리
+  const handleCompare = () => {
+    if (compareItems.length < 2) {
+      toast({
+        title: "비교 항목 부족",
+        description: "최소 2개 이상의 제품을 선택해야 합니다.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // 비교 페이지로 이동 (ids 파라미터로 전달)
+    const compareUrl = `/products/compare?ids=${compareItems.join(',')}`;
+    window.open(compareUrl, '_blank');
   };
 
   return (
@@ -830,6 +929,30 @@ export function DataTable<T extends { id: number }>({ data: initialData, columns
           </div>
         </div>
       </div>
+
+      {/* 선택된 항목에 대한 비교 버튼 */}
+      {compareItems.length > 0 && (
+        <div className="fixed bottom-4 right-4 bg-white p-3 rounded-lg shadow-lg border border-gray-200 z-50">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium">{compareItems.length}개 제품 선택됨</span>
+            <Button 
+              size="sm" 
+              onClick={handleCompare}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <BarChart2 className="w-4 h-4 mr-1" />
+              비교하기
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => setCompareItems([])}
+            >
+              초기화
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

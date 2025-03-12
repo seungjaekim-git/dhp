@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Search, Menu, X, ArrowRight, ArrowLeft } from "lucide-react";
+import { Search, Menu, X, ArrowRight, ArrowLeft, ShoppingCart, ChevronDown, User, FileText, Trash2, ExternalLink, Heart } from "lucide-react";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -26,9 +26,23 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
 import { debounce } from "lodash";
 import { navigationConfig } from "@/config/navigation";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchStore } from "@/store/SearchStore"; // Import search store
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { NavActions } from "./NavigationComponents";
+import { usePathname } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { useQuoteCart, useBookmarks } from "@/hooks/useClientStore";
+import { cn } from "@/lib/utils";
 
 // Reusable components with React.memo for performance optimization
 const CategoryLink = React.memo(({ href, title, description }: { href: string, title: string, description: string }) => (
@@ -110,9 +124,35 @@ const Navigation = () => {
   const [selectedPartner, setSelectedPartner] = React.useState(navigationConfig.partners.items[0]);
   const [isVisible, setIsVisible] = React.useState(true);
   const [lastScrollY, setLastScrollY] = React.useState(0);
+  const pathname = usePathname();
+  const { toast } = useToast();
+  const [scrolled, setScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   // Use search store instead of local state
   const { setIsOpen, isOpen } = useSearchStore();
+
+  // 장바구니 상태 가져오기
+  const { cartItems, cartItemCount, removeFromCart } = useQuoteCart();
+  
+  // 북마크 상태 가져오기
+  const { bookmarks, bookmarkCount, removeBookmark } = useBookmarks();
+  
+  // 북마크를 카테고리별로 그룹화하는 함수
+  const bookmarksByCategory = React.useMemo(() => {
+    const grouped: Record<string, typeof bookmarks> = {};
+    if (bookmarks) {
+      bookmarks.forEach(bookmark => {
+        const category = bookmark.category || '기타';
+        if (!grouped[category]) {
+        grouped[category] = [];
+      }
+      grouped[category].push(bookmark);
+    });
+    
+    return grouped;
+    }
+  }, [bookmarks]);
 
   React.useEffect(() => {
     const controlNavbar = () => {
@@ -245,6 +285,39 @@ const Navigation = () => {
         return null;
     }
   }, [selectedMenu]);
+
+  // 제품 삭제 함수
+  const handleRemoveFromCart = (e: React.MouseEvent, itemId: number) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    removeFromCart(itemId);
+    
+    toast({
+      title: "제품이 장바구니에서 삭제되었습니다",
+      description: "견적 요청 목록에서 제품이 제거되었습니다.",
+      variant: "default",
+    });
+  };
+
+  // 북마크 삭제 함수
+  const handleRemoveFromBookmarks = (e: React.MouseEvent, itemId: number) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    removeBookmark(itemId);
+    
+    toast({
+      title: "북마크에서 삭제되었습니다",
+      description: "북마크 목록에서 제품이 제거되었습니다.",
+      variant: "default",
+    });
+  };
+
+  // 네비게이션 링크 활성화 확인 함수
+  const isLinkActive = (path: string) => {
+    return pathname === path;
+  };
 
   return (
     <div className={`w-full bg-white border-b transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
@@ -417,12 +490,6 @@ const Navigation = () => {
                   </div>
                 </NavigationMenuContent>
               </NavigationMenuItem>
-
-              <NavigationMenuItem>
-                <Link href="/quote" legacyBehavior passHref>
-                  <NavigationMenuLink className={`${navigationMenuTriggerStyle()} text-gray-700 hover:text-blue-600`}>견적요청</NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
         </div>
@@ -506,6 +573,302 @@ const Navigation = () => {
               </div>
             </SheetContent>
           </Sheet>
+        </div>
+
+        {/* 우측 네비게이션 아이템 영역 */}
+        <div className="flex items-center gap-2">
+          
+          {/* 견적 및 북마크 드롭다운 */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className={cn(
+                  "relative flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                  cartItemCount > 0 ? "text-blue-600" : "text-gray-700",
+                  isLinkActive("/quote-cart") ? "bg-blue-50" : "hover:bg-gray-100"
+                )}
+              >
+                <ShoppingCart className="h-5 w-5" />
+                <span>견적</span>
+                {cartItemCount > 0 && (
+                  <Badge 
+                    className="ml-1 bg-blue-500 hover:bg-blue-600 text-white px-2 py-0.5 rounded-full"
+                  >
+                    {cartItemCount}
+                  </Badge>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent 
+              align="end" 
+              className="w-80 p-3"
+              sideOffset={8}
+            >
+              <Tabs defaultValue="quote-cart" className="w-full">
+                <TabsList className="w-full flex p-1 mb-4 bg-transparent border-b">
+                  <TabsTrigger 
+                    value="quote-cart" 
+                    className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 rounded-none transition-all duration-300"
+                  >
+                    견적 장바구니
+                    {cartItemCount > 0 && (
+                      <Badge 
+                        className="ml-1 bg-blue-500 hover:bg-blue-600 text-white px-2 py-0.5 rounded-full"
+                      >
+                        {cartItemCount}
+                      </Badge>
+                    )}
+                  </TabsTrigger>
+                  
+                  <TabsTrigger 
+                    value="bookmarks" 
+                    className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 rounded-none transition-all duration-300"
+                  >
+                    북마크
+                    {bookmarkCount > 0 && (
+                      <Badge 
+                        className="ml-1 bg-rose-500 hover:bg-rose-600 text-white px-2 py-0.5 rounded-full"
+                      >
+                        {bookmarkCount}
+                      </Badge>
+                    )}
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* 견적 장바구니 탭 콘텐츠 */}
+                <TabsContent value="quote-cart" className="pt-0">
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="text-lg font-medium">견적 장바구니</h3>
+                    <Badge 
+                      variant="outline" 
+                      className="font-mono bg-blue-50 border-blue-200 text-blue-700"
+                    >
+                      {cartItemCount}개 항목
+                    </Badge>
+                  </div>
+                  
+                  {cartItemCount === 0 ? (
+                    <div className="py-6 text-center text-gray-500">
+                      <ShoppingCart className="w-10 h-10 mx-auto mb-2 text-gray-300" />
+                      <p>장바구니가 비어있습니다</p>
+                      <p className="text-xs mt-1">제품 페이지에서 견적을 추가해보세요</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="max-h-[300px] overflow-y-auto mb-3 space-y-2">
+                        {cartItems.map((item) => (
+                          <div
+                            key={item.id}
+                            className="flex items-center justify-between bg-gray-50 p-3 rounded-lg hover:bg-gray-100 transition-colors"
+                          >
+                            {/* 제품 정보 */}
+                            <div className="flex items-center space-x-3">
+                              {item.imageUrl ? (
+                                <div className="w-10 h-10 rounded overflow-hidden border border-gray-200">
+                                  <img
+                                    src={item.imageUrl}
+                                    alt={item.name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                              ) : (
+                                <div className="w-10 h-10 rounded bg-blue-100 flex items-center justify-center text-blue-700 font-medium">
+                                  {item.name.charAt(0)}
+                                </div>
+                              )}
+                              
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 truncate">
+                                  {item.name}
+                                </p>
+                                <p className="text-xs text-gray-500 truncate">
+                                  {item.manufacturerName} · {item.quantity}개
+                                </p>
+                                <p className="text-xs text-gray-500 truncate">
+                                  추가일: {new Date(item.addedAt).toLocaleDateString()}
+                                </p>
+                                {item.packageType && (
+                                  <Badge 
+                                    variant="outline" 
+                                    className="text-[10px] px-1 py-0 mt-1 h-4"
+                                  >
+                                    {item.packageType}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {/* 버튼 영역 */}
+                            <div className="flex gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 rounded-full hover:bg-blue-100 hover:text-blue-600"
+                                asChild
+                              >
+                                <Link href={`/products/detail/${item.id}`}>
+                                  <ExternalLink className="h-4 w-4" />
+                                </Link>
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 rounded-full hover:bg-red-100 hover:text-red-600"
+                                onClick={(e) => handleRemoveFromCart(e, item.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      <DropdownMenuSeparator />
+                      
+                      <div className="mt-3 flex justify-between items-center">
+                        <p className="text-sm text-gray-500">
+                          총 <span className="font-semibold">{cartItemCount}</span>개 제품
+                        </p>
+                        <Button asChild className="rounded-full px-4">
+                          <Link href="/quote-cart">
+                            견적함 보기 
+                            <FileText className="ml-2 h-4 w-4" />
+                          </Link>
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                </TabsContent>
+
+                {/* 북마크 탭 콘텐츠 */}
+                <TabsContent value="bookmarks" className="pt-0">
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="text-lg font-medium">북마크</h3>
+                    <Badge 
+                      variant="outline" 
+                      className="font-mono bg-rose-50 border-rose-200 text-rose-700"
+                    >
+                      {bookmarkCount}개 항목
+                    </Badge>
+                  </div>
+                  
+                  {bookmarkCount === 0 ? (
+                    <div className="py-6 text-center text-gray-500">
+                      <Heart className="w-10 h-10 mx-auto mb-2 text-gray-300" />
+                      <p>북마크가 비어있습니다</p>
+                      <p className="text-xs mt-1">제품 페이지에서 북마크 해보세요</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="text-xs text-gray-500 mb-2">카테고리별 북마크</div>
+                      
+                      {/* 카테고리별 그룹화된 북마크 */}
+                      <div className="max-h-[300px] overflow-y-auto mb-3">
+                        {bookmarksByCategory && Object.entries(bookmarksByCategory).map(([category, items]) => (
+                          <div key={category} className="mb-3">
+                            <div className="flex items-center gap-2 mb-1">
+                              <div className="h-1 w-1 rounded-full bg-gray-300"></div>
+                              <h4 className="text-sm font-medium text-gray-700">{category}</h4>
+                              <Badge variant="outline" className="text-xs">{items.length}</Badge>
+                            </div>
+                            
+                            <div className="space-y-2 pl-3">
+                              {items.map((item) => (
+                                <div
+                                  key={item.id}
+                                  className="flex items-center justify-between bg-gray-50 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                                >
+                                  {/* 제품 정보 */}
+                                  <div className="flex items-center space-x-2">
+                                    {item.imageUrl ? (
+                                      <div className="w-8 h-8 rounded overflow-hidden border border-gray-200">
+                                        <img
+                                          src={item.imageUrl}
+                                          alt={item.name}
+                                          className="w-full h-full object-cover"
+                                        />
+                                      </div>
+                                    ) : (
+                                      <div className="w-8 h-8 rounded bg-rose-100 flex items-center justify-center text-rose-700 font-medium">
+                                        {item.name.charAt(0)}
+                                      </div>
+                                    )}
+                                    
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm font-medium text-gray-900 truncate">
+                                        {item.name}
+                                      </p>
+                                      <p className="text-xs text-gray-500 truncate">
+                                        {item.manufacturerName}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  
+                                  {/* 버튼 영역 */}
+                                  <div className="flex gap-1">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-6 w-6 rounded-full hover:bg-blue-100 hover:text-blue-600"
+                                      asChild
+                                    >
+                                      <Link href={`/products/detail/${item.id}`}>
+                                        <ExternalLink className="h-3 w-3" />
+                                      </Link>
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-6 w-6 rounded-full hover:bg-red-100 hover:text-red-600"
+                                      onClick={(e) => handleRemoveFromBookmarks(e, item.id)}
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      <DropdownMenuSeparator />
+                      
+                      <div className="mt-3 flex justify-between items-center">
+                        <p className="text-sm text-gray-500">
+                          총 <span className="font-semibold">{bookmarkCount}</span>개 제품
+                        </p>
+                        <Button asChild variant="outline" className="rounded-full px-4">
+                          <Link href="/bookmarks">
+                            북마크 보기
+                            <Heart className="ml-2 h-4 w-4" />
+                          </Link>
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* <Button 
+            variant="ghost" 
+            size="sm" 
+            className="rounded-full"
+            onClick={() => {
+              // 로그인 기능 (나중에 추가)
+            }}
+          >
+            <Avatar className="h-8 w-8">
+              <AvatarImage src="/placeholder-user.jpg" alt="사용자" />
+              <AvatarFallback className="bg-blue-100 text-blue-700">
+                <User className="h-4 w-4" />
+              </AvatarFallback>
+            </Avatar>
+          </Button> */}
         </div>
       </div>
     </div>

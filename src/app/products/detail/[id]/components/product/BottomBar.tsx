@@ -1,7 +1,10 @@
 import React from "react";
-import { Heart } from "lucide-react";
+import { Heart, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductProps } from "../../types/product";
+import { useQuoteCart } from "@/hooks/useClientStore";
+import { useToast } from "@/hooks/use-toast";
+import Link from "next/link";
 
 interface BottomBarProps {
   product: ProductProps;
@@ -14,6 +17,46 @@ export const BottomBar = ({
   isBookmarked, 
   onBookmarkToggle 
 }: BottomBarProps) => {
+  const { addToCart } = useQuoteCart();
+  const { toast } = useToast();
+  
+  // 견적 장바구니에 1개 항목 바로 추가
+  const addToQuoteCart = () => {
+    try {
+      const cartItem = {
+        id: Number(product.id),
+        name: product.name,
+        quantity: 1,
+        subtitle: product.subtitle,
+        manufacturerName: product.manufacturers.name,
+        manufacturerId: Number(product.manufacturers.id),
+        addedAt: new Date().toISOString(),
+        imageUrl: product.images?.[0]?.url || "",
+        packageType: product.specifications?.led_driver_ic?.package_type || "",
+        category: product.categories?.[0]?.name || "기타"
+      };
+      
+      addToCart(cartItem);
+      
+      toast({
+        title: "견적 장바구니에 추가되었습니다",
+        description: "견적 요청 목록에 제품이 추가되었습니다.",
+        action: (
+          <ToastAction altText="견적함으로 이동" asChild>
+            <Link href="/quote-cart">견적함 보기</Link>
+          </ToastAction>
+        ),
+      });
+    } catch (error) {
+      console.error("장바구니 추가 실패:", error);
+      toast({
+        title: "오류가 발생했습니다",
+        description: "장바구니 추가 중 문제가 발생했습니다. 다시 시도해주세요.",
+        variant: "destructive",
+      });
+    }
+  };
+  
   // 제조사 로고 및 국가 정보 안전하게 접근
   const manufacturerLogo = product.manufacturers?.logo || 
                           product.manufacturers?.manufacturer_images?.[0]?.image_url;
@@ -43,7 +86,9 @@ export const BottomBar = ({
             <Button 
               className="rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 active:from-blue-800 active:to-blue-700 px-5 py-2 mx-4 text-base font-medium flex-grow transition-all duration-200"
               size="lg"
+              onClick={addToQuoteCart}
             >
+              <ShoppingCart className="w-4 h-4 mr-2" />
               견적 요청
             </Button>
             <Button 

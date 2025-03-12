@@ -28,7 +28,7 @@ export const getData = async () => {
       manufacturer:manufacturers(
         id,
         name,
-        website,
+        website_url,
         established,
         headquarters,
         business_type,

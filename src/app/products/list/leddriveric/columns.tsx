@@ -91,7 +91,7 @@ export const useColumns = (filterOptions: FilterOptions = {}) => {
   const [columnVisibility, setColumnVisibility] = React.useState<Record<string, boolean>>({});
   const [columnOrder, setColumnOrder] = React.useState<string[]>([]);
 
-  return [
+  const columns: Column[] = [
     {
       key: "name",
       header: "기본 정보", 
@@ -772,6 +772,20 @@ export const useColumns = (filterOptions: FilterOptions = {}) => {
           )}
         </div>
       )
+    },
+    {
+      key: 'actions',
+      header: '액션',
+      width: 100,
+      isVisible: true,
+      order: 999,
+      render: (row) => (
+        <div className="flex items-center justify-center">
+          <span className="text-xs text-gray-500">액션</span>
+        </div>
+      )
     }
   ];
+
+  return columns;
 };
