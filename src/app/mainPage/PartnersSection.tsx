@@ -4,6 +4,7 @@ import Image from "next/image"
 import Link from "next/link";
 import { BriefcaseIcon, SettingsIcon, HeartIcon, LightbulbIcon, MountainSnow, FlowerIcon, ArrowRightIcon, ExternalLinkIcon } from "lucide-react";
 import { useMemo, useState } from "react";
+import { partnersConfig } from "@/config/navigation";
 
 // 파트너사 데이터
 const PARTNER_DATA = [
@@ -97,83 +98,84 @@ const PARTNER_DATA = [
     }
 ];
 
+// 파트너 카테고리 탭
+const PARTNER_TABS = [
+  { title: "전체", icon: BriefcaseIcon },
+  { title: "LED 드라이버 IC", icon: LightbulbIcon },
+  { title: "다이오드", icon: SettingsIcon },
+  { title: "전원관리 IC", icon: HeartIcon },
+  { title: "커넥터&케이블", icon: FlowerIcon },
+  { title: "수동 소자", icon: MountainSnow },
+  { title: "센서", icon: FlowerIcon },
+  { title: "자동차 인증 부품", icon: MountainSnow }
+];
+
 interface PartnerCardProps {
-    logo: string;
-    title: string;
-    categories: string[];
-    country: string;
-    type: string;
-    subtitle: string;
-    description: string[];
-    href: string;
+  logo: string;
+  title: string;
+  categories: string[];
+  country: string;
+  type: string;
+  subtitle: string;
+  description: string[];
+  href: string;
 }
 
 const PartnerCard: React.FC<PartnerCardProps> = ({ logo, title, categories, country, type, subtitle, description, href }) => (
-    <Link href={href}>
-        <div className="group relative bg-white rounded-xl p-6 border-2 border-gray-100 transition-all duration-300 hover:border-blue-300 hover:shadow-lg cursor-pointer overflow-hidden">
-            <div className="absolute inset-0 bg-black/0 transition-all duration-300 group-hover:bg-blue-300/5 rounded-xl" />
-            <div className="absolute top-4 right-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                <ExternalLinkIcon className="w-5 h-5 text-gray-600" />
+  <Link href={href}>
+    <div className="group relative bg-white rounded-xl p-6 border-2 border-gray-100 transition-all duration-300 hover:border-blue-300 hover:shadow-lg cursor-pointer overflow-hidden">
+      <div className="absolute inset-0 bg-black/0 transition-all duration-300 group-hover:bg-blue-300/5 rounded-xl" />
+      <div className="absolute top-4 right-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+        <ExternalLinkIcon className="w-5 h-5 text-gray-600" />
+      </div>
+      <div className="flex flex-col gap-5">
+        <div className="flex items-center gap-4">
+          <Image 
+            src={logo} 
+            alt={`${title} 로고`} 
+            width={64}
+            height={64}
+            className="object-contain"
+          />
+          <div>
+            <h3 className="font-bold text-xl tracking-tight">{title}</h3>
+            <div className="flex gap-2 mt-2">
+              <span className="text-xs px-2 py-1 bg-gray-50 rounded-full ">{country}</span>
+              <span className="text-xs px-2 py-1 bg-gray-50 rounded-full ">{type}</span>
             </div>
-            <div className="flex flex-col gap-5">
-                <div className="flex items-center gap-4">
-                    <Image 
-                        src={logo} 
-                        alt={`${title} 로고`} 
-                        width={64}
-                        height={64}
-                        className="object-contain"
-                    />
-                    <div>
-                        <h3 className="font-bold text-xl tracking-tight">{title}</h3>
-                        <div className="flex gap-2 mt-2">
-                            <span className="text-xs px-2 py-1 bg-gray-50 rounded-full ">{country}</span>
-                            <span className="text-xs px-2 py-1 bg-gray-50 rounded-full ">{type}</span>
-                        </div>
-                    </div>
-                </div>
-                <div className="space-y-3">
-                    <div className="h-[1px] bg-gray-100" />
-                    <div className="flex flex-wrap gap-2">
-                        <p className="text-sm font-semibold text-gray-600">{subtitle}</p>
-                    </div>
-                    <ul className="space-y-1">
-                        {description.map((item, index) => (
-                            <li key={index} className="flex items-center gap-2 text-sm text-gray-600">
-                                <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-                                {item}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            </div>
-            <div className="absolute inset-x-0 bottom-0 h-12 flex items-center justify-center bg-gradient-to-t from-sky-400 to-blue-300 text-gray-600 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                <span className="font-semibold">자세히 알아보기</span>
-                <ArrowRightIcon className="w-4 h-4 ml-2" />
-            </div>
+          </div>
         </div>
-    </Link>
+        <div className="space-y-3">
+          <div className="h-[1px] bg-gray-100" />
+          <div className="flex flex-wrap gap-2">
+            <p className="text-sm font-semibold text-gray-600">{subtitle}</p>
+          </div>
+          <ul className="space-y-1">
+            {description.map((item, index) => (
+              <li key={index} className="flex items-center gap-2 text-sm text-gray-600">
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+      <div className="absolute inset-x-0 bottom-0 h-12 flex items-center justify-center bg-gradient-to-t from-sky-400 to-blue-300 text-gray-600 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+        <span className="font-semibold">자세히 알아보기</span>
+        <ArrowRightIcon className="w-4 h-4 ml-2" />
+      </div>
+    </div>
+  </Link>
 );
 
 // 파트너 섹션 컴포넌트
 export default function PartnersSection() {
-    const tabs = [
-        { title: "전체", icon: BriefcaseIcon },
-        { title: "LED 드라이버 IC", icon: LightbulbIcon },
-        { title: "다이오드", icon: SettingsIcon },
-        { title: "전원관리 IC", icon: HeartIcon },
-        { title: "커넥터&케이블", icon: FlowerIcon },
-        { title: "수동 소자", icon: MountainSnow },
-        { title: "센서", icon: FlowerIcon },
-        { title: "자동차 인증 부품", icon: MountainSnow }
-    ];
-
     const [selectedTab, setSelectedTab] = useState<number>(0);
 
     const filteredPartners = useMemo(() => {
         if (selectedTab === 0) return PARTNER_DATA;
         
-        const selectedCategory = tabs[selectedTab].title;
+        const selectedCategory = PARTNER_TABS[selectedTab].title;
         return PARTNER_DATA.filter(partner => partner.categories.includes(selectedCategory));
     }, [selectedTab]);
 
@@ -225,7 +227,7 @@ export default function PartnersSection() {
                 {/* 오른쪽 컬럼 */}
                 <div className="lg:col-span-8 space-y-8">
                     <div className="flex flex-wrap gap-2">
-                        {tabs.map((tab, index) => (
+                        {PARTNER_TABS.map((tab, index) => (
                             <button
                                 key={tab.title}
                                 onClick={() => setSelectedTab(index)}

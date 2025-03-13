@@ -2,28 +2,55 @@ import React from "react";
 import { Heart, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductProps } from "../../types/product";
-import { useQuoteCart } from "@/hooks/useClientStore";
+import { useQuoteCartStore, QuoteCartItem } from "@/store/quoteCartStore"; 
+import { useBookmarkStore } from "@/store/bookmarkStore";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
+import { ToastAction } from "@/components/ui/toast";
 
 interface BottomBarProps {
   product: ProductProps;
-  isBookmarked: boolean;
-  onBookmarkToggle: () => void;
 }
 
-export const BottomBar = ({ 
-  product, 
-  isBookmarked, 
-  onBookmarkToggle 
-}: BottomBarProps) => {
-  const { addToCart } = useQuoteCart();
+export const BottomBar = ({ product }: BottomBarProps) => {
+  // 북마크 스토어 사용
+  const { isBookmarked, addBookmark, removeBookmark } = useBookmarkStore();
+  // 견적 장바구니 스토어 사용
+  const { addItem } = useQuoteCartStore();
   const { toast } = useToast();
+  
+  // 북마크 토글 함수
+  const onBookmarkToggle = () => {
+    const productIsBookmarked = isBookmarked(Number(product.id));
+    
+    if (productIsBookmarked) {
+      removeBookmark(Number(product.id));
+    } else {
+      addBookmark({
+        id: Number(product.id),
+        name: product.name,
+        subtitle: product.subtitle,
+        manufacturerName: product.manufacturers.name,
+        manufacturerId: Number(product.manufacturers.id),
+        addedAt: new Date().toISOString(),
+        imageUrl: product.images?.[0]?.url || "",
+        packageType: product.specifications?.led_driver_ic?.package_type || "",
+        category: product.categories?.[0]?.name || "기타"
+      });
+    }
+    
+    toast({
+      title: productIsBookmarked ? "북마크가 해제되었습니다" : "북마크에 추가되었습니다",
+      description: productIsBookmarked 
+        ? "관심제품 목록에서 제거되었습니다." 
+        : "마이페이지 관심제품 목록에서 확인하실 수 있습니다.",
+    });
+  };
   
   // 견적 장바구니에 1개 항목 바로 추가
   const addToQuoteCart = () => {
     try {
-      const cartItem = {
+      const cartItem: QuoteCartItem = {
         id: Number(product.id),
         name: product.name,
         quantity: 1,
@@ -33,10 +60,9 @@ export const BottomBar = ({
         addedAt: new Date().toISOString(),
         imageUrl: product.images?.[0]?.url || "",
         packageType: product.specifications?.led_driver_ic?.package_type || "",
-        category: product.categories?.[0]?.name || "기타"
       };
       
-      addToCart(cartItem);
+      addItem(cartItem);
       
       toast({
         title: "견적 장바구니에 추가되었습니다",
@@ -62,6 +88,9 @@ export const BottomBar = ({
                           product.manufacturers?.manufacturer_images?.[0]?.image_url;
   const countryName = product.manufacturers?.countries?.name || 
                       product.manufacturers?.headquarters?.split(',')?.[0]?.trim();
+  
+  // 북마크 상태 확인
+  const productIsBookmarked = isBookmarked(Number(product.id));
                       
   return (
     <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-lg z-50">
@@ -97,7 +126,7 @@ export const BottomBar = ({
               className="rounded-xl hover:bg-rose-50 transition-colors duration-200"
               onClick={onBookmarkToggle}
             >
-              <Heart className={`h-4 w-4 ${isBookmarked ? 'fill-rose-500 text-rose-500' : 'hover:fill-rose-200'}`} />
+              <Heart className={`h-4 w-4 ${productIsBookmarked ? 'fill-rose-500 text-rose-500' : 'hover:fill-rose-200'}`} />
             </Button>
           </div>
         </div>

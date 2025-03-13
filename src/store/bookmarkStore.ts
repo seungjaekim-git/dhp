@@ -10,6 +10,7 @@ export interface BookmarkedProduct {
   addedAt: string;
   imageUrl?: string;
   packageType?: string;
+  category?: string;
 }
 
 interface BookmarkState {

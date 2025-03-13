@@ -15,6 +15,7 @@ import { ProductProps } from "./types/product";
 
 // 훅 임포트
 import { useProductActions } from "./hooks/useProductActions";
+import { useBookmarkStore } from "@/store/bookmarkStore";
 
 // 컴포넌트 임포트
 import { ImageGallery } from "./components/product/ImageGallery";
@@ -37,10 +38,22 @@ export default function ProductDetailPage({
   product: ProductProps;
 }) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  const { isBookmarked, handleBookmarkToggle, handleShare } = useProductActions(
-    product.name,
-    product.subtitle
-  );
+  
+  // 북마크 스토어 사용
+  const { isBookmarked } = useBookmarkStore();
+  const productIsBookmarked = isBookmarked(Number(product.id));
+  
+  // useProductActions 훅 사용 - 수정된 버전
+  const { handleBookmarkToggle, handleShare } = useProductActions({
+    id: Number(product.id),
+    name: product.name,
+    subtitle: product.subtitle,
+    manufacturerName: product.manufacturers.name,
+    manufacturerId: Number(product.manufacturers.id),
+    imageUrl: product.images?.[0]?.url || "",
+    packageType: product.specifications?.led_driver_ic?.package_type || "",
+    category: product.categories?.[0]?.name || "기타"
+  });
 
   // 무거운 계산 최적화
   const documents = useMemo(() => 
@@ -120,11 +133,11 @@ export default function ProductDetailPage({
                       className="rounded-xl hover:bg-rose-50 active:bg-rose-100 transition-colors duration-200"
                       onClick={handleBookmarkToggle}
                     >
-                      <Heart className={`h-4 w-4 ${isBookmarked ? 'fill-rose-500 text-rose-500' : 'hover:text-rose-500'}`} />
+                      <Heart className={`h-4 w-4 ${productIsBookmarked ? 'fill-rose-500 text-rose-500' : 'hover:text-rose-500'}`} />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>{isBookmarked ? '관심 제품에서 제거' : '관심 제품에 추가'}</p>
+                    <p>{productIsBookmarked ? '관심 제품에서 제거' : '관심 제품에 추가'}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -248,9 +261,7 @@ export default function ProductDetailPage({
         
         {/* 모바일 하단 메뉴바 */}
         <BottomBar 
-          product={product} 
-          isBookmarked={isBookmarked} 
-          onBookmarkToggle={handleBookmarkToggle} 
+          product={product}
         />
       </div>
 

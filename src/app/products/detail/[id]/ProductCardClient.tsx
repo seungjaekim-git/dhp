@@ -18,8 +18,12 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
-import { useQuoteCart, useBookmarks } from "@/hooks/useClientStore";
+import { useQuoteCart } from "@/hooks/useClientStore";
 import Link from "next/link";
+import { useBookmarkStore } from "@/store/bookmarkStore";
+import { useQuoteCartStore, QuoteCartItem } from "@/store/quoteCartStore";
+import { ToastAction } from "@/components/ui/toast";
+import { useProductActions } from "./hooks/useProductActions";
 
 interface ProductCardProps {
   product: {
@@ -56,16 +60,7 @@ export default function ProductCardClient({ product }: ProductCardProps) {
   
   // Zustand 스토어 사용
   const { addToCart } = useQuoteCart();
-  const { isBookmarked, toggleBookmark } = useBookmarks();
   
-  // 현재 제품의 북마크 상태
-  const [productBookmarked, setProductBookmarked] = useState(false);
-  
-  // 첫 렌더링 시 북마크 상태 확인
-  React.useEffect(() => {
-    setProductBookmarked(isBookmarked(product.id));
-  }, [isBookmarked, product.id]);
-
   // 제조사 로고 이미지 URL (안전하게 접근)
   const manufacturerLogo = product.manufacturers?.manufacturer_images?.[0]?.image_url;
   
@@ -74,35 +69,37 @@ export default function ProductCardClient({ product }: ProductCardProps) {
                       product.manufacturers?.headquarters?.split(',')?.[0]?.trim() || 
                       "Unknown";
 
-  // 견적 장바구니에 추가하는 함수
+  // 북마크 및 장바구니 스토어 사용
+  const { isBookmarked, addBookmark, removeBookmark } = useBookmarkStore();
+  const { addItem } = useQuoteCartStore();
+  
+  // 북마크 상태 확인
+  const isProductBookmarked = isBookmarked(product.id);
+
+  // 견적 장바구니에 추가 함수
   const addToQuoteCart = () => {
-    setIsLoading(true);
-    
     try {
-      // 제품 정보 및 수량 가져오기
-      const cartItem = {
+      const cartItem: QuoteCartItem = {
         id: product.id,
         name: product.name,
-        quantity: quantity,
+        quantity: 1,
         subtitle: product.subtitle,
         manufacturerName: product.manufacturers.name,
-        manufacturerId: Number(product.manufacturers.id),
+        manufacturerId: product.manufacturers.id,
         addedAt: new Date().toISOString(),
         imageUrl: product.images?.[0]?.url || "",
         packageType: product.packaging_info?.[0]?.type || "",
-        category: product.category?.name || "기타"
       };
       
-      // 장바구니에 추가
-      addToCart(cartItem);
+      addItem(cartItem);
       
       toast({
         title: "견적 장바구니에 추가되었습니다",
         description: "견적 요청 목록에 제품이 추가되었습니다.",
         action: (
-          <Button variant="outline" size="sm" asChild>
+          <ToastAction altText="견적함으로 이동" asChild>
             <Link href="/quote-cart">견적함 보기</Link>
-          </Button>
+          </ToastAction>
         ),
       });
     } catch (error) {
@@ -112,33 +109,32 @@ export default function ProductCardClient({ product }: ProductCardProps) {
         description: "장바구니 추가 중 문제가 발생했습니다. 다시 시도해주세요.",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
-  
-  // 북마크 전환 함수
+
+  // 북마크 토글 함수
   const handleToggleBookmark = () => {
-    const bookmarkItem = {
-      id: product.id,
-      name: product.name,
-      subtitle: product.subtitle,
-      manufacturerName: product.manufacturers.name,
-      manufacturerId: Number(product.manufacturers.id),
-      addedAt: new Date().toISOString(),
-      imageUrl: product.images?.[0]?.url || "",
-      packageType: product.packaging_info?.[0]?.type || "",
-      category: product.category?.name || "기타"
-    };
-    
-    const isNowBookmarked = toggleBookmark(bookmarkItem);
+    if (isProductBookmarked) {
+      removeBookmark(product.id);
+    } else {
+      addBookmark({
+        id: product.id,
+        name: product.name,
+        subtitle: product.subtitle,
+        manufacturerName: product.manufacturers.name,
+        manufacturerId: product.manufacturers.id,
+        addedAt: new Date().toISOString(),
+        imageUrl: product.images?.[0]?.url || "",
+        packageType: product.packaging_info?.[0]?.type || "",
+        category: product.category?.name || "기타"
+      });
+    }
     
     toast({
-      title: isNowBookmarked ? "북마크에 추가되었습니다" : "북마크가 해제되었습니다",
-      description: isNowBookmarked 
-        ? "관심제품 목록에서 확인하실 수 있습니다."
-        : "관심제품 목록에서 제거되었습니다.",
-      variant: "default",
+      title: isProductBookmarked ? "북마크가 해제되었습니다" : "북마크에 추가되었습니다",
+      description: isProductBookmarked 
+        ? "관심제품 목록에서 제거되었습니다." 
+        : "마이페이지 관심제품 목록에서 확인하실 수 있습니다.",
     });
   };
 
@@ -205,11 +201,11 @@ export default function ProductCardClient({ product }: ProductCardProps) {
                       className="rounded-xl hover:bg-slate-100 active:bg-slate-200"
                       onClick={handleToggleBookmark}
                     >
-                      <Heart className={`h-4 w-4 ${productBookmarked ? 'fill-rose-500 text-rose-500' : 'hover:fill-rose-200'}`} />
+                      <Heart className={`h-4 w-4 ${isProductBookmarked ? 'fill-rose-500 text-rose-500' : 'hover:fill-rose-200'}`} />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>{productBookmarked ? '북마크에서 제거' : '북마크에 추가'}</p>
+                    <p>{isProductBookmarked ? '북마크에서 제거' : '북마크에 추가'}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -314,10 +310,10 @@ export default function ProductCardClient({ product }: ProductCardProps) {
           <Button 
             variant="outline" 
             size="icon" 
-            className={`h-12 w-12 rounded-xl hover:bg-slate-100 active:bg-slate-200 hover:border-slate-400 active:border-blue-400 transition-all duration-200 ${productBookmarked ? 'border-rose-300 text-rose-500' : ''}`}
+            className={`h-12 w-12 rounded-xl hover:bg-slate-100 active:bg-slate-200 hover:border-slate-400 active:border-blue-400 transition-all duration-200 ${isProductBookmarked ? 'border-rose-300 text-rose-500' : ''}`}
             onClick={handleToggleBookmark}
           >
-            <Heart className={`h-5 w-5 ${productBookmarked ? 'fill-rose-500' : ''}`} />
+            <Heart className={`h-5 w-5 ${isProductBookmarked ? 'fill-rose-500' : ''}`} />
           </Button>
         </div>
       </CardFooter>
