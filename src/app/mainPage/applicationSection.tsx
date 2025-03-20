@@ -1,103 +1,175 @@
 "use client";
 
-import { ArrowRightIcon } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
+import { ArrowRight, CircleCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
-// ApplicationsSection 컴포넌트
-export default function ApplicationsSection({ applications }: { applications: any[] }) {
+// 애니메이션 변수
+const container = {
+    hidden: { opacity: 0 },
+    show: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.1,
+            delayChildren: 0.2
+        }
+    }
+};
+
+const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+};
+
+// 애플리케이션 데이터 정의
+const applicationData = [
+    {
+        title: "LED 디스플레이",
+        description: "디지털 사이니지, 비디오 월, 스포츠 경기장 디스플레이를 위한 LED 드라이버 솔루션",
+        icon: "/icons/led-display.png",
+        link: "/applications/led-display",
+        benefits: ["고효율", "선명한 화질", "긴 수명"],
+    },
+    {
+        title: "LED 조명",
+        description: "실내 및 실외 조명, 스마트 조명 시스템을 위한 고효율 LED 드라이버 IC",
+        icon: "/icons/led-lighting.png",
+        link: "/applications/led-lighting",
+        benefits: ["에너지 절약", "밝기 제어", "스마트 기능"],
+    },
+    {
+        title: "자동차 전장",
+        description: "자동차 디스플레이, 인포테인먼트 시스템, 내외부 조명을 위한 자동차급 반도체 솔루션",
+        icon: "/icons/automotive.png",
+        link: "/applications/automotive",
+        benefits: ["AEC-Q100 인증", "내구성", "내열성"],
+    },
+    {
+        title: "산업용 제어",
+        description: "공장 자동화, 로봇 시스템, 산업용 장비를 위한 모터 제어 및 센서 인터페이스 솔루션",
+        icon: "/icons/industrial.png",
+        link: "/applications/industrial-control",
+        benefits: ["안정성", "정밀 제어", "내환경성"],
+    },
+    {
+        title: "의료 기기",
+        description: "의료 영상 시스템, 환자 모니터링 장비, 진단 장비를 위한 고신뢰성 반도체 솔루션",
+        icon: "/icons/medical.png",
+        link: "/applications/medical-devices",
+        benefits: ["초고정밀", "저전력", "안전성"],
+    },
+    {
+        title: "스마트 홈",
+        description: "홈 자동화, IoT 기기, 스마트 가전을 위한 저전력 반도체 및 센서 솔루션",
+        icon: "/icons/smart-home.png",
+        link: "/applications/smart-home",
+        benefits: ["연결성", "사용 편의성", "IoT 호환"],
+    },
+];
+
+// 애플리케이션 섹션 컴포넌트
+export default function ApplicationSection() {
     return (
-        <div className="container py-12 lg:py-12 mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-                {/* 왼쪽 컬럼 */}
-                <div className="order-2 lg:order-1 lg:col-span-8">
-                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2">
-                        {applications.map((application) => (
-                            <Link key={application.title} href={application.link}>
-                                <div className="group relative bg-white rounded-xl p-6 border-2 border-gray-100 transition-all duration-300 hover:border-blue-300 hover:shadow-lg">
-                                    {/* 배경 호버 효과 */}
-                                    <div className="absolute inset-0 bg-black/0 transition-all duration-300 group-hover:bg-blue-50 rounded-xl" />
+        <section id="applications" className="py-10 sm:py-14 bg-background">
+            <div className="container mx-auto px-4 sm:px-6">
+                <motion.div 
+                    className="text-center mb-8 sm:mb-10"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium mb-3">
+                        산업별 솔루션
+                    </span>
+                    <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-700 to-indigo-700 bg-clip-text text-transparent mb-3">
+                        다양한 산업 분야를 위한 최적의 솔루션
+                    </h2>
+                    <p className="text-sm sm:text-base text-gray-600 mt-2 mx-auto max-w-2xl">
+                        대한플러스전자(주)는 각 산업 분야의 특수한 요구사항에 맞는 최적화된 반도체 솔루션을 제공합니다
+                    </p>
+                </motion.div>
 
-                                    <div className="relative space-y-4">
-                                        {/* 이미지와 뱃지 */}
-                                        <div className="flex justify-between items-start">
-                                            <Image
-                                                src={application.thumbnail}
-                                                alt={application.title}
-                                                width={160}
-                                                height={120}
-                                                className="rounded-lg shadow-md group-hover:shadow-lg"
-                                                quality={80}
-                                            />
-                                            <div className="flex flex-col gap-2">
-                                                {application.badges?.map((badge, i) => (
-                                                    <span
-                                                        key={i}
-                                                        className="text-xs font-medium px-2.5 py-1 rounded-full bg-gradient-to-r from-blue-500 to-blue-400 text-white"
-                                                    >
-                                                        {badge}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </div>
+                <motion.div 
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6"
+                    variants={container}
+                    initial="hidden"
+                    animate="show"
+                >
+                    {applicationData.map((app, index) => (
+                        <motion.div key={index} variants={item}>
+                            <ApplicationCard application={app} />
+                        </motion.div>
+                    ))}
+                </motion.div>
 
-                                        {/* 적용 분야 타이틀 및 설명 */}
-                                        <div>
-                                            <h3 className="font-bold text-xl text-gray-800">{application.title}</h3>
-                                            <p className="mt-2 text-sm text-gray-600 leading-relaxed">
-                                                {application.description}
-                                            </p>
-                                            <div className="mt-2 text-blue-600 font-medium text-sm">
-                                                {application.highlight}
-                                            </div>
-                                        </div>
+                <motion.div 
+                    className="flex justify-center mt-8 sm:mt-10"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.6, duration: 0.5 }}
+                >
+                    <Button 
+                        asChild 
+                        className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
+                    >
+                        <Link href="/applications">
+                            <span>모든 산업 분야별 솔루션 보기</span>
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                    </Button>
+                </motion.div>
+            </div>
+        </section>
+    )
+}
 
-                                        {/* 주요 특징 및 CTA */}
-                                        <div className="mt-4 flex items-center justify-between">
-                                            <span className="inline-block text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                                                {application.feature}
-                                            </span>
-                                            <span className="text-sm text-gray-500 flex items-center gap-1 group-hover:text-blue-600">
-                                                자세히 보기
-                                                <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </Link>
+// 애플리케이션 카드 컴포넌트
+function ApplicationCard({ application }: { application: any }) {
+    return (
+        <Link 
+            href={application.link}
+            className="group block bg-white border-2 border-gray-100 hover:border-blue-200 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 p-5"
+        >
+            <div className="flex space-x-4">
+                <div className="flex-shrink-0">
+                    <div className="h-14 w-14 bg-blue-50 rounded-lg p-2.5 flex items-center justify-center border border-blue-100 group-hover:bg-gradient-to-br group-hover:from-blue-50 group-hover:to-indigo-50 transition-colors duration-300">
+                        <Image 
+                            src={application.icon} 
+                            alt={application.title}
+                            width={50}
+                            height={50}
+                            className="object-contain w-full h-full group-hover:scale-110 transition-transform duration-300"
+                        />
+                    </div>
+                </div>
+                
+                <div className="flex-1">
+                    <h3 className="text-base sm:text-lg font-bold text-gray-900 group-hover:text-blue-700 transition-colors duration-300 mb-1.5">
+                        {application.title}
+                    </h3>
+                    <p className="text-xs text-gray-600 line-clamp-2 mb-2">
+                        {application.description}
+                    </p>
+                    
+                    <div className="space-y-1">
+                        {application.benefits.map((benefit: string, idx: number) => (
+                            <div key={idx} className="flex items-center text-xs">
+                                <CircleCheck className="h-3 w-3 text-green-500 mr-1.5 flex-shrink-0" />
+                                <span className="text-gray-700">{benefit}</span>
+                            </div>
                         ))}
                     </div>
                 </div>
-
-                {/* 오른쪽 컬럼 - 고정 위치 */}
-                <div className="order-1 lg:order-2 lg:col-span-4 lg:sticky lg:top-24 h-fit">
-                    <Link href="/applications" className="block [perspective:800px]">
-                        <div className="space-y-8 p-8 bg-gradient-to-br from-gray-50/80 to-white rounded-3xl border border-gray-100/80 transition-all duration-300 ease-in-out hover:[transform:rotate3d(-0.5,-1,0,8deg)]">
-                            <div className="space-y-8">
-                                <div className="space-y-4 hover:-translate-y-1 transition-transform duration-200">
-                                    <h1 className="scroll-m-20 text-3xl font-extrabold tracking-tight lg:text-4xl bg-gradient-to-r from-gray-900 via-gray-700 to-gray-800 bg-clip-text text-transparent">
-                                        상황별 맞춤 제품
-                                    </h1>
-                                    <div className="h-1 w-20 bg-gradient-to-r from-blue-600 to-blue-400 rounded-full" />
-                                    <p className="text-base font-medium text-gray-700">
-                                        &quot;귀사의 요구에 딱 맞춘 맞춤형 제품 라인업&quot;
-                                    </p>
-                                </div>
-                                <div className="space-y-6">
-                                    <p className="text-base leading-relaxed text-gray-600 hover:-translate-y-1 transition-transform duration-200">
-                                        <strong className="text-gray-900 font-semibold">대한플러스전자(주)</strong>는
-                                        LED Driver IC 분야의 전문성을 바탕으로 다양한 산업 분야에 최적화된 솔루션을 제공합니다.
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="group flex justify-center items-center w-full mt-12 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-xl text-sm font-medium hover:from-blue-700 hover:to-blue-600 hover:-translate-y-1 transition-all duration-200">
-                                전체 제품 카테고리 보기
-                                <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                            </div>
-                        </div>
-                    </Link>
-                </div>
             </div>
-        </div>
+            
+            <div className="mt-4 pt-3 border-t border-gray-100 flex justify-end">
+                <span className="text-sm font-medium text-blue-600 flex items-center group-hover:text-blue-700 transition-colors">
+                    자세히 보기
+                    <ArrowRight className="ml-1.5 h-3.5 w-3.5 group-hover:translate-x-1 transition-transform duration-300" />
+                </span>
+            </div>
+        </Link>
     )
 }

@@ -458,20 +458,20 @@ const Navigation = () => {
         isVisible ? 'translate-y-0' : '-translate-y-full'
       )}
     >
-      <div className="container mx-auto flex justify-between items-center h-16 px-4 lg:px-6">
+      <div className="container mx-auto flex justify-between items-center h-14 px-4 lg:px-6">
         {/* 로고 영역 */}
         <Link href="/" className="flex items-center space-x-2">
-          <div className="relative overflow-hidden rounded-full h-10 w-10 flex items-center justify-center bg-gradient-to-br from-blue-50 to-white border border-blue-100">
+          <div className="relative overflow-hidden rounded-full h-7 w-7 sm:h-8 sm:w-8 flex items-center justify-center bg-gradient-to-br from-blue-50 to-white border border-blue-100">
             <Image 
               src="/logos/dhp-logo.png" 
               alt="대한플러스전자(주)" 
-              width={32} 
-              height={32} 
+              width={24} 
+              height={24} 
               className="object-contain" 
               priority
             />
           </div>
-          <span className="font-bold md:hidden lg:block text-gray-800 tracking-tight">대한플러스전자(주)</span>
+          <span className="font-bold md:hidden lg:block text-gray-800 tracking-tight text-xs sm:text-sm">대한플러스전자(주)</span>
         </Link>
 
         {/* 데스크탑 네비게이션 */}
@@ -480,20 +480,20 @@ const Navigation = () => {
         </div>
         
         {/* 우측 액션 버튼 영역 */}
-        <div className="flex items-center space-x-1 md:space-x-2">
+        <div className="flex items-center space-x-0.5 md:space-x-2">
           {/* 북마크 버튼 - 개별 UI */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="p-2 hover:bg-rose-50 rounded-full relative group"
+                className="p-1.5 sm:p-2 hover:bg-rose-50 rounded-full relative group"
               >
-                <Heart className="h-[22px] w-[22px] text-neutral-600 group-hover:text-rose-500 transition-colors" />
+                <Heart className="h-[18px] w-[18px] sm:h-[22px] sm:w-[22px] text-neutral-600 group-hover:text-rose-500 transition-colors" />
                 {bookmarkCount > 0 && (
                   <Badge 
                     variant="secondary" 
-                    className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[1.25rem] h-5 flex items-center justify-center text-[10px] font-semibold bg-rose-500 text-white"
+                    className="absolute -top-1 -right-1 px-1 py-0.5 min-w-[1rem] h-4 sm:min-w-[1.25rem] sm:h-5 flex items-center justify-center text-[8px] sm:text-[10px] font-semibold bg-rose-500 text-white"
                   >
                     {bookmarkCount}
                   </Badge>
@@ -502,7 +502,7 @@ const Navigation = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent 
               align="end" 
-              className="w-[340px] p-0 rounded-xl overflow-hidden border border-neutral-100 shadow-lg"
+              className="w-[300px] sm:w-[340px] p-0 rounded-xl overflow-hidden border border-neutral-100 shadow-lg"
             >
               <div className="bg-gradient-to-r from-rose-50 via-rose-50/70 to-white p-4 border-b border-neutral-100">
                 <div className="flex items-center justify-between">
@@ -533,13 +533,13 @@ const Navigation = () => {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="p-2 hover:bg-blue-50 rounded-full relative group"
+                className="p-1.5 sm:p-2 hover:bg-blue-50 rounded-full relative group"
               >
-                <ShoppingCart className="h-[22px] w-[22px] text-neutral-600 group-hover:text-blue-500 transition-colors" />
+                <ShoppingCart className="h-[18px] w-[18px] sm:h-[22px] sm:w-[22px] text-neutral-600 group-hover:text-blue-500 transition-colors" />
                 {cartItemCount > 0 && (
                   <Badge 
                     variant="secondary" 
-                    className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[1.25rem] h-5 flex items-center justify-center text-[10px] font-semibold bg-blue-500 text-white"
+                    className="absolute -top-1 -right-1 px-1 py-0.5 min-w-[1rem] h-4 sm:min-w-[1.25rem] sm:h-5 flex items-center justify-center text-[8px] sm:text-[10px] font-semibold bg-blue-500 text-white"
                   >
                     {cartItemCount}
                   </Badge>
@@ -548,7 +548,7 @@ const Navigation = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent 
               align="end" 
-              className="w-[340px] p-0 rounded-xl overflow-hidden border border-neutral-100 shadow-lg"
+              className="w-[300px] sm:w-[340px] p-0 rounded-xl overflow-hidden border border-neutral-100 shadow-lg"
             >
               <div className="bg-gradient-to-r from-blue-50 via-blue-50/70 to-white p-4 border-b border-neutral-100">
                 <div className="flex items-center justify-between">
@@ -577,10 +577,10 @@ const Navigation = () => {
           <Button 
             variant="ghost"
             size="icon"
-            className="p-2 hover:bg-amber-50 hover:text-amber-600 rounded-full"
+            className="p-1.5 sm:p-2 hover:bg-amber-50 hover:text-amber-600 rounded-full"
             onClick={() => setIsOpen(!isOpen)}
           >
-            <Search className="h-5 w-5" />
+            <Search className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
 
           {/* 모바일 햄버거 메뉴 */}
@@ -589,10 +589,9 @@ const Navigation = () => {
               <Button 
                 variant="ghost" 
                 size="icon"
-                className="hover:bg-neutral-100 rounded-full"
+                className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full"
               >
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">메뉴 열기</span>
+                <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-screen md:hidden p-0">

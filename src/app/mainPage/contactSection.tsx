@@ -1,469 +1,391 @@
-'use client'
+"use client"
 
 import Link from 'next/link';
-import { CircleHelpIcon, ChevronRightIcon, BookOpenIcon, FileSearchIcon, UserPlusIcon, MapPinIcon, ArrowRightIcon, PhoneIcon, MailIcon } from 'lucide-react';
-import { RiKakaoTalkFill } from '@react-icons/all-files/ri/RiKakaoTalkFill';
-import { RiYoutubeFill } from '@react-icons/all-files/ri/RiYoutubeFill';
-
-import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { useState } from "react";
+import Image from "next/image";
+import { 
+  ArrowRightIcon, 
+  MailIcon, 
+  PhoneIcon, 
+  MapPinIcon, 
+  GlobeIcon, 
+  ClockIcon, 
+  NewspaperIcon, 
+  CalendarIcon, 
+  CheckCircleIcon, 
+  LinkIcon,
+  ExternalLinkIcon,
+  BuildingIcon,
+  TagIcon,
+  InfoIcon
+} from "lucide-react";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { useToast } from "@/hooks/use-toast"
+} from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
-const contactInfo = {
-  social: {
-    kakao: "http://pf.kakao.com/_xjFMxbM",
-    blog: "https://blog.naver.com/daehanplus",
-    youtube: "https://youtube.com/@daehanplus"
+// 연락처 정보
+const CONTACT_METHODS = [
+  {
+    icon: PhoneIcon,
+    title: "전화",
+    value: "02-123-4567",
+    description: "평일 09:00 - 18:00",
+    action: "tel:02-123-4567",
+    tooltip: "영업 및 기술 문의를 위한 대표 전화번호입니다."
   },
-  location: {
-    address: "서울특별시 구로구 경인로 53길 15 중앙유통단지 바동 3217 ~ 3218호",
-    mapLink: "/location",
-    coordinates: {
-      lat: 37.40189,
-      lng: 127.10374
-    }
+  {
+    icon: MailIcon,
+    title: "이메일",
+    value: "info@daehanplus.com",
+    description: "24시간 문의 가능",
+    action: "mailto:info@daehanplus.com",
+    tooltip: "견적 및 일반 문의를 위한 이메일 주소입니다."
   },
-  phone: {
-    main: {
-      number: "82-2-6679-5025",
-      description: "대표번호"
-    },
-    sales: {
-      number: "82-2-6679-5026",
-      description: "제품 문의 및 견적"
-    },
-    support: {
-      number: "82-2-6679-5025", 
-      description: "기술 문의 및 AS"
-    }
+  {
+    icon: GlobeIcon,
+    title: "웹사이트",
+    value: "www.daehanplus.com",
+    description: "제품 정보 및 자료",
+    action: "https://www.daehanplus.com",
+    tooltip: "회사 홈페이지에서 다양한 제품 정보와 자료를 확인하실 수 있습니다."
   },
-  email: {
-    main: {
-      address: "dhes@dhes.co.kr",
-      description: "대표 이메일"
-    },
-    info: {
-      address: "dhes2@dhes.co.kr",
-      description: "견적 및 일반 상담"
-    },
-    support: {
-      address: "kimyg@dhes.co.kr",
-      description: "기술 문의 및 장애 대응"
-    }
+  {
+    icon: MapPinIcon,
+    title: "주소",
+    value: "서울시 강남구 테헤란로 123",
+    description: "우편번호: 06123",
+    action: "https://maps.google.com/?q=서울시+강남구+테헤란로+123",
+    tooltip: "본사 위치는 강남역 3번 출구에서 도보 5분 거리에 있습니다."
   }
-};
+];
 
-// 임시 데이터
-const newsData = {
-  notices: [
-    {
-      id: 1,
-      title: "MBI5353 제품 단종 안내",
-      content: "MBI5353 제품의 단종이 결정되었습니다. 대체 제품으로 MBI5354를 추천드립니다.",
-      date: "2024.01.15",
-      category: "단종"
-    },
-    {
-      id: 2,
-      title: "MBI6651 제품 단종 예정 안내", 
-      content: "MBI6651 제품이 2024년 하반기 단종 예정입니다.",
-      date: "2024.01.10",
-      category: "단종"
-    }
-  ],
-  releases: [
-    {
-      id: 3,
-      title: "신제품 출시: 차량용 LED 드라이버 IC MBI5124",
-      content: "AEC-Q100 인증을 획득한 신제품 MBI5124가 출시되었습니다.",
-      date: "2024.01.20",
-      category: "제품 출시"
-    },
-    {
-      id: 4,
-      title: "신제품 출시: 고효율 LED 드라이버 IC MBI6754",
-      content: "에너지 효율이 개선된 신제품 MBI6754가 출시되었습니다.",
-      date: "2024.01.18",
-      category: "제품 출시"
-    }
-  ],
-  events: [
-    {
-      id: 5,
-      title: "2024 한국전자전 참가 안내",
-      content: "10월 코엑스에서 열리는 한국전자전에 참가합니다.",
-      date: "2024.01.25",
-      category: "이벤트"
-    },
-    {
-      id: 6,
-      title: "LED & OLED EXPO 2024 참가 안내",
-      content: "6월 일산 KINTEX에서 열리는 LED & OLED EXPO에 참가합니다.",
-      date: "2024.01.22",
-      category: "이벤트"
-    }
-  ],
-  announcements: [
-    {
-      id: 7,
-      title: "2024년 설 연휴 휴무 안내",
-      content: "2024년 설 연휴 기간 동안 고객센터 운영이 중단됩니다.",
-      date: "2024.01.30",
-      category: "공지사항"
-    },
-    {
-      id: 8,
-      title: "홈페이지 개편 안내",
-      content: "더 나은 서비스 제공을 위해 홈페이지가 개편되었습니다.",
-      date: "2024.01.28",
-      category: "공지사항"
-    }
-  ],
-  techBlogs: [
-    {
-      id: 9,
-      title: "LED 드라이버 IC의 발전 과정",
-      content: "LED 드라이버 IC의 기술 발전 과정과 미래 전망을 소개합니다.",
-      date: "2024.01.27",
-      category: "기술블로그"
-    },
-    {
-      id: 10,
-      title: "차량용 LED 조명의 기술 동향",
-      content: "자동차 산업에서의 LED 조명 기술 동향을 분석합니다.",
-      date: "2024.01.26",
-      category: "기술블로그"
-    }
-  ]
-};
+// 회사 뉴스 데이터
+const COMPANY_NEWS = [
+  {
+    id: "news-1",
+    title: "대한플러스전자, LED 드라이버 IC 신제품 출시",
+    date: "2023-05-15",
+    summary: "대한플러스전자가 에너지 효율이 30% 향상된 새로운 LED 드라이버 IC 제품군을 출시했습니다.",
+    category: "제품 소식",
+    image: "/images/news-1.jpg",
+    url: "/news/led-driver-ic-release"
+  },
+  {
+    id: "news-2",
+    title: "자동차 전장 솔루션 전시회 참가 안내",
+    date: "2023-06-10",
+    summary: "오는 7월 15일부터 3일간 코엑스에서 열리는 자동차 전장 솔루션 전시회에 참가합니다.",
+    category: "전시회",
+    image: "/images/news-2.jpg",
+    url: "/news/automotive-expo"
+  },
+  {
+    id: "news-3",
+    title: "2023년 2분기 실적 발표",
+    date: "2023-07-20",
+    summary: "대한플러스전자의 2023년 2분기 실적이 전년 동기 대비 15% 성장했습니다.",
+    category: "경영 소식",
+    image: "/images/news-3.jpg",
+    url: "/news/q2-performance"
+  }
+];
 
-// ContactSection 컴포넌트
-export default function ContactSection() {
-    const { toast } = useToast();
-    
-    const copyToClipboard = (text: string) => {
-      navigator.clipboard.writeText(text);
-      toast({
-        title: "복사 완료",
-        description: "클립보드에 복사되었습니다.",
-        duration: 2000,
-      });
-    };
-
-    const [activeCategory, setActiveCategory] = useState("전체");
-    
-    const getFilteredNews = () => {
-      if (activeCategory === "전체") {
-        return [...newsData.notices, ...newsData.releases, ...newsData.events, ...newsData.announcements, ...newsData.techBlogs]
-          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-          .slice(0, 5);
-      }
+// 연락처 카드 컴포넌트
+const ContactCard = ({ icon: Icon, title, value, description, action, tooltip }) => (
+  <Link href={action} target={action.startsWith('http') ? '_blank' : undefined}>
+    <div className="group bg-white rounded-xl p-4 border border-gray-200 hover:border-blue-200 transition-all duration-300 hover:shadow-md relative overflow-hidden">
+      {/* 호버 시 상단 효과 */}
+      <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-blue-500 to-blue-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
       
-      const categoryMap: Record<string, Array<{id: number, title: string, content: string, date: string, category: string}>> = {
-        "단종": newsData.notices,
-        "제품 출시": newsData.releases,
-        "이벤트": newsData.events,
-        "공지사항": newsData.announcements,
-        "기술블로그": newsData.techBlogs
-      };
-      
-      return categoryMap[activeCategory] || [];
-    };
-  
-    return (
-      <div className="container py-12 lg:py-12 mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* 오른쪽 컬럼 */}
-          <div className="order-2 lg:order-1 lg:col-span-8 grid gap-4 grid-cols-1">
-            {/* 찾아오시는 길 */}
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold">찾아오시는 길</h3>
-              <Link 
-                href={contactInfo.location.mapLink}
-                className="block p-4 bg-white rounded-lg border border-gray-100 hover:border-gray-300 hover:shadow-sm transition-all"
-              >
-                <div className="flex items-start gap-4">
-                  <MapPinIcon className="w-5 h-5 text-blue-500 flex-shrink-0 mt-1" />
-                  <div className="space-y-1">
-                    <p className="font-medium text-gray-900">본사</p>
-                    <p className="text-sm text-gray-600">{contactInfo.location.address}</p>
-                    <span className="inline-flex items-center text-sm font-medium text-blue-600">
-                      지도로 보기
-                      <ArrowRightIcon className="w-4 h-4 ml-1" />
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            </div>
-
-            {/* 연락처 정보 */}
-            <div className="grid sm:grid-cols-2 gap-4">
-              {/* 전화/팩스 */}
-              <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-left">전화/팩스</h3>
-                <div className="p-4 bg-white rounded-lg border border-gray-100">
-                  <div className="flex items-start gap-4">
-                    <PhoneIcon className="w-5 h-5 text-blue-500 flex-shrink-0 mt-1" />
-                    <div className="space-y-3 w-full">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button 
-                              onClick={() => copyToClipboard(contactInfo.phone.main.number)}
-                              className="w-full space-y-1 hover:bg-blue-50 p-2 rounded-lg transition-colors text-left"
-                            >
-                              <p className="font-medium text-gray-900">대표전화</p>
-                              <p className="text-sm text-gray-600">{contactInfo.phone.main.number}</p>
-                              <p className="text-xs text-gray-500">{contactInfo.phone.main.description}</p>
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>클릭하여 복사</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      <div className="h-px bg-gray-100" />
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button 
-                              onClick={() => copyToClipboard(contactInfo.phone.sales.number)}
-                              className="w-full space-y-1 hover:bg-blue-50 p-2 rounded-lg transition-colors text-left"
-                            >
-                              <p className="font-medium text-gray-900">영업부</p>
-                              <p className="text-sm text-gray-600">{contactInfo.phone.sales.number}</p>
-                              <p className="text-xs text-gray-500">{contactInfo.phone.sales.description}</p>
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>클릭하여 복사</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      <div className="h-px bg-gray-100" />
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button 
-                              onClick={() => copyToClipboard(contactInfo.phone.support.number)}
-                              className="w-full space-y-1 hover:bg-blue-50 p-2 rounded-lg transition-colors text-left"
-                            >
-                              <p className="font-medium text-gray-900">기술지원팀</p>
-                              <p className="text-sm text-gray-600">{contactInfo.phone.support.number}</p>
-                              <p className="text-xs text-gray-500">{contactInfo.phone.support.description}</p>
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>클릭하여 복사</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                  </div>
-                </div>
-              </div>
-  
-              {/* 이메일 */}
-              <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-left">이메일</h3>
-                <div className="p-4 bg-white rounded-lg border border-gray-100">
-                  <div className="flex items-start gap-4">
-                    <MailIcon className="w-5 h-5 text-blue-500 flex-shrink-0 mt-1" />
-                    <div className="space-y-3 w-full">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button 
-                              onClick={() => copyToClipboard(contactInfo.email.main.address)}
-                              className="w-full space-y-1 hover:bg-blue-50 p-2 rounded-lg transition-colors text-left"
-                            >
-                              <p className="font-medium text-gray-900">대표 이메일</p>
-                              <p className="text-sm text-gray-600">{contactInfo.email.main.address}</p>
-                              <p className="text-xs text-gray-500">{contactInfo.email.main.description}</p>
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>클릭하여 복사</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      <div className="h-px bg-gray-100" />
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button 
-                              onClick={() => copyToClipboard(contactInfo.email.info.address)}
-                              className="w-full space-y-1 hover:bg-blue-50 p-2 rounded-lg transition-colors text-left"
-                            >
-                              <p className="font-medium text-gray-900">일반 문의</p>
-                              <p className="text-sm text-gray-600">{contactInfo.email.info.address}</p>
-                              <p className="text-xs text-gray-500">{contactInfo.email.info.description}</p>
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>클릭하여 복사</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      <div className="h-px bg-gray-100" />
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button 
-                              onClick={() => copyToClipboard(contactInfo.email.support.address)}
-                              className="w-full space-y-1 hover:bg-blue-50 p-2 rounded-lg transition-colors text-left"
-                            >
-                              <p className="font-medium text-gray-900">기술 지원</p>
-                              <p className="text-sm text-gray-600">{contactInfo.email.support.address}</p>
-                              <p className="text-xs text-gray-500">{contactInfo.email.support.description}</p>
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>클릭하여 복사</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 뉴스 섹션 */}
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="text-xl font-semibold">최신 소식</h3>
-                <Link 
-                  href="/news"
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
-                >
-                  더 알아보기
-                  <ArrowRightIcon className="w-4 h-4" />
-                </Link>
-              </div>
-              <div className="flex flex-wrap gap-2 mb-4">
-                {["전체", "단종", "제품 출시", "이벤트", "공지사항", "기술블로그"].map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => setActiveCategory(category)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                      activeCategory === category
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                    }`}
-                  >
-                    {category}
-                  </button>
-                ))}
-              </div>
-              <div className="space-y-2">
-                {getFilteredNews().map((news) => (
-                  <div
-                    key={news.id}
-                    className="p-4 bg-white rounded-lg border border-gray-100 hover:border-gray-300 transition-all"
-                  >
-                    <div className="flex justify-between items-start gap-4">
-                      <div>
-                        <h4 className="font-medium text-gray-900">{news.title}</h4>
-                        <p className="text-sm text-gray-600 mt-1">{news.content}</p>
-                      </div>
-                      <span className="text-sm text-gray-500 whitespace-nowrap">{news.date}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+      <div className="flex items-start gap-3">
+        <div className="rounded-lg bg-gray-50 p-3 text-blue-600 group-hover:bg-blue-50 group-hover:scale-110 transition-all duration-300">
+          <Icon className="w-5 h-5" />
+        </div>
+        <div className="space-y-1 flex-grow">
+          <div className="flex items-center">
+            <h3 className="text-sm font-medium text-gray-800 group-hover:text-blue-600 transition-colors">
+              {title}
+            </h3>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <InfoIcon className="w-3.5 h-3.5 ml-1.5 text-blue-500 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent className="bg-white p-2 rounded-lg shadow-md border border-gray-200">
+                  <p className="text-xs text-gray-600">{tooltip}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
-
-          {/* 왼쪽 컬럼 */}
-          <div className="order-1 lg:order-2 lg:col-span-4 space-y-8">
-            <div className="p-8 bg-gradient-to-br from-gray-50/80 to-white rounded-3xl border border-gray-100/80 shadow-lg backdrop-blur-sm">
-              <div className="space-y-8">
-                <div className="space-y-4">
-                  <h1 className="scroll-m-20 text-3xl font-extrabold tracking-tight lg:text-4xl bg-gradient-to-r from-gray-900 via-gray-700 to-gray-800 bg-clip-text text-transparent">
-                    Contact Us
-                  </h1>
-                  <div className="h-1 w-20 bg-gradient-to-r from-blue-600 to-blue-400 rounded-full" />
-                  <p className="text-lg font-medium text-gray-700">
-                    언제든 연락주세요
-                  </p>
-                </div>
-                <div className="space-y-6">
-                  <p className="text-lg leading-relaxed text-gray-600">
-                    <strong className="text-gray-900 font-semibold">대한플러스전자(주)</strong>는 
-                    고객님의 문의사항에 신속하고 정확하게 답변드리겠습니다.
-                  </p>
-                </div>
-              </div>
-            </div>
-  
-            {/* 기술지원 & 리소스 */}
-            <div className="space-y-4">
-              <Link 
-                href="/support/faq"
-                className="flex items-center gap-4 p-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors"
-              >
-                <CircleHelpIcon className="w-6 h-6 text-blue-600" />
-                <span className="font-medium">자주 묻는 질문 (FAQ)</span>
-                <ChevronRightIcon className="w-4 h-4 ml-auto" />
-              </Link>
-              <Link 
-                href="/support/guides"
-                className="flex items-center gap-4 p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-colors"
-              >
-                <BookOpenIcon className="w-6 h-6 text-green-600" />
-                <span className="font-medium">제품 선택 가이드</span>
-                <ChevronRightIcon className="w-4 h-4 ml-auto" />
-              </Link>
-              <Link 
-                href="/support/datasheets"
-                className="flex items-center gap-4 p-4 bg-purple-50 rounded-xl hover:bg-purple-100 transition-colors"
-              >
-                <FileSearchIcon className="w-6 h-6 text-purple-600" />
-                <span className="font-medium">데이터시트 모음</span>
-                <ChevronRightIcon className="w-4 h-4 ml-auto" />
-              </Link>
-              <Link 
-                href="/careers"
-                className="flex items-center gap-4 p-4 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors"
-              >
-                <UserPlusIcon className="w-6 h-6 text-orange-600" />
-                <span className="font-medium">채용 공고</span>
-                <ChevronRightIcon className="w-4 h-4 ml-auto" />
-              </Link>
-            </div>
-  
-            {/* 소셜 미디어 링크 */}
-            <div className="flex justify-between gap-3">
-              <Link 
-                href={contactInfo.social.kakao}
-                className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 p-2 rounded-lg hover:text-gray-900"
-              >
-                <RiKakaoTalkFill size={20} color="#FFEB00" />
-                <span className="text-xs whitespace-nowrap overflow-hidden text-ellipsis">카카오톡 채널</span>
-              </Link>
-              <Link 
-                href={contactInfo.social.blog}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width={20} height={20} viewBox="0 0 24 24"><path fill="currentColor" d="M16.273 12.845L7.376 0H0v24h7.726V11.156L16.624 24H24V0h-7.727z"></path></svg>
-                <span className="text-xs whitespace-nowrap overflow-hidden text-ellipsis">네이버 블로그</span>
-              </Link>
-              <Link 
-                href={contactInfo.social.youtube}
-                className="flex items-center gap-2 text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg"
-              >
-                <RiYoutubeFill size={20} color="#FF0000" />
-                <span className="text-xs whitespace-nowrap overflow-hidden text-ellipsis">유튜브 채널</span>
-              </Link>
-            </div>
-          </div>
+          <p className="text-base font-semibold text-black">
+            {value}
+          </p>
+          <p className="text-xs text-gray-500 flex items-center gap-1">
+            <ClockIcon className="w-3 h-3" />
+            {description}
+          </p>
+        </div>
+        <div className="text-gray-400 group-hover:text-blue-500 group-hover:translate-x-1 transition-all duration-300">
+          <ArrowRightIcon className="w-4 h-4" />
         </div>
       </div>
-    );
-  };
+    </div>
+  </Link>
+);
+
+// 뉴스 카드 컴포넌트
+const NewsCard = ({ title, date, summary, category, image, url }) => (
+  <Link href={url}>
+    <div className="group bg-white rounded-xl overflow-hidden border border-gray-200 transition-all duration-300 hover:border-blue-200 hover:shadow-md flex flex-col h-full">
+      {/* 이미지 섹션 */}
+      <div className="relative h-40 overflow-hidden">
+        <Image
+          src={image || "/images/placeholder.jpg"}
+          alt={title}
+          width={400}
+          height={200}
+          className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+        />
+        <Badge className="absolute top-3 right-3 bg-black/80 hover:bg-black/90 text-white text-xs backdrop-blur-sm">
+          {category}
+        </Badge>
+      </div>
+
+      {/* 콘텐츠 섹션 */}
+      <div className="flex-grow flex flex-col p-4 space-y-2">
+        <div className="flex items-center gap-1.5 text-xs text-gray-500">
+          <CalendarIcon className="w-3.5 h-3.5" />
+          <span>{date}</span>
+        </div>
+        
+        <h3 className="font-semibold text-base text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+          {title}
+        </h3>
+        
+        <p className="text-sm text-gray-600 line-clamp-3">
+          {summary}
+        </p>
+        
+        <div className="mt-auto pt-3 flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+          <span className="text-xs font-medium text-blue-600 flex items-center gap-1">
+            자세히 보기
+            <ArrowRightIcon className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+          </span>
+        </div>
+      </div>
+    </div>
+  </Link>
+);
+
+// 연락처 폼 버튼 컴포넌트
+const ContactFormButton = () => (
+  <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 hover:border-blue-200 transition-all duration-300 hover:shadow-md">
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold text-gray-900">문의하기</h3>
+        <p className="text-sm text-gray-600">
+          제품 문의, 견적 요청, 기술 지원 등 궁금한 사항이 있으시면 문의 양식을 작성해 주세요.
+        </p>
+      </div>
+      
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <CheckCircleIcon className="w-4 h-4 text-blue-600" />
+          <span className="text-sm text-gray-700">24시간 이내 답변</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <CheckCircleIcon className="w-4 h-4 text-blue-600" />
+          <span className="text-sm text-gray-700">전문 엔지니어의 기술 상담</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <CheckCircleIcon className="w-4 h-4 text-blue-600" />
+          <span className="text-sm text-gray-700">맞춤형 견적 제공</span>
+        </div>
+      </div>
+      
+      <Link href="/contact" className="block">
+        <div className="group w-full px-4 py-3 flex items-center justify-center gap-2 rounded-lg bg-black text-white text-sm font-medium hover:bg-gray-900 transition-colors">
+          <MailIcon className="w-4 h-4" />
+          문의 양식 작성하기
+          <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+        </div>
+      </Link>
+    </div>
+  </div>
+);
+
+// 회사 정보 카드 컴포넌트
+const CompanyInfoCard = () => (
+  <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 hover:border-blue-200 transition-all duration-300 hover:shadow-md">
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-gray-900">회사 정보</h3>
+          <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200 border-0">Since 2000</Badge>
+        </div>
+        <p className="text-sm text-gray-600">
+          대한플러스전자는 20년 이상의 경험을 바탕으로 반도체 부품 유통 및 기술 지원 서비스를 제공합니다.
+        </p>
+      </div>
+      
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 text-sm text-gray-700">
+          <BuildingIcon className="w-4 h-4 text-blue-600" />
+          <span>사업자등록번호: 123-45-67890</span>
+        </div>
+        <div className="flex items-center gap-2 text-sm text-gray-700">
+          <TagIcon className="w-4 h-4 text-blue-600" />
+          <span>업종: 전자부품 도매 및 수입</span>
+        </div>
+        <div className="flex items-center gap-2 text-sm text-gray-700">
+          <ClockIcon className="w-4 h-4 text-blue-600" />
+          <span>영업시간: 평일 09:00 - 18:00</span>
+        </div>
+      </div>
+      
+      <Link href="/about" className="block">
+        <div className="group w-full px-4 py-3 flex items-center justify-center gap-2 rounded-lg bg-white border border-gray-300 text-gray-800 text-sm font-medium hover:border-blue-300 hover:text-blue-700 transition-all">
+          <GlobeIcon className="w-4 h-4" />
+          회사 소개 자세히 보기
+          <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+        </div>
+      </Link>
+    </div>
+  </div>
+);
+
+export default function ContactSection() {
+  const [activeTab, setActiveTab] = useState("contact");
+  
+  return (
+    <div className="container py-16 lg:py-24 mx-auto">
+      <div className="flex flex-col items-center text-center space-y-4 mb-12">
+        <h2 className="text-3xl md:text-4xl font-bold text-black">
+          연락처 및 소식
+        </h2>
+        <div className="h-0.5 w-16 bg-blue-600 rounded-full" />
+        <p className="max-w-3xl text-base md:text-lg text-gray-600">
+          궁금한 점이 있으시거나 제품에 관한 문의가 필요하신가요?
+          <br className="hidden md:block" />
+          언제든지 연락 주시면 빠르게 답변 드리겠습니다.
+        </p>
+        
+        <Tabs 
+          defaultValue="contact"
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="w-full max-w-md mt-4"
+        >
+          <TabsList className="grid grid-cols-2 bg-gray-100 p-1 rounded-lg">
+            <TabsTrigger 
+              value="contact" 
+              className={cn(
+                "rounded-md text-sm font-medium transition-all py-2",
+                activeTab === "contact" ? "text-white shadow-sm" : "text-gray-700 hover:text-blue-600"
+              )}
+            >
+              <PhoneIcon className="w-4 h-4 mr-2" />
+              연락처
+            </TabsTrigger>
+            <TabsTrigger 
+              value="news" 
+              className={cn(
+                "rounded-md text-sm font-medium transition-all py-2",
+                activeTab === "news" ? "text-white shadow-sm" : "text-gray-700 hover:text-blue-600"
+              )}
+            >
+              <NewspaperIcon className="w-4 h-4 mr-2" />
+              소식
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="contact">
+            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-0">
+              언제든지 연락주세요
+            </Badge>
+          </TabsContent>
+          
+          <TabsContent value="news">
+            <Badge variant="outline" className="bg-gray-100 text-gray-700 border-0">
+              최신 소식을 확인하세요
+            </Badge>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {activeTab === "contact" ? (
+        <motion.div 
+          key="contact"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6"
+        >
+          {/* 연락처 카드 그리드 */}
+          <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+            {CONTACT_METHODS.map((method, index) => (
+              <ContactCard
+                key={index}
+                icon={method.icon}
+                title={method.title}
+                value={method.value}
+                description={method.description}
+                action={method.action}
+                tooltip={method.tooltip}
+              />
+            ))}
+          </div>
+          
+          {/* 오른쪽 사이드 컬럼 */}
+          <div className="lg:col-span-4 space-y-6">
+            <ContactFormButton />
+            <CompanyInfoCard />
+          </div>
+        </motion.div>
+      ) : (
+        <motion.div 
+          key="news"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="space-y-8"
+        >
+          {/* 뉴스 카드 그리드 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {COMPANY_NEWS.map((news) => (
+              <NewsCard
+                key={news.id}
+                title={news.title}
+                date={news.date}
+                summary={news.summary}
+                category={news.category}
+                image={news.image}
+                url={news.url}
+              />
+            ))}
+          </div>
+          
+          {/* 모든 뉴스 보기 버튼 */}
+          <div className="flex justify-center">
+            <Link href="/news" className="group inline-flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-gray-50 text-gray-700 rounded-full border border-gray-300 transition-colors text-sm font-medium">
+              모든 소식 보기
+              <ExternalLinkIcon className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+          </div>
+        </motion.div>
+      )}
+    </div>
+  );
+}
