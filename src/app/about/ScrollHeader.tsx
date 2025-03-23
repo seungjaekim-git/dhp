@@ -2,6 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { throttle } from "lodash";
+import { motion, AnimatePresence } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface ScrollHeaderProps {
   title: string;
@@ -35,58 +38,76 @@ export default function ScrollHeader({
     window.addEventListener("scroll", handleScroll);
     return () => {
       window.removeEventListener("scroll", handleScroll);
+      handleScroll.cancel();
     };
   }, []);
 
   return (
     <div
-      className={`sticky top-[64px] z-40 transition-all duration-300 ease-in-out rounded-2xl grid grid-cols-5 gap-4 ${
+      className={cn(
+        "sticky top-4 z-40 transition-all duration-300 ease-in-out rounded-2xl",
         isScrolled
-          ? "bg-white shadow-md border border-gray-200 p-4 m-2"
-          : "bg-gradient-to-r from-sky-50 to-blue-50 border border-sky-100 p-4"
-      }`}
+          ? "bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-md border border-gray-200 dark:border-gray-800 p-4"
+          : "bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-850 border border-gray-200 dark:border-gray-800 p-6"
+      )}
     >
-      <div className="flex flex-col md:col-span-4 col-span-3">
-        <div
-          className={`flex items-center gap-2 text-sm text-gray-600 mb-4 ${
-            isScrolled ? "hidden" : ""
-          }`}
-        >
-          {children}
-        </div>
+      <div className="w-full flex flex-col">
+        <AnimatePresence>
+          {!isScrolled && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-6">
+                {children}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div className="grid grid-cols-1 gap-6">
           <div className="flex items-start gap-4">
             <div
-              className={`transition-all duration-300 ${
+              className={cn(
+                "flex items-center justify-center rounded-xl transition-all duration-300",
                 isScrolled
-                  ? "w-6 h-6 bg-gray-100 text-gray-600"
-                  : "w-8 md:w-10 h-8 md:h-10 bg-gradient-to-br from-blue-500 to-sky-400 text-white"
-              } rounded-xl flex items-center justify-center`}
+                  ? "w-8 h-8 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
+                  : "w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md"
+              )}
             >
               {icon}
             </div>
 
             <div className="flex-1">
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center gap-3">
                 <h1
-                  className={`transition-all duration-300 ${
+                  className={cn(
+                    "transition-all duration-300 text-gray-900 dark:text-gray-100",
                     isScrolled
-                      ? "text-sm md:text-base font-medium"
-                      : "text-lg md:text-xl font-bold"
-                  } text-gray-900`}
+                      ? "text-base font-medium"
+                      : "text-xl font-bold"
+                  )}
                 >
                   {title}
                 </h1>
 
-                <div className="flex gap-2 ml-2">
+                <div className="flex flex-wrap gap-2">
                   {badges.map((badge, index) => (
-                    <span
+                    <Badge
                       key={index}
-                      className={`px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[10px] md:text-xs font-medium ${badge.bgColor} ${badge.textColor} ${badge.hoverColor}`}
+                      variant="secondary"
+                      className={cn(
+                        "transition-all text-xs font-medium",
+                        badge.bgColor,
+                        badge.textColor,
+                        badge.hoverColor,
+                        isScrolled ? "scale-90" : "scale-100"
+                      )}
                     >
                       {badge.text}
-                    </span>
+                    </Badge>
                   ))}
                 </div>
               </div>
@@ -94,13 +115,18 @@ export default function ScrollHeader({
           </div>
         </div>
 
-        <p
-          className={`mt-4 text-gray-600 text-sm leading-relaxed ${
-            isScrolled ? "hidden" : ""
-          }`}
-        >
-          {description}
-        </p>
+        <AnimatePresence>
+          {!isScrolled && (
+            <motion.p
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="mt-4 text-gray-600 dark:text-gray-400 text-sm leading-relaxed"
+            >
+              {description}
+            </motion.p>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

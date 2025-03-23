@@ -133,16 +133,6 @@ export const navigationConfig: NavigationConfig = {
         }
       },
       {
-        title: "사업소개",
-        description: "About Our Business",
-        link: "/about/business",
-        seo: {
-          title: "사업소개 | 대한플러스전자",
-          description: "LED Driver IC, 다이오드, 전원관리 IC 등 대한플러스전자의 주요 사업 영역을 소개합니다.",
-          keywords: ["사업영역", "반도체사업", "전자부품", "기술력"]
-        }
-      },
-      {
         title: "찾아오시는길",
         description: "Corporate Location",
         link: "/about/location",

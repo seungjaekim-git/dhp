@@ -50,9 +50,10 @@ export default function LocationClient({ data }: { data: any }) {
                 };
 
                 const mapDiv = document.getElementById("map");
-                const newMap = new window.naver.maps.Map(mapDiv, mapOptions);
-
-                setMap(newMap);
+                if (mapDiv) {
+                    const newMap = new window.naver.maps.Map(mapDiv, mapOptions);
+                    setMap(newMap);
+                }
             }
         };
 
@@ -75,10 +76,10 @@ export default function LocationClient({ data }: { data: any }) {
             });
 
             const contentString = `
-                <div class="bg-white p-4 rounded-lg shadow-md min-w-[280px]">
-                    <h3 class="text-base font-semibold mb-2">${selectedLocation.name}</h3>
-                    <p class="text-sm text-gray-600 mb-2">${selectedLocation.address}</p>
-                    <p class="text-sm text-gray-600">${selectedLocation.contact}</p>
+                <div class="bg-gray-900 p-4 rounded-lg shadow-md min-w-[280px] border border-gray-800">
+                    <h3 class="text-base font-semibold mb-2 text-white">${selectedLocation.name}</h3>
+                    <p class="text-sm text-gray-300 mb-2">${selectedLocation.address}</p>
+                    <p class="text-sm text-gray-300">${selectedLocation.contact}</p>
                 </div>
             `;
 
@@ -107,20 +108,20 @@ export default function LocationClient({ data }: { data: any }) {
     return (
         <main className="max-w-7xl mx-auto px-4 py-8">
             <div className="flex flex-col items-center mb-8">
-                <MapPin className="w-12 h-12 mb-4 text-blue-500" />
-                <h1 className="text-2xl font-semibold text-gray-900 mb-2">{data.title}</h1>
-                <p className="text-sm text-gray-600 mb-4 text-center max-w-xl whitespace-pre-line">{data.description}</p>
+                <MapPin className="w-12 h-12 mb-4 text-blue-400" />
+                <h1 className="text-2xl font-semibold text-white mb-2">{data.title}</h1>
+                <p className="text-sm text-gray-300 mb-4 text-center max-w-xl whitespace-pre-line">{data.description}</p>
                 <div className="flex flex-wrap gap-2 mb-4">
-                    <Badge className="px-2 py-1 text-xs" variant="outline">#구로구</Badge>
-                    <Badge className="px-2 py-1 text-xs" variant="outline">#중앙유통단지</Badge>
-                    <Badge className="px-2 py-1 text-xs" variant="outline">#주차2시간무료</Badge>
-                    <Badge className="px-2 py-1 text-xs" variant="outline">#구로역10분</Badge>
+                    <Badge className="px-2 py-1 text-xs bg-blue-500/20 text-blue-400 hover:bg-blue-500/30" variant="outline">#구로구</Badge>
+                    <Badge className="px-2 py-1 text-xs bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30" variant="outline">#중앙유통단지</Badge>
+                    <Badge className="px-2 py-1 text-xs bg-amber-500/20 text-amber-400 hover:bg-amber-500/30" variant="outline">#주차2시간무료</Badge>
+                    <Badge className="px-2 py-1 text-xs bg-purple-500/20 text-purple-400 hover:bg-purple-500/30" variant="outline">#구로역10분</Badge>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="relative">
-                    <div className="h-[500px] rounded-lg overflow-hidden shadow-md">
+                    <div className="h-[500px] rounded-lg overflow-hidden shadow-lg border border-gray-800">
                         <div id="map" style={{ width: "100%", height: "100%" }}></div>
                     </div>
                     <div className="absolute top-4 right-4 flex gap-2">
@@ -129,9 +130,9 @@ export default function LocationClient({ data }: { data: any }) {
                                 <TooltipTrigger asChild>
                                     <button 
                                         onClick={shareLocation}
-                                        className="p-2 bg-white rounded-full shadow-md hover:bg-gray-100"
+                                        className="p-2 bg-gray-900/80 backdrop-blur-sm rounded-full shadow-md hover:bg-gray-800 transition-colors border border-gray-700"
                                     >
-                                        <Share2 className="w-5 h-5 text-gray-600" />
+                                        <Share2 className="w-5 h-5 text-blue-400" />
                                     </button>
                                 </TooltipTrigger>
                                 <TooltipContent>
@@ -144,9 +145,9 @@ export default function LocationClient({ data }: { data: any }) {
                                 <TooltipTrigger asChild>
                                     <button 
                                         onClick={() => copyToClipboard(window.location.href)}
-                                        className="p-2 bg-white rounded-full shadow-md hover:bg-gray-100"
+                                        className="p-2 bg-gray-900/80 backdrop-blur-sm rounded-full shadow-md hover:bg-gray-800 transition-colors border border-gray-700"
                                     >
-                                        <ClipboardCopy className="w-5 h-5 text-gray-600" />
+                                        <ClipboardCopy className="w-5 h-5 text-blue-400" />
                                     </button>
                                 </TooltipTrigger>
                                 <TooltipContent>
@@ -158,10 +159,10 @@ export default function LocationClient({ data }: { data: any }) {
                 </div>
 
                 <div className="space-y-4">
-                    <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                    <div className="bg-gray-900/50 backdrop-blur-sm p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-800">
                         <div className="flex items-start gap-4">
-                            <div className="bg-blue-500/10 rounded-lg p-3 shrink-0">
-                                <MapPin className="w-5 h-5 text-blue-500" />
+                            <div className="bg-blue-500/20 rounded-lg p-3 shrink-0">
+                                <MapPin className="w-5 h-5 text-blue-400" />
                             </div>
                             <div className="flex-1">
                                 <TooltipProvider>
@@ -169,13 +170,13 @@ export default function LocationClient({ data }: { data: any }) {
                                         <TooltipTrigger asChild>
                                             <button 
                                                 onClick={() => copyToClipboard(data.locations[0].address)}
-                                                className="w-full text-left space-y-1 hover:bg-blue-50 p-2 rounded-lg transition-colors"
+                                                className="w-full text-left space-y-1 hover:bg-gray-800/50 p-2 rounded-lg transition-colors"
                                             >
-                                                <h3 className="text-sm font-medium text-gray-900">
+                                                <h3 className="text-sm font-medium text-white">
                                                     {data.locations[0].name}
                                                 </h3>
-                                                <p className="text-xs text-gray-600">주소 : {data.locations[0].address}</p>
-                                                <p className="text-xs text-gray-500">연락처 : {data.locations[0].contact}</p>
+                                                <p className="text-xs text-gray-300">주소 : {data.locations[0].address}</p>
+                                                <p className="text-xs text-gray-400">연락처 : {data.locations[0].contact}</p>
                                             </button>
                                         </TooltipTrigger>
                                         <TooltipContent>
@@ -192,10 +193,10 @@ export default function LocationClient({ data }: { data: any }) {
                         { icon: ParkingSquare, info: data.parkingInfo },
                         { icon: Clock, info: data.operationTimeInfo }
                     ].map((item, index) => (
-                        <div key={index} className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                        <div key={index} className="bg-gray-900/50 backdrop-blur-sm p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-800">
                             <div className="flex items-start gap-4">
-                                <div className="bg-blue-500/10 rounded-lg p-3 shrink-0">
-                                    <item.icon className="w-5 h-5 text-blue-500" />
+                                <div className="bg-blue-500/20 rounded-lg p-3 shrink-0">
+                                    <item.icon className="w-5 h-5 text-blue-400" />
                                 </div>
                                 <div className="flex-1">
                                     <TooltipProvider>
@@ -203,14 +204,14 @@ export default function LocationClient({ data }: { data: any }) {
                                             <TooltipTrigger asChild>
                                                 <button 
                                                     onClick={() => copyToClipboard(`${item.info.title || item.info.time}\n${item.info.details}\n${item.info.extra}`)}
-                                                    className="w-full text-left space-y-1 hover:bg-blue-50 p-2 rounded-lg transition-colors"
+                                                    className="w-full text-left space-y-1 hover:bg-gray-800/50 p-2 rounded-lg transition-colors"
                                                 >
-                                                    <h3 className="text-sm font-medium text-gray-900 mb-2">
+                                                    <h3 className="text-sm font-medium text-white mb-2">
                                                         {item.info.title || item.info.time}
                                                     </h3>
                                                     <div className="space-y-1">
-                                                        <p className="text-xs text-gray-600 whitespace-pre-line">{item.info.details}</p>
-                                                        <p className="text-xs text-gray-600 whitespace-pre-line">{item.info.extra}</p>
+                                                        <p className="text-xs text-gray-300 whitespace-pre-line">{item.info.details}</p>
+                                                        <p className="text-xs text-gray-400 whitespace-pre-line">{item.info.extra}</p>
                                                     </div>
                                                 </button>
                                             </TooltipTrigger>

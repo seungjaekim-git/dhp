@@ -10,9 +10,9 @@ const breadcrumb = [
 ];
 
 const badges = [
-  { text: "구로구", bgColor: "bg-green-100", textColor: "text-green-800", hoverColor: "hover:bg-green-200" },
-  { text: "중앙유통단지", bgColor: "bg-blue-100", textColor: "text-blue-800", hoverColor: "hover:bg-blue-200" },
-  { text: "주차정보", bgColor: "bg-yellow-100", textColor: "text-yellow-800", hoverColor: "hover:bg-yellow-200" },
+  { text: "구로구", bgColor: "bg-emerald-500/20", textColor: "text-emerald-400", hoverColor: "hover:bg-emerald-500/30" },
+  { text: "중앙유통단지", bgColor: "bg-blue-500/20", textColor: "text-blue-400", hoverColor: "hover:bg-blue-500/30" },
+  { text: "주차정보", bgColor: "bg-amber-500/20", textColor: "text-amber-400", hoverColor: "hover:bg-amber-500/30" },
 ];
 
 const description = "우리를 찾아오시는 길을 안내해드립니다. 아래 지도와 정보를 참고해주세요.";
@@ -66,7 +66,7 @@ const data = {
 export default function LocationPage() {
   return (
     <AboutLayout
-      icon={<MapPin />}
+      icon={<MapPin className="w-6 h-6 text-blue-400" />}
       title="찾아오시는 길"
       breadcrumb={breadcrumb}
       description={description}

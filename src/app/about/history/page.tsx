@@ -12,7 +12,7 @@ export default function HistoryPage() {
       },
       eventType: "Establishment",
       badges: [
-        { text: "창립", bgColor: "bg-blue-100", textColor: "text-blue-600" }
+        { text: "창립", bgColor: "bg-blue-500/20", textColor: "text-blue-400" }
       ],
       isLatest: false
     },
@@ -24,7 +24,7 @@ export default function HistoryPage() {
       },
       eventType: "Partnership", 
       badges: [
-        { text: "대리점", bgColor: "bg-green-100", textColor: "text-green-600" }
+        { text: "대리점", bgColor: "bg-emerald-500/20", textColor: "text-emerald-400" }
       ],
       isLatest: false
     },
@@ -36,7 +36,7 @@ export default function HistoryPage() {
       },
       eventType: "Establishment",
       badges: [
-        { text: "법인", bgColor: "bg-blue-100", textColor: "text-blue-600" }
+        { text: "법인", bgColor: "bg-blue-500/20", textColor: "text-blue-400" }
       ],
       isLatest: false
     },
@@ -48,7 +48,7 @@ export default function HistoryPage() {
       },
       eventType: "Exhibition",
       badges: [
-        { text: "전시회", bgColor: "bg-yellow-100", textColor: "text-yellow-600" }
+        { text: "전시회", bgColor: "bg-amber-500/20", textColor: "text-amber-400" }
       ],
       isLatest: false
     },
@@ -60,7 +60,7 @@ export default function HistoryPage() {
       },
       eventType: "Exhibition",
       badges: [
-        { text: "전시회", bgColor: "bg-yellow-100", textColor: "text-yellow-600" }
+        { text: "전시회", bgColor: "bg-amber-500/20", textColor: "text-amber-400" }
       ],
       isLatest: false
     },
@@ -72,7 +72,7 @@ export default function HistoryPage() {
       },
       eventType: "Partnership",
       badges: [
-        { text: "대리점", bgColor: "bg-green-100", textColor: "text-green-600" }
+        { text: "대리점", bgColor: "bg-emerald-500/20", textColor: "text-emerald-400" }
       ],
       isLatest: false
     },
@@ -84,7 +84,7 @@ export default function HistoryPage() {
       },
       eventType: "Partnership",
       badges: [
-        { text: "대리점", bgColor: "bg-green-100", textColor: "text-green-600" }
+        { text: "대리점", bgColor: "bg-emerald-500/20", textColor: "text-emerald-400" }
       ],
       isLatest: false
     },
@@ -96,7 +96,7 @@ export default function HistoryPage() {
       },
       eventType: "Partnership",
       badges: [
-        { text: "대리점", bgColor: "bg-green-100", textColor: "text-green-600" }
+        { text: "대리점", bgColor: "bg-emerald-500/20", textColor: "text-emerald-400" }
       ],
       isLatest: false
     },
@@ -108,7 +108,7 @@ export default function HistoryPage() {
       },
       eventType: "Partnership",
       badges: [
-        { text: "대리점", bgColor: "bg-green-100", textColor: "text-green-600" }
+        { text: "대리점", bgColor: "bg-emerald-500/20", textColor: "text-emerald-400" }
       ],
       isLatest: false
     },
@@ -120,7 +120,7 @@ export default function HistoryPage() {
       },
       eventType: "Branch",
       badges: [
-        { text: "지사", bgColor: "bg-purple-100", textColor: "text-purple-600" }
+        { text: "지사", bgColor: "bg-purple-500/20", textColor: "text-purple-400" }
       ],
       isLatest: false
     },
@@ -132,7 +132,7 @@ export default function HistoryPage() {
       },
       eventType: "Partnership",
       badges: [
-        { text: "대리점", bgColor: "bg-green-100", textColor: "text-green-600" }
+        { text: "대리점", bgColor: "bg-emerald-500/20", textColor: "text-emerald-400" }
       ],
       isLatest: false
     },
@@ -144,7 +144,7 @@ export default function HistoryPage() {
       },
       eventType: "Exhibition",
       badges: [
-        { text: "전시회", bgColor: "bg-yellow-100", textColor: "text-yellow-600" }
+        { text: "전시회", bgColor: "bg-amber-500/20", textColor: "text-amber-400" }
       ],
       isLatest: false
     },
@@ -156,7 +156,7 @@ export default function HistoryPage() {
       },
       eventType: "Exhibition",
       badges: [
-        { text: "전시회", bgColor: "bg-yellow-100", textColor: "text-yellow-600" }
+        { text: "전시회", bgColor: "bg-amber-500/20", textColor: "text-amber-400" }
       ],
       isLatest: false
     },
@@ -168,7 +168,7 @@ export default function HistoryPage() {
       },
       eventType: "Partnership",
       badges: [
-        { text: "대리점", bgColor: "bg-green-100", textColor: "text-green-600" }
+        { text: "대리점", bgColor: "bg-emerald-500/20", textColor: "text-emerald-400" }
       ],
       isLatest: false
     },
@@ -180,7 +180,7 @@ export default function HistoryPage() {
       },
       eventType: "Partnership",
       badges: [
-        { text: "대리점", bgColor: "bg-green-100", textColor: "text-green-600" }
+        { text: "대리점", bgColor: "bg-emerald-500/20", textColor: "text-emerald-400" }
       ],
       isLatest: false
     },
@@ -192,7 +192,7 @@ export default function HistoryPage() {
       },
       eventType: "Partnership",
       badges: [
-        { text: "대리점", bgColor: "bg-green-100", textColor: "text-green-600" }
+        { text: "대리점", bgColor: "bg-emerald-500/20", textColor: "text-emerald-400" }
       ],
       isLatest: false
     },
@@ -204,7 +204,7 @@ export default function HistoryPage() {
       },
       eventType: "Partnership",
       badges: [
-        { text: "대리점", bgColor: "bg-green-100", textColor: "text-green-600" }
+        { text: "대리점", bgColor: "bg-emerald-500/20", textColor: "text-emerald-400" }
       ],
       isLatest: true
     }
@@ -219,22 +219,22 @@ export default function HistoryPage() {
   const badges = [
     {
       text: "연혁",
-      bgColor: "bg-blue-100",
-      textColor: "text-blue-600",
-      hoverColor: "hover:bg-blue-100"
+      bgColor: "bg-blue-500/20",
+      textColor: "text-blue-400",
+      hoverColor: "hover:bg-blue-500/30"
     },
     {
       text: "회사소개",
-      bgColor: "bg-sky-100",
-      textColor: "text-sky-600",
-      hoverColor: "hover:bg-sky-100"
+      bgColor: "bg-sky-500/20",
+      textColor: "text-sky-400",
+      hoverColor: "hover:bg-sky-500/30"
     }
   ];
 
   return (
     <AboutLayout
       title="회사 연혁"
-      icon={<CalendarDays className="w-6 h-6" />}
+      icon={<CalendarDays className="w-6 h-6 text-blue-400" />}
       breadcrumb={breadcrumb}
       description="대한플러스전자(주)의 회사 연혁을 소개합니다."
       badges={badges}
