@@ -1,83 +1,64 @@
 "use client";
 
 import React from "react";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { CalendarDays, Eye, MessageSquare } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
+import { Calendar } from "lucide-react";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { BlogPost } from "@/lib/blog";
 
 interface BlogCardProps {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  thumbnail: string;
-  author: string;
-  publishDate: string;
-  readTime: string;
-  views: number;
-  comments: number;
+  post: BlogPost;
 }
 
-export default function BlogCard({
-  id,
-  title,
-  description,
-  category,
-  thumbnail,
-  author,
-  publishDate,
-  readTime,
-  views,
-  comments,
-}: BlogCardProps) {
+export default function BlogCard({ post }: BlogCardProps) {
+  // Format date
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
   return (
-    <Link href={`/support/blog/${id}`}>
-      <Card className="overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
-        <div className="relative h-48 w-full">
+    <Link href={`/support/blog/${post.slug}`}>
+      <Card className="h-full overflow-hidden hover:shadow-md transition-shadow">
+        {/* Image */}
+        <div className="relative h-48">
           <Image
-            src={thumbnail}
-            alt={title}
+            src={post.image_url || "/images/placeholder.jpg"}
+            alt={post.title}
             fill
             className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
-          <Badge className="absolute top-4 left-4 bg-primary/90 hover:bg-primary">
-            {category}
-          </Badge>
         </div>
-        <CardHeader>
-          <h3 className="text-xl font-bold line-clamp-2 hover:text-primary">
-            {title}
+        
+        {/* Content */}
+        <CardContent className="p-4">
+          <Badge variant="secondary" className="mb-2 bg-blue-100 hover:bg-blue-200 text-blue-800">
+            {post.category}
+          </Badge>
+          
+          <h3 className="text-xl font-semibold mb-2 line-clamp-2 text-slate-900">
+            {post.title}
           </h3>
-          <p className="text-sm text-muted-foreground line-clamp-2">
-            {description}
+          
+          <p className="text-slate-600 line-clamp-3 mb-4 text-sm">
+            {post.summary}
           </p>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>{author}</span>
-            <span>•</span>
-            <span>{readTime} 읽기</span>
-          </div>
         </CardContent>
-        <CardFooter className="flex justify-between text-sm text-muted-foreground">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1">
-              <CalendarDays className="h-4 w-4" />
-              <span>{publishDate}</span>
-            </div>
+        
+        {/* Footer */}
+        <CardFooter className="px-4 py-3 border-t border-slate-100 flex justify-between items-center">
+          <div className="flex items-center text-xs text-slate-500">
+            <Calendar className="h-3.5 w-3.5 mr-1" />
+            <span>{formatDate(post.created_at)}</span>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1">
-              <Eye className="h-4 w-4" />
-              <span>{views}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <MessageSquare className="h-4 w-4" />
-              <span>{comments}</span>
-            </div>
-          </div>
+          <span className="text-xs font-medium text-blue-600">자세히 보기</span>
         </CardFooter>
       </Card>
     </Link>

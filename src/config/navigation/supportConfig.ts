@@ -68,6 +68,15 @@ export const supportConfig: SupportConfig = {
           keywords: ["데이터시트", "사양", "기술문서"]
         }
       },
+      {
+        title: "블로그",
+        link: "/support/blog",
+        seo: {
+          title: "블로그 | 대한플러스전자",
+          description: "대한플러스전자 최신 소식 및 기술 블로그",
+          keywords: ["블로그", "뉴스", "소식", "기술정보"]
+        }
+      },
       // 추가 자료 항목...
     ]
   }
