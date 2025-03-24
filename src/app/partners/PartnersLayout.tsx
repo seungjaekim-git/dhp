@@ -137,7 +137,7 @@ export default function PartnersLayout({
           {/* Sticky sidebar */}
           <div className="w-full lg:w-64 order-2 lg:order-1">
             <div className="lg:sticky lg:top-8 w-full">
-              <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+              <div className="bg-gray-900 border border-gray-800 rounded-xl">
                 <div className="p-4 border-b border-gray-800">
                   <h2 className="text-xl font-semibold text-white">
                     파트너사

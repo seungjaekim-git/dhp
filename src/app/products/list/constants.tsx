@@ -1,5 +1,3 @@
-"use client";
-
 import { cn } from "@/lib/utils";
 import { type ColumnSchema } from "./schema";
 import type {
@@ -292,7 +290,6 @@ export const filterFields = [
     value: "tags",
     type: "checkbox",
     defaultOpen: true,
-    // REMINDER: "use client" needs to be declared in the file - otherwise getting serialization error from Server Component
     component: (props: Option) => {
       if (typeof props.value === "boolean") return null;
       if (typeof props.value === "undefined") return null;
@@ -308,3 +305,157 @@ export const filterFields = [
     options: TAGS.map((tag) => ({ label: tag, value: tag })),
   },
 ] satisfies DataTableFilterField<ColumnSchema>[];
+
+// 제품 인터페이스
+export interface Product {
+  id: string;
+  name: string;
+  part_number: string;
+  description: string;
+  category: string;
+  manufacturer_id: string;
+  manufacturer_name: string;
+  applications: string[];
+  in_stock: boolean;
+  price?: number;
+  image_url?: string;
+}
+
+// 필터 옵션 인터페이스
+export interface FilterOption {
+  id: string;
+  name: string;
+}
+
+// 카테고리, 제조사, 응용 분야 타입
+export interface Category extends FilterOption {}
+export interface Manufacturer extends FilterOption {}
+export interface Application extends FilterOption {}
+
+// 샘플 제품 데이터
+const productData: Product[] = [
+  {
+    id: "1",
+    name: "High Power LED Driver",
+    part_number: "LP8863-Q1",
+    description: "Automotive high-power LED driver with boost/buck-boost/buck control",
+    category: "led-driver",
+    manufacturer_id: "ti",
+    manufacturer_name: "Texas Instruments",
+    applications: ["automotive", "lighting"],
+    in_stock: true,
+    price: 3.95,
+    image_url: "/images/products/led-driver-1.png"
+  },
+  {
+    id: "2",
+    name: "RGB LED Driver",
+    part_number: "TLC5971",
+    description: "12-channel LED driver with 3-group brightness and global brightness control",
+    category: "led-driver",
+    manufacturer_id: "ti",
+    manufacturer_name: "Texas Instruments",
+    applications: ["lighting", "display"],
+    in_stock: true,
+    price: 2.85,
+    image_url: "/images/products/led-driver-2.png"
+  },
+  {
+    id: "3",
+    name: "Switching LED Driver",
+    part_number: "NCL30160",
+    description: "Constant current regulator LED driver for automotive lighting",
+    category: "led-driver",
+    manufacturer_id: "on-semi",
+    manufacturer_name: "ON Semiconductor",
+    applications: ["automotive", "lighting"],
+    in_stock: false,
+    price: 1.75,
+    image_url: "/images/products/led-driver-3.png"
+  },
+  {
+    id: "4",
+    name: "Digital LED Driver",
+    part_number: "MAXREFDES1295",
+    description: "High efficiency LED driver with dimming control for indoor lighting",
+    category: "led-driver",
+    manufacturer_id: "maxim",
+    manufacturer_name: "Maxim Integrated",
+    applications: ["lighting", "home-appliance"],
+    in_stock: true,
+    price: 4.50,
+    image_url: "/images/products/led-driver-4.png"
+  }
+];
+
+// 카테고리 데이터
+const categoryData: Category[] = [
+  { id: "led-driver", name: "LED Driver" },
+  { id: "power-management", name: "Power Management" },
+  { id: "microcontroller", name: "Microcontroller" },
+  { id: "sensor", name: "Sensor" }
+];
+
+// 제조사 데이터
+const manufacturerData: Manufacturer[] = [
+  { id: "ti", name: "Texas Instruments" },
+  { id: "on-semi", name: "ON Semiconductor" },
+  { id: "maxim", name: "Maxim Integrated" },
+  { id: "infineon", name: "Infineon" }
+];
+
+// 응용 분야 데이터
+const applicationData: Application[] = [
+  { id: "automotive", name: "Automotive" },
+  { id: "lighting", name: "Lighting" },
+  { id: "display", name: "Display" },
+  { id: "home-appliance", name: "Home Appliance" }
+];
+
+// 제품 데이터 가져오기 함수
+export function getProducts(): Product[] {
+  return productData;
+}
+
+// 카테고리 데이터 가져오기 함수
+export function getCategories(): Category[] {
+  return categoryData;
+}
+
+// 제조사 데이터 가져오기 함수
+export function getManufacturers(): Manufacturer[] {
+  return manufacturerData;
+}
+
+// 응용 분야 데이터 가져오기 함수
+export function getApplications(): Application[] {
+  return applicationData;
+}
+
+// 검색 매개변수 URL 생성 유틸리티
+export function createSearchParamsURL(
+  categories?: string[],
+  manufacturers?: string[],
+  applications?: string[],
+  search?: string
+) {
+  const params = new URLSearchParams();
+  
+  if (categories && categories.length > 0) {
+    categories.forEach(cat => params.append('category', cat));
+  }
+  
+  if (manufacturers && manufacturers.length > 0) {
+    manufacturers.forEach(man => params.append('manufacturer', man));
+  }
+  
+  if (applications && applications.length > 0) {
+    applications.forEach(app => params.append('application', app));
+  }
+  
+  if (search) {
+    params.set('search', search);
+  }
+  
+  return params.toString();
+}
