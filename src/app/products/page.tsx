@@ -95,8 +95,8 @@ export default async function ProductsPage() {
       ]}
       description="대한플러스전자에서 제공하는 다양한 제품과 솔루션을 살펴보세요."
       badges={[
-        { 
-          text: "LED 드라이버 IC", 
+        {
+          text: "LED 드라이버 IC",
           bgColor: "bg-blue-500/20", 
           textColor: "text-blue-300", 
           hoverColor: "hover:bg-blue-500/30" 

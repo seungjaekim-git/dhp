@@ -57,7 +57,7 @@ export default async function ProductDetailPage({
   if (!product) {
     notFound();
   }
-  
+
   // 관련 제품 - 같은 카테고리의 다른 제품
   const relatedProducts = allProducts
     .filter(p => p.category === product.category && p.id !== product.id)
@@ -77,7 +77,7 @@ export default async function ProductDetailPage({
       groups[groupName][paramName] = value;
       return groups;
     }, {}) : {};
-  
+
   return (
     <div className="space-y-6">
       {/* 제품 헤더 */}
