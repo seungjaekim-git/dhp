@@ -1,47 +1,61 @@
-import LEDDriverICListPage from "./leddrivericListPage";
-import ListLayout from "./ListLayout";
-import { Cpu, FlaskConical, Zap } from "lucide-react";
 import { Metadata } from "next";
+import LEDDriverICListPage from "./leddrivericListPage";
+import { LedBulbIcon, Cpu } from "lucide-react";
+import AnimatedHeroSection from "@/app/about/components/AnimatedHeroSection";
 
 export const metadata: Metadata = {
-  title: "LED 드라이버 IC | DHP Electronics",
-  description: "LED 관련 반도체 제품으로 높은 효율성과 안정적인 성능을 제공하는 다양한 브랜드와 사양의 LED 드라이버 IC 목록입니다.",
-  keywords: "LED 드라이버, IC, 반도체, 전자부품, 고효율, 안정성"
+  title: "LED 드라이버 IC | 반도체 부품 정보",
+  description: "LED 드라이버 IC - 고효율 LED 조명 컨트롤을 위한 다양한 LED 드라이버 IC",
 };
 
-export default function Page() {
+export default function LedDriverICPage() {
+  const breadcrumbItems = [
+    { label: "홈", href: "/" },
+    { label: "제품", href: "/products" },
+    { label: "LED 드라이버 IC", href: "/products/list/leddriveric" },
+  ];
+
+  const badges = [
+    { 
+      text: "LED 조명", 
+      bgColor: "bg-blue-100", 
+      textColor: "text-blue-800", 
+      hoverColor: "hover:bg-blue-200" 
+    },
+    { 
+      text: "디스플레이", 
+      bgColor: "bg-green-100", 
+      textColor: "text-green-800", 
+      hoverColor: "hover:bg-green-200" 
+    },
+    { 
+      text: "자동차", 
+      bgColor: "bg-amber-100", 
+      textColor: "text-amber-800", 
+      hoverColor: "hover:bg-amber-200" 
+    },
+    { 
+      text: "산업용", 
+      bgColor: "bg-purple-100", 
+      textColor: "text-purple-800", 
+      hoverColor: "hover:bg-purple-200" 
+    }
+  ];
+
   return (
-    <ListLayout
-      title="LED 드라이버 IC"
-      icon={<Cpu className="w-6 h-6 text-white" />}
-      breadcrumb={[
-        { label: "홈", href: "/" },
-        { label: "제품", href: "/products" },
-        { label: "LED 드라이버 IC" },
-      ]}
-      description="LED 관련 반도체 제품으로 높은 효율성과 안정적인 성능을 제공하는 다양한 브랜드와 사양의 LED 드라이버 IC 목록입니다. 최신 기술을 적용한 다양한 제품을 만나보세요."
-      badges={[
-        { 
-          text: "신제품", 
-          bgColor: "bg-gradient-to-r from-green-100 to-green-200", 
-          textColor: "text-green-700", 
-          hoverColor: "hover:from-green-200 hover:to-green-300" 
-        },
-        { 
-          text: "인기 제품", 
-          bgColor: "bg-gradient-to-r from-amber-100 to-amber-200", 
-          textColor: "text-amber-700", 
-          hoverColor: "hover:from-amber-200 hover:to-amber-300" 
-        },
-        { 
-          text: "고효율", 
-          bgColor: "bg-gradient-to-r from-blue-100 to-blue-200", 
-          textColor: "text-blue-700", 
-          hoverColor: "hover:from-blue-200 hover:to-blue-300" 
-        }
-      ]}
-    >
-      <LEDDriverICListPage />
-    </ListLayout>
+    <>
+      {/* Hero Section */}
+      <AnimatedHeroSection
+        title="LED 드라이버 IC"
+        icon={<Cpu className="w-6 h-6 text-blue-400" />}
+        breadcrumb={breadcrumbItems}
+        description="다양한 응용 분야의 LED 조명 제어를 위한 고효율, 고신뢰성 LED 드라이버 IC 제품 목록입니다. 채널 수, 전압, 전류 등 다양한 조건으로 필터링하여 최적의 제품을 찾아보세요."
+        badges={badges}
+      />
+      
+      <div className="mx-auto px-4 py-12 max-w-[1400px]">
+        <LEDDriverICListPage />
+      </div>
+    </>
   );
 }

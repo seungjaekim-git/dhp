@@ -103,7 +103,10 @@ export const LEDDriverICInfoSchema = z.object({
   }).nullable().optional().describe("통신 인터페이스"),
 
   pwm: z.object({
-    resolution: z.string().optional().nullable().describe("PWM 해상도 (예: 10-bit)"),
+    resolution: z.union([z.string(), z.array(z.string())])
+    .optional()
+    .nullable()
+    .describe("PWM 해상도 (예: '10-bit' 또는 ['8-bit', '10-bit'])"),
     frequency: z.number().optional().nullable().describe("PWM 주파수 (kHz)"),
     description: z.string().optional().nullable().describe("PWM 특성 설명")
   }).nullable().optional().describe("PWM 특성"),

@@ -2,27 +2,32 @@
 
 import { z } from "zod";
 import { getData } from "./constants";
-import { DataTable } from "./data-table";
 import { searchParamsCache } from "./search-params";
 import { Skeleton } from "@/components/ui/skeleton";
 import * as React from "react";
 import { LEDDriverICInfoSchema } from "@/app/supabase/schemas/LEDDriverIC";
-import { useColumns } from "./columns";
-import { motion, AnimatePresence } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
-import { InfoIcon, FilterIcon, Search, SlidersHorizontal, Table, List, Grid, Cpu } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
+// 분리된 컴포넌트 및 훅 가져오기
+import IntroSection from "./components/IntroSection";
+import SearchBar from "./components/SearchBar";
+import FilterStatus from "./components/FilterStatus";
+import { useFilteredData } from "./hooks/useFilteredData";
+
+// 뷰 모드 전환을 위한 컴포넌트 가져오기
+import ViewToggle, { ViewMode } from "./components/ViewToggle";
+import ProductGrid from "./components/ProductGrid";
+import ProductList from "./components/ProductList";
+import { useBookmarks, useQuoteCart } from "@/hooks/useClientStore";
+import { useCompareItems } from "./hooks/useCompareItems";
+import FloatingFilterButton from "./components/FloatingFilterButton";
+import CompareDialog from "./components/CompareDialog";
+import { Button } from "@/components/ui/button";
+import { Scale } from "lucide-react";
+import { LEDDriverICFilters } from "./filter";
+import ListLayout from "./ListLayout";
+import { Cpu } from "lucide-react";
+import { PackageX } from "lucide-react";
 
 // Product 스키마 정의 개선 - 타입 에러 해결을 위한 확장된 정의
 export type ProductSchema = {
@@ -32,6 +37,7 @@ export type ProductSchema = {
   manufacturer: {
     id: number;
     name: string;
+    slug?: string;
   };
   part_number: string | null;
   specifications: z.infer<typeof LEDDriverICInfoSchema>;
@@ -46,6 +52,8 @@ export type ProductSchema = {
     name: string;
   };
   package_type?: string;
+  package_case?: string;
+  supply_package?: string;
   images: {
     id: number;
     title: string | null;
@@ -64,6 +72,29 @@ export type ProductSchema = {
       name: string;
     }
   }[];
+  categories?: {
+    category: {
+      id: number;
+      name: string;
+      description?: string;
+      parent_id?: number;
+    }
+  }[];
+  // 필터링에 필요한 추가 필드
+  input_voltage_range?: string;
+  output_voltage_range?: string;
+  output_current_range?: string;
+  operating_temperature?: string;
+  options?: {
+    package_types?: {
+      package_type: {
+        name: string;
+      }
+    }[];
+    mounting_style?: string;
+  }[];
+  topologies?: string[];
+  dimming_methods?: string[];
 };
 
 export default function LEDDriverICListPage() {
@@ -73,27 +104,81 @@ export default function LEDDriverICListPage() {
   const [isLoading, setIsLoading] = React.useState(true);
   const [activeFilters, setActiveFilters] = React.useState<string[]>([]);
   const [searchQuery, setSearchQuery] = React.useState<string>("");
-  const [viewMode, setViewMode] = React.useState<'table' | 'list' | 'grid'>('table');
+  // 뷰 모드 상태 ('list', 'grid')
+  const [viewMode, setViewMode] = React.useState<ViewMode>('grid');
+  const [filterState, setFilterState] = React.useState<Record<string, any>>({});
+  const [appliedFilterState, setAppliedFilterState] = React.useState<Record<string, any>>({});
+  const [itemsPerPage, setItemsPerPage] = React.useState(viewMode === 'grid' ? 12 : 10);
 
+  // compareStore 추가
+  const compareStore = useCompareItems();
+
+  // URL 매개변수 검색
   React.useEffect(() => {
     if (typeof window !== "undefined") {
       const searchParams = new URLSearchParams(window.location.search);
       const parsedSearch = searchParamsCache.parse(Object.fromEntries(searchParams));
       setSearch(parsedSearch || {});
       
-      // Track active filters for animation and display
+      // 활성 필터 추적
       setActiveFilters(Object.keys(parsedSearch || {}));
     }
   }, []);
 
+  // 데이터 가져오기
   React.useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const result = await getData();
-        // 타입 안전성을 위해 타입 단언 사용
-        setData(result.products as ProductSchema[]);
-        setFilterOptions(result.filterOptions);
+      const result = await getData();
+        // API 응답을 우리 타입에 맞게 변환
+        const transformedProducts = result.products.map((product: any) => {
+          // 필요한 필드 추가 및 변환
+          const inputVoltageRange = product.specifications?.input_voltage ? 
+            JSON.stringify([
+              product.specifications.input_voltage.min || 0, 
+              product.specifications.input_voltage.max || 0
+            ]) : null;
+            
+          const outputVoltageRange = product.specifications?.output_voltage ? 
+            JSON.stringify([
+              product.specifications.output_voltage.min || 0, 
+              product.specifications.output_voltage.max || 0
+            ]) : null;
+            
+          const outputCurrentRange = product.specifications?.output_current ? 
+            JSON.stringify([
+              product.specifications.output_current.min || 0, 
+              product.specifications.output_current.max || 0
+            ]) : null;
+            
+          const operatingTemperature = product.specifications?.operating_temperature ? 
+            JSON.stringify([
+              product.specifications.operating_temperature.min || -40, 
+              product.specifications.operating_temperature.max || 125
+            ]) : null;
+            
+          return {
+            ...product,
+            input_voltage_range: inputVoltageRange,
+            output_voltage_range: outputVoltageRange,
+            output_current_range: outputCurrentRange,
+            operating_temperature: operatingTemperature,
+            topologies: product.specifications?.topology || [],
+            dimming_methods: product.specifications?.dimming_method || [],
+            options: [{
+              package_types: product.specifications?.package_type ? [{
+                package_type: {
+                  name: product.specifications.package_type
+                }
+              }] : [],
+              mounting_style: product.specifications?.mounting_type
+            }]
+          };
+        });
+        
+        setData(transformedProducts as ProductSchema[]);
+      setFilterOptions(result.filterOptions);
       } catch (error) {
         console.error("Error fetching LED Driver IC data:", error);
       } finally {
@@ -102,6 +187,15 @@ export default function LEDDriverICListPage() {
     };
     fetchData();
   }, []);
+
+  // 뷰 모드가 변경될 때 itemsPerPage 조정
+  React.useEffect(() => {
+    if (viewMode === 'grid') {
+      setItemsPerPage(12);
+    } else if (viewMode === 'list') {
+      setItemsPerPage(10);
+    }
+  }, [viewMode]);
 
   const categoryFilterFields = React.useMemo(() => {
     return [
@@ -132,39 +226,8 @@ export default function LEDDriverICListPage() {
     ];
   }, [filterOptions]);
 
-  const checkFilterCondition = React.useCallback((item: ProductSchema, key: string, value: any) => {
-    if (!value) return true;
-
-    const filterConditions: Record<string, () => boolean> = {
-      certifications: () => item.certifications?.some(c => c.certification.name === value),
-      applications: () => item.applications?.some(a => a.application.name === value),
-      categories: () => item.category?.name === value
-    };
-
-    return filterConditions[key]?.() ?? true;
-  }, []);
-
-  // 문자열 검색을 위한 함수
-  const matchesSearchQuery = React.useCallback((item: ProductSchema) => {
-    if (!searchQuery.trim()) return true;
-    
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      item.name.toLowerCase().includes(searchLower) ||
-      item.subtitle.toLowerCase().includes(searchLower) ||
-      item.description?.toLowerCase().includes(searchLower) ||
-      item.part_number?.toLowerCase().includes(searchLower) ||
-      item.manufacturer?.name.toLowerCase().includes(searchLower)
-    );
-  }, [searchQuery]);
-
-  const filteredData = React.useMemo(() => {
-    return data.filter(item => 
-      Object.entries(search).every(([key, value]) => 
-        checkFilterCondition(item, key, value)
-      ) && matchesSearchQuery(item)
-    );
-  }, [data, search, checkFilterCondition, matchesSearchQuery]);
+  // 필터링된 데이터 및 필터 통계 가져오기
+  const { filteredData, filterStats } = useFilteredData(data, appliedFilterState, searchQuery);
 
   const searchFilters = React.useMemo(() => {
     return Object.entries(search)
@@ -175,15 +238,6 @@ export default function LEDDriverICListPage() {
       .filter(({ value }) => value != null);
   }, [search]);
 
-  // 필터 통계
-  const filterStats = React.useMemo(() => {
-    return {
-      total: data.length,
-      filtered: filteredData.length,
-      percentage: data.length > 0 ? Math.round((filteredData.length / data.length) * 100) : 0
-    };
-  }, [data, filteredData]);
-
   // 필터 제거 함수
   const removeFilter = (filterKey: string) => {
     const newSearch = { ...search };
@@ -191,273 +245,230 @@ export default function LEDDriverICListPage() {
     setSearch(newSearch);
     setActiveFilters(activeFilters.filter(key => key !== filterKey));
     
+    // 필터 상태에서도 제거
+    const newFilterState = { ...filterState };
+    delete newFilterState[filterKey];
+    setFilterState(newFilterState);
+    setAppliedFilterState(newFilterState);
+    
     // URL 업데이트
     if (typeof window !== "undefined") {
       const searchParams = new URLSearchParams();
       Object.entries(newSearch).forEach(([key, value]) => {
-        if (value !== null && value !== undefined) {
-          searchParams.set(key, String(value));
+        if (value != null) {
+          searchParams.set(key, value.toString());
         }
       });
       
-      const newUrl = `${window.location.pathname}${
-        searchParams.toString() ? `?${searchParams.toString()}` : ""
-      }`;
-      window.history.pushState({ path: newUrl }, "", newUrl);
+      const queryString = searchParams.toString();
+      window.history.replaceState(
+        null,
+        "",
+        queryString ? `?${queryString}` : window.location.pathname
+      );
     }
   };
 
-  // 모든 필터 초기화
+  // 모든 필터 제거
   const clearAllFilters = () => {
     setSearch({});
     setActiveFilters([]);
+    setFilterState({});
+    setAppliedFilterState({});
     
     // URL 업데이트
     if (typeof window !== "undefined") {
-      const newUrl = window.location.pathname;
-      window.history.pushState({ path: newUrl }, "", newUrl);
+      window.history.replaceState(null, "", window.location.pathname);
     }
   };
 
-  // 컬럼 초기화 (조건적 초기화가 아닌, 컴포넌트 시작 시 한 번만 초기화)
-  const columns = useColumns(filterOptions);
+  // 뷰 모드 토글
+  const toggleViewMode = () => {
+    setViewMode(viewMode === 'grid' ? 'list' : 'grid');
+  };
+
+  // 뷰 모드 전환 UI
+  const renderViewToggle = () => (
+    <ViewToggle
+      viewMode={viewMode} 
+      onChange={toggleViewMode}
+    />
+  );
+
+  // 활성 필터 수 계산
+  const activeFilterCount = React.useMemo(() => {
+    return Object.keys(appliedFilterState).filter(key => {
+      const value = appliedFilterState[key];
+      if (Array.isArray(value)) {
+        return value.length > 0;
+      }
+      if (typeof value === 'object' && value !== null) {
+        return Object.values(value).some(v => v !== undefined && v !== null);
+      }
+      return value !== undefined && value !== null && value !== '' && value !== 'all';
+    }).length;
+  }, [appliedFilterState]);
+
+  // 필터 변경 처리
+  const handleFilterChange = (key: string, value: any) => {
+    if (value === undefined) {
+      // 필터 제거
+      const newState = { ...filterState };
+      delete newState[key];
+      setFilterState(newState);
+    } else {
+      // 필터 추가 또는 업데이트
+      setFilterState({
+        ...filterState,
+        [key]: value
+      });
+    }
+  };
+
+  // 필터 적용
+  const applyFilters = () => {
+    setAppliedFilterState(filterState);
+    setActiveFilters(Object.keys(filterState).filter(key => filterState[key] !== undefined));
+  };
+
+  // 검색어 적용
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
+
+  // 모바일 필터 패널 표시 여부
+  const [showFilterPanel, setShowFilterPanel] = React.useState(false);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="h-48 bg-slate-100 animate-pulse rounded-md"></div>
+        <div className="flex flex-col gap-3">
+          <div className="h-10 w-full bg-slate-100 animate-pulse rounded-md"></div>
+          <div className="h-64 w-full bg-slate-100 animate-pulse rounded-md"></div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Skeleton key={i} className="h-[350px]" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-8 p-4 sm:p-6">
-      {/* 소개 섹션 추가 */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <div className="max-w-[1400px] mx-auto">
-          <div className="flex items-start gap-6">
-            <div className="hidden sm:block rounded-xl overflow-hidden bg-gradient-to-tr from-blue-100 to-blue-50 p-3 border border-blue-200/80">
-              <Cpu className="w-8 h-8 text-blue-600" />
-            </div>
-            <div className="space-y-4">
-              <h2 className="text-xl font-bold text-gray-900">LED 드라이버 IC</h2>
-              <p className="text-gray-600 max-w-3xl text-sm leading-relaxed">
-                LED 드라이버 IC는 LED에 전류를 공급하고 제어하는 반도체 소자입니다. 
-                효율적인 전력 관리와 밝기 제어 기능을 제공하며, 다양한 응용 분야에서 사용됩니다. 
-                아래에서 다양한 제조사의 제품을 비교하고 최적의 솔루션을 찾아보세요.
-              </p>
-              <div className="flex flex-wrap gap-2 mt-2">
-                <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-100">고효율</Badge>
-                <Badge className="bg-green-50 text-green-700 hover:bg-green-100">에너지 절약</Badge>
-                <Badge className="bg-amber-50 text-amber-700 hover:bg-amber-100">정밀 제어</Badge>
-                <Badge className="bg-purple-50 text-purple-700 hover:bg-purple-100">다양한 패키지</Badge>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <>
+      {/* 소개 섹션 */}
+      <IntroSection />
       
-      {/* 상단 검색 및 뷰 컨트롤 영역 */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <div className="flex flex-wrap gap-4 items-center justify-between">
-          <div className="relative flex-1 min-w-[280px] max-w-md">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <Search className="h-4 w-4 text-gray-400" />
-            </div>
-            <Input
-              type="text"
-              placeholder="제품 이름, 부품 번호, 브랜드 검색..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 w-full border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
-            />
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <RadioGroup 
-              defaultValue="table" 
-              value={viewMode}
-              onValueChange={(value) => setViewMode(value as 'table' | 'list' | 'grid')}
-              className="flex bg-gray-100 p-1 rounded-lg"
-            >
-              <div className="flex items-center space-x-1">
-                <Label 
-                  htmlFor="table" 
-                  className={`p-2 cursor-pointer rounded-md ${viewMode === 'table' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600 hover:text-gray-900'}`}
-                >
-                  <Table className="h-4 w-4" />
-                </Label>
-                <RadioGroupItem value="table" id="table" className="sr-only" />
-              </div>
-              
-              <div className="flex items-center space-x-1">
-                <Label 
-                  htmlFor="list" 
-                  className={`p-2 cursor-pointer rounded-md ${viewMode === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600 hover:text-gray-900'}`}
-                >
-                  <List className="h-4 w-4" />
-                </Label>
-                <RadioGroupItem value="list" id="list" className="sr-only" />
-              </div>
-              
-              <div className="flex items-center space-x-1">
-                <Label 
-                  htmlFor="grid" 
-                  className={`p-2 cursor-pointer rounded-md ${viewMode === 'grid' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600 hover:text-gray-900'}`}
-                >
-                  <Grid className="h-4 w-4" />
-                </Label>
-                <RadioGroupItem value="grid" id="grid" className="sr-only" />
-              </div>
-            </RadioGroup>
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-1 p-2 border-gray-200">
-                  <SlidersHorizontal className="h-4 w-4" />
-                  <span className="hidden sm:inline">고급 필터</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem onClick={() => {}}>
-                  전압 범위 필터
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => {}}>
-                  전류 범위 필터
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => {}}>
-                  출시일 필터
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+      {isLoading ? (
+        // 로딩 상태 표시
+        <div className="space-y-4">
+          <Skeleton className="h-12 w-full" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <Card key={i} className="overflow-hidden">
+                <Skeleton className="h-40 w-full" />
+                <CardContent className="p-4">
+                  <Skeleton className="h-6 w-3/4 mb-2" />
+                  <Skeleton className="h-4 w-full mb-2" />
+                  <Skeleton className="h-4 w-2/3" />
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
-      </div>
-
-      {/* 필터 통계 및 정보 */}
-      <AnimatePresence>
-        {(activeFilters.length > 0 || filteredData.length !== data.length) && (
-          <motion.div 
-            initial={{ opacity: 0, y: 10, height: 0 }}
-            animate={{ opacity: 1, y: 0, height: 'auto' }}
-            exit={{ opacity: 0, y: -10, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="bg-white rounded-xl p-6 shadow-sm border border-gray-100"
-          >
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-              <div className="flex items-center gap-2">
-                <FilterIcon className="w-4 h-4 text-blue-500" />
-                <span className="text-sm font-medium text-blue-700">
-                  필터 상태:
-                </span>
-                <span className="text-sm">
-                  {isLoading ? (
-                    <Skeleton className="h-4 w-20" />
-                  ) : (
-                    <>
-                      전체 <span className="font-bold">{filterStats.total}</span>개 제품 중 
-                      <span className="font-bold text-blue-700 mx-1">{filterStats.filtered}</span>개 표시 중
-                      (<span className="font-medium">{filterStats.percentage}%</span>)
-                    </>
-                  )}
-                </span>
-              </div>
-              
-              {/* 활성 필터 표시 */}
-              <div className="flex flex-wrap gap-2">
-                {activeFilters.length > 0 ? (
-                  <>
-                    {activeFilters.map((filterKey, index) => {
-                      const value = search[filterKey];
-                      const fieldLabel = categoryFilterFields.find(f => f.id === filterKey)?.label || filterKey;
-                      const optionLabel = categoryFilterFields
-                        .find(f => f.id === filterKey)?.options
-                        .find((o: any) => o.value === value)?.label || value;
-                      
-                      return (
-                        <motion.div
-                          key={`${filterKey}-${index}`}
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.9 }}
-                          transition={{ duration: 0.2, delay: index * 0.05 }}
-                        >
-                          <Badge 
-                            variant="outline" 
-                            className="group bg-blue-50 border-blue-200 text-blue-800 hover:bg-blue-100 px-2 py-1 flex items-center gap-1 cursor-pointer"
-                            onClick={() => removeFilter(filterKey)}
-                          >
-                            <span className="font-normal mr-1">{fieldLabel}:</span>
-                            <span className="font-medium">{optionLabel}</span>
-                            <span className="w-3.5 h-3.5 rounded-full bg-blue-200 group-hover:bg-blue-300 flex items-center justify-center ml-1">
-                              <span className="text-blue-700 text-[8px]">✕</span>
-                            </span>
-                          </Badge>
-                        </motion.div>
-                      );
-                    })}
-                    
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.2, delay: activeFilters.length * 0.05 }}
-                    >
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={clearAllFilters}
-                        className="h-6 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50"
-                      >
-                        모두 지우기
-                      </Button>
-                    </motion.div>
-                  </>
-                ) : (
-                  searchQuery && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="flex items-center text-sm text-gray-500">
-                            <InfoIcon className="w-3.5 h-3.5 mr-1" />
-                            <span>검색 중: &ldquo;{searchQuery}&rdquo;</span>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom">
-                          <p>검색어를 지우려면 검색창을 비우세요</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )
-                )}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* 데이터 테이블 및 로딩 상태 */}
-      {isLoading ? (
-        <Card className="rounded-xl overflow-hidden shadow-md border border-gray-100">
-          <CardContent className="p-6 space-y-4">
-            <div className="flex justify-between items-center">
-              <Skeleton className="h-8 w-64" />
-              <Skeleton className="h-8 w-48" />
-            </div>
-            <Skeleton className="h-[500px] w-full" />
-            <div className="flex justify-between items-center">
-              <Skeleton className="h-8 w-40" />
-              <div className="flex gap-2">
-                <Skeleton className="h-8 w-12" />
-                <Skeleton className="h-8 w-12" />
-                <Skeleton className="h-8 w-12" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       ) : (
-        <Card className="rounded-xl overflow-hidden shadow-md border border-gray-100">
-          <CardContent className="p-0">
-            <DataTable
-              columns={columns}
-              data={filteredData}
-              filterFields={categoryFilterFields}
-              defaultColumnFilters={searchFilters}
+        <>
+          <ListLayout
+            title="LED 드라이버 IC"
+            icon={<Cpu className="w-6 h-6 text-blue-400" />}
+            breadcrumb={[
+              { label: "홈", href: "/" },
+              { label: "제품", href: "/products" },
+              { label: "LED 드라이버 IC" }
+            ]}
+            description="LED 드라이버 IC는 LED 조명의 효율적이고 안정적인 작동을 위한 핵심 반도체 부품입니다."
+            badges={[
+              { text: "고효율", bgColor: "bg-blue-100", textColor: "text-blue-800", hoverColor: "hover:bg-blue-200" },
+              { text: "저전력", bgColor: "bg-green-100", textColor: "text-green-800", hoverColor: "hover:bg-green-200" },
+              { text: "다양한 패키지", bgColor: "bg-purple-100", textColor: "text-purple-800", hoverColor: "hover:bg-purple-200" }
+            ]}
+            filterState={filterState}
+            appliedFilterState={appliedFilterState}
+            filterOptions={filterOptions}
+            onFilterChange={handleFilterChange}
+            onApplyFilters={applyFilters}
+            onClearFilters={clearAllFilters}
+            activeFilters={activeFilters}
+            searchQuery={searchQuery}
+            onSearch={handleSearch}
+            totalProducts={data.length}
+          >
+            {/* 결과 요약 및 뷰 전환 */}
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+              <div className="text-sm text-muted-foreground">
+                {filterStats.filtered} / {filterStats.total} 제품 ({filterStats.percentage}%)
+              </div>
+
+              {renderViewToggle()}
+              
+              {/* 비교 버튼: 비교 항목이 있을 때만 표시 */}
+              {compareStore?.items?.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => compareStore?.openCompareDialog()}
+                  className="ml-auto"
+                >
+                  <Scale className="h-4 w-4 mr-1.5" />
+                  비교하기 ({compareStore?.items?.length})
+                </Button>
+              )}
+            </div>
+            
+            {filteredData.length === 0 ? (
+              <div className="p-8 text-center border rounded-lg bg-gray-50">
+                <PackageX className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium mb-2">검색 결과가 없습니다</h3>
+                <p className="text-muted-foreground mb-4">다른 검색어나 필터 조건을 사용해보세요.</p>
+                <Button variant="outline" onClick={clearAllFilters}>
+                  모든 필터 초기화
+                </Button>
+              </div>
+            ) : (
+              viewMode === 'grid' ? (
+                <ProductGrid 
+                  products={filteredData} 
+                  itemsPerPage={itemsPerPage}
+                  onItemsPerPageChange={setItemsPerPage}
+                />
+              ) : (
+                <ProductList 
+                  products={filteredData} 
+                  itemsPerPage={itemsPerPage}
+                  onItemsPerPageChange={setItemsPerPage}
+                />
+              )
+            )}
+          </ListLayout>
+            
+          {/* 비교 다이얼로그 */}
+          {compareStore?.isCompareDialogOpen && (
+            <CompareDialog 
+              items={compareStore?.items || []} 
+              onClear={() => compareStore?.clearItems?.()}
+              onRemoveItem={(id: number) => compareStore?.removeItem(id)}
             />
-          </CardContent>
-        </Card>
+          )}
+            
+          {/* 모바일 필터 버튼 */}
+          <FloatingFilterButton 
+            onToggle={() => setShowFilterPanel(!showFilterPanel)}
+            badgeCount={activeFilters.length}
+          />
+        </>
       )}
-    </div>
+    </>
   );
 }
