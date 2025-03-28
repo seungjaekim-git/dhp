@@ -13,7 +13,8 @@ import {
   Share,
   Info,
   Check,
-  Loader2
+  Loader2,
+  Scale
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
@@ -24,6 +25,7 @@ import { useBookmarkStore } from "@/store/bookmarkStore";
 import { useQuoteCartStore, QuoteCartItem } from "@/store/quoteCartStore";
 import { ToastAction } from "@/components/ui/toast";
 import { useProductActions } from "./hooks/useProductActions";
+import { useCompare } from "./hooks/useCompare";
 
 interface ProductCardProps {
   product: {
@@ -49,6 +51,8 @@ interface ProductCardProps {
     }[];
     images?: { url: string }[];
     category?: { name: string };
+    specifications?: any;
+    part_number?: string;
   };
 }
 
@@ -75,6 +79,17 @@ export default function ProductCardClient({ product }: ProductCardProps) {
   
   // 북마크 상태 확인
   const isProductBookmarked = isBookmarked(product.id);
+
+  // useCompare 훅 사용
+  const { isInCompare, toggleCompare, compareCount, openCompareDialog } = useCompare({
+    id: product.id,
+    name: product.name,
+    manufacturer: product.manufacturers.name,
+    part_number: product.part_number || product.name,
+    thumbnail: product.images?.[0]?.url || "/placeholder.webp",
+    category: product.category?.name || "LED 드라이버 IC",
+    specifications: product.specifications
+  });
 
   // 견적 장바구니에 추가 함수
   const addToQuoteCart = () => {
@@ -234,6 +249,23 @@ export default function ProductCardClient({ product }: ProductCardProps) {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      className="rounded-xl hover:bg-blue-50 active:bg-blue-100"
+                      onClick={toggleCompare}
+                    >
+                      <Scale className={`h-4 w-4 ${isInCompare ? 'fill-blue-500 text-blue-500' : 'hover:text-blue-500'}`} />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{isInCompare ? '비교 목록에서 제거' : '비교 목록에 추가'}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </div>
           <div className="text-sm text-slate-600">
@@ -291,31 +323,28 @@ export default function ProductCardClient({ product }: ProductCardProps) {
         </div>
       </CardContent>
 
-      <CardFooter className="px-6 py-4">
-        <div className="flex w-full gap-4">
-          <Button 
-            className="flex-1 h-12 text-base rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 active:from-blue-800 active:to-blue-700 transition-all duration-300"
-            onClick={addToQuoteCart}
-            disabled={isLoading}
+      <CardFooter className="px-6 flex flex-col sm:flex-row gap-3 pt-6 pb-8">
+        <Button
+          size="lg"
+          variant="secondary"
+          className="w-full sm:w-auto rounded-full border-blue-100 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:border-blue-200 active:bg-blue-200 active:border-blue-300"
+          onClick={addToQuoteCart}
+        >
+          <ShoppingCart className="mr-2 h-4 w-4" />
+          견적 요청하기
+        </Button>
+
+        {compareCount > 0 && (
+          <Button
+            size="lg"
+            variant="outline"
+            className="w-full sm:w-auto rounded-full border-blue-100 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:border-blue-200 active:bg-blue-200 active:border-blue-300"
+            onClick={openCompareDialog}
           >
-            {isLoading ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <>
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                견적 요청
-              </>
-            )}
+            <Scale className="mr-2 h-4 w-4" />
+            {compareCount}개 제품 비교하기
           </Button>
-          <Button 
-            variant="outline" 
-            size="icon" 
-            className={`h-12 w-12 rounded-xl hover:bg-slate-100 active:bg-slate-200 hover:border-slate-400 active:border-blue-400 transition-all duration-200 ${isProductBookmarked ? 'border-rose-300 text-rose-500' : ''}`}
-            onClick={handleToggleBookmark}
-          >
-            <Heart className={`h-5 w-5 ${isProductBookmarked ? 'fill-rose-500' : ''}`} />
-          </Button>
-        </div>
+        )}
       </CardFooter>
     </Card>
   );

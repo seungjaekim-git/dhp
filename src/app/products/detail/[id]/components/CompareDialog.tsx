@@ -16,6 +16,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { useCompareStore } from "../hooks/useCompare";
 
 interface CompareItem {
   id: number;
@@ -24,7 +25,7 @@ interface CompareItem {
   part_number: string;
   thumbnail: string;
   category: string;
-  specifications: {
+  specifications?: {
     input_voltage?: {
       min: number;
       max: number;
@@ -50,75 +51,42 @@ interface CompareItem {
   applications?: Array<{ application: { name: string } }>;
 }
 
-interface CompareDialogProps {
-  items: CompareItem[];
-  onClear: () => void;
-  onRemoveItem?: (id: number) => void;
-}
-
-export default function CompareDialog({ items, onClear, onRemoveItem }: CompareDialogProps) {
-  const [open, setOpen] = useState(false);
-  
-  // 비교 다이얼로그를 열기 위한 이벤트 리스너
-  useEffect(() => {
-    const openCompareHandler = () => setOpen(true);
-    window.addEventListener('open-compare-dialog', openCompareHandler);
-    
-    return () => {
-      window.removeEventListener('open-compare-dialog', openCompareHandler);
-    };
-  }, []);
+export default function CompareDialog() {
+  const { items, clearItems, removeItem, isCompareDialogOpen, closeCompareDialog } = useCompareStore();
   
   // 비교할 항목이 없으면 렌더링하지 않음
   if (!items || items.length === 0) return null;
   
-  // 비교 항목을 개별적으로 제거
-  const handleRemoveItem = (id: number, e: React.MouseEvent) => {
-    e.stopPropagation();
-    
-    // props로 전달된 콜백이 있으면 사용
-    if (onRemoveItem) {
-      onRemoveItem(id);
-      return;
-    }
-    
-    // 아니면 이벤트를 발생시켜 상위 컴포넌트에서 처리
-    const removeEvent = new CustomEvent('remove-compare-item', { 
-      detail: { id }
-    });
-    window.dispatchEvent(removeEvent);
-  };
-  
   const renderSpecification = (item: CompareItem, spec: string) => {
     switch (spec) {
       case 'input_voltage':
-        return item.specifications.input_voltage 
+        return item.specifications?.input_voltage 
           ? `${item.specifications.input_voltage.min}V ~ ${item.specifications.input_voltage.max}V`
           : '-';
       case 'output_current':
-        return item.specifications.output_current
+        return item.specifications?.output_current
           ? `${item.specifications.output_current.min}mA ~ ${item.specifications.output_current.max}mA`
           : '-';
       case 'channels':
-        return item.specifications.channels ? `${item.specifications.channels}채널` : '-';
+        return item.specifications?.channels ? `${item.specifications.channels}채널` : '-';
       case 'topology':
-        return item.specifications.topology?.join(', ') || '-';
+        return item.specifications?.topology?.join(', ') || '-';
       case 'dimming_method':
-        return item.specifications.dimming_method?.join(', ') || '-';
+        return item.specifications?.dimming_method?.join(', ') || '-';
       case 'package_type':
-        return item.specifications.package_type || '-';
+        return item.specifications?.package_type || '-';
       case 'operating_temperature':
-        return item.specifications.operating_temperature
+        return item.specifications?.operating_temperature
           ? `${item.specifications.operating_temperature.min}°C ~ ${item.specifications.operating_temperature.max}°C`
           : '-';
       case 'efficiency':
-        return item.specifications.efficiency ? `${item.specifications.efficiency}%` : '-';
+        return item.specifications?.efficiency ? `${item.specifications.efficiency}%` : '-';
       case 'switching_frequency':
-        return item.specifications.switching_frequency ? `${item.specifications.switching_frequency}kHz` : '-';
+        return item.specifications?.switching_frequency ? `${item.specifications.switching_frequency}kHz` : '-';
       case 'internal_switch':
-        return item.specifications.internal_switch ? '있음' : '없음';
+        return item.specifications?.internal_switch ? '있음' : '없음';
       case 'thermal_pad':
-        return item.specifications.thermal_pad ? '있음' : '없음';
+        return item.specifications?.thermal_pad ? '있음' : '없음';
       case 'certifications':
         return item.certifications?.map(c => c.certification.name).join(', ') || '-';
       case 'applications':
@@ -149,7 +117,7 @@ export default function CompareDialog({ items, onClear, onRemoveItem }: CompareD
       <Button
         variant="outline"
         className="fixed bottom-4 right-4 z-50 flex items-center gap-2 bg-white shadow-lg border-blue-200 hover:bg-blue-50"
-        onClick={() => setOpen(true)}
+        onClick={useCompareStore.getState().openCompareDialog}
       >
         <Scale className="h-4 w-4 text-blue-500" />
         <span className="font-medium">
@@ -157,7 +125,7 @@ export default function CompareDialog({ items, onClear, onRemoveItem }: CompareD
         </span>
       </Button>
       
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={isCompareDialogOpen} onOpenChange={closeCompareDialog}>
         <DialogContent className="max-w-5xl w-[95vw]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -183,7 +151,7 @@ export default function CompareDialog({ items, onClear, onRemoveItem }: CompareD
                         variant="ghost"
                         size="icon"
                         className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-slate-200 hover:bg-slate-300"
-                        onClick={(e) => handleRemoveItem(item.id, e)}
+                        onClick={() => removeItem(item.id)}
                       >
                         <X className="h-3 w-3" />
                       </Button>
@@ -240,11 +208,11 @@ export default function CompareDialog({ items, onClear, onRemoveItem }: CompareD
           </ScrollArea>
           
           <div className="flex justify-between mt-4">
-            <Button variant="outline" size="sm" onClick={onClear}>
+            <Button variant="outline" size="sm" onClick={clearItems}>
               <X className="h-4 w-4 mr-2" />
               비교 목록 비우기
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setOpen(false)}>
+            <Button variant="outline" size="sm" onClick={closeCompareDialog}>
               닫기
             </Button>
           </div>
@@ -252,4 +220,4 @@ export default function CompareDialog({ items, onClear, onRemoveItem }: CompareD
       </Dialog>
     </>
   );
-}
+} 

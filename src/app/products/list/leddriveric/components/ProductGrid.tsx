@@ -6,17 +6,35 @@ import { ProductCard } from "./ProductCard";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Bookmark, Scale, ShoppingCart } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 interface ProductGridProps {
   products: ProductSchema[];
   itemsPerPage?: number;
   onItemsPerPageChange?: (value: number) => void;
+  isBookmarked: (id: number) => boolean;
+  isInQuote: (id: number) => boolean;
+  isInCompare: (id: number) => boolean;
+  onToggleBookmark: (product: ProductSchema) => void;
+  onToggleQuote: (product: ProductSchema) => void;
+  onToggleCompare: (product: ProductSchema) => void;
 }
 
 export default function ProductGrid({ 
   products, 
   itemsPerPage = 12,
-  onItemsPerPageChange
+  onItemsPerPageChange,
+  isBookmarked,
+  isInQuote,
+  isInCompare,
+  onToggleBookmark,
+  onToggleQuote,
+  onToggleCompare
 }: ProductGridProps) {
   const [currentPage, setCurrentPage] = React.useState(1);
   
@@ -156,7 +174,114 @@ export default function ProductGrid({
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {visibleProducts.length > 0 ? (
           visibleProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <Card key={product.id} className="overflow-hidden hover:shadow-md transition-shadow">
+              <CardContent className="p-0">
+                <Link
+                  href={`/products/detail/${product.id}`}
+                  className="block p-4"
+                >
+                  <div className="aspect-square relative flex items-center justify-center overflow-hidden rounded-md bg-muted">
+                    {product.images && product.images.length > 0 ? (
+                      <Image
+                        src={product.images[0].url}
+                        alt={product.name}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                        className="object-contain p-2"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
+                        이미지 없음
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-3">
+                    <div className="text-xs text-muted-foreground mb-1">
+                      {product.manufacturer?.name}
+                    </div>
+                    <div className="font-medium truncate">{product.name}</div>
+                    <div className="text-sm text-muted-foreground mt-1 truncate">
+                      {product.part_number}
+                    </div>
+                    
+                    {/* 주요 사양 뱃지 */}
+                    <div className="flex flex-wrap gap-1 mt-3">
+                      {product.specifications?.input_voltage && (
+                        <Badge variant="outline" className="text-xs px-2 py-0">
+                          {product.specifications.input_voltage.min} - {product.specifications.input_voltage.max}V
+                        </Badge>
+                      )}
+                      {product.specifications?.output_current && (
+                        <Badge variant="outline" className="text-xs px-2 py-0">
+                          ~{product.specifications.output_current.max}mA
+                        </Badge>
+                      )}
+                      {product.specifications?.channels && (
+                        <Badge variant="outline" className="text-xs px-2 py-0">
+                          {product.specifications.channels}채널
+                        </Badge>
+                      )}
+                      {product.specifications?.package_type && (
+                        <Badge variant="outline" className="text-xs px-2 py-0">
+                          {product.specifications.package_type}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+                
+                <div className="border-t p-2 flex justify-between">
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={cn(
+                        "h-8 w-8 rounded-md",
+                        isBookmarked(product.id) && "text-yellow-500 hover:text-yellow-600"
+                      )}
+                      onClick={() => onToggleBookmark(product)}
+                    >
+                      <Bookmark className="h-4 w-4" />
+                      <span className="sr-only">즐겨찾기</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={cn(
+                        "h-8 w-8 rounded-md",
+                        isInQuote(product.id) && "text-green-500 hover:text-green-600"
+                      )}
+                      onClick={() => onToggleQuote(product)}
+                    >
+                      <ShoppingCart className="h-4 w-4" />
+                      <span className="sr-only">견적함 담기</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={cn(
+                        "h-8 w-8 rounded-md",
+                        isInCompare(product.id) && "text-blue-500 hover:text-blue-600"
+                      )}
+                      onClick={() => onToggleCompare(product)}
+                    >
+                      <Scale className="h-4 w-4" />
+                      <span className="sr-only">비교하기</span>
+                    </Button>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 px-2 text-xs"
+                    asChild
+                  >
+                    <Link href={`/products/detail/${product.id}`}>
+                      상세보기
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           ))
         ) : (
           <div className="col-span-full flex flex-col items-center justify-center py-10 text-center">

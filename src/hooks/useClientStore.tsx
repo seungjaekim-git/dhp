@@ -7,7 +7,7 @@ import { useBookmarkStore } from "@/store/bookmarkStore";
 // 견적 장바구니 훅
 export function useQuoteCart() {
   const [mounted, setMounted] = useState(false);
-  const { items, addItem, removeItem, updateQuantity, clearCart, getItemCount, getTotalQuantity } = useQuoteCartStore();
+  const { items, addItem, removeItem, updateQuantity, clearCart, getItemCount, getTotalQuantity, isInQuote } = useQuoteCartStore();
 
   useEffect(() => {
     setMounted(true);
@@ -20,7 +20,8 @@ export function useQuoteCart() {
     addToCart: addItem,
     removeFromCart: removeItem,
     updateQuantity,
-    clearCart
+    clearCart,
+    isInQuote: (id: number) => mounted && isInQuote(id)
   };
 }
 

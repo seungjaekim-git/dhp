@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ProductParametersCard } from "../../components/ProductParametersCard";
 import { AlertCircle } from "lucide-react";
+import CompareDialog from "./components/CompareDialog";
 
 // 메타데이터를 동적으로 생성
 export async function generateMetadata({
@@ -367,6 +368,9 @@ export default async function ProductDetailPage({
           </Card>
         </TabsContent>
       </Tabs>
+      
+      {/* 비교 다이얼로그 추가 */}
+      <CompareDialog />
     </div>
   );
 }

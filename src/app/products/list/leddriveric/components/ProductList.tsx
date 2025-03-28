@@ -20,12 +20,24 @@ interface ProductListProps {
   products: ProductSchema[];
   itemsPerPage?: number;
   onItemsPerPageChange?: (value: number) => void;
+  isBookmarked: (id: number) => boolean;
+  isInQuote: (id: number) => boolean;
+  isInCompare: (id: number) => boolean;
+  onToggleBookmark: (product: ProductSchema) => void;
+  onToggleQuote: (product: ProductSchema) => void;
+  onToggleCompare: (product: ProductSchema) => void;
 }
 
 export default function ProductList({
   products,
   itemsPerPage = 10,
-  onItemsPerPageChange
+  onItemsPerPageChange,
+  isBookmarked,
+  isInQuote,
+  isInCompare,
+  onToggleBookmark,
+  onToggleQuote,
+  onToggleCompare,
 }: ProductListProps) {
   const [currentPage, setCurrentPage] = React.useState(1);
   const { toast } = useToast();
@@ -330,18 +342,24 @@ export default function ProductList({
                   <div className="flex flex-col sm:flex-row">
                     {/* 제품 이미지 */}
                     <div className="w-full sm:w-48 h-40 relative bg-slate-50 border-b sm:border-b-0 sm:border-r">
-                      {product.images && product.images.length > 0 ? (
-                        <Image
-                          src={product.images[0].url}
-                          alt={product.name}
-                          fill
-                          className="object-contain p-2"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                          이미지 없음
-                        </div>
-                      )}
+                      <Link
+                        href={`/products/detail/${product.id}`}
+                        className="block aspect-square h-24 w-24 relative shrink-0 overflow-hidden rounded-md bg-muted sm:h-32 sm:w-32"
+                      >
+                        {product.images && product.images.length > 0 ? (
+                          <Image
+                            src={product.images[0].url}
+                            alt={product.name}
+                            fill
+                            sizes="128px"
+                            className="object-contain p-2"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
+                            이미지 없음
+                          </div>
+                        )}
+                      </Link>
                     </div>
                     
                     {/* 제품 정보 */}
@@ -368,7 +386,7 @@ export default function ProductList({
                                 ? "bg-yellow-50 text-yellow-600 hover:bg-yellow-100 hover:text-yellow-700"
                                 : "hover:bg-yellow-50 hover:text-yellow-600"
                             )}
-                            onClick={() => handleToggleBookmark(product)}
+                            onClick={() => onToggleBookmark(product)}
                           >
                             {bookmarkStore && bookmarkStore.items.some(b => b.id === product.id) ? (
                               <BookmarkIcon className="h-3.5 w-3.5 mr-1 fill-yellow-500 text-yellow-500" />
@@ -387,7 +405,7 @@ export default function ProductList({
                                 ? "bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700"
                                 : "hover:bg-blue-50 hover:text-blue-600"
                             )}
-                            onClick={() => handleAddToQuoteCart(product)}
+                            onClick={() => onToggleQuote(product)}
                           >
                             {quoteCartStore && quoteCartStore.items.some(item => item.id === product.id) ? (
                               <ShoppingCart className="h-3.5 w-3.5 mr-1 fill-blue-500 text-blue-500" />
@@ -400,7 +418,10 @@ export default function ProductList({
                       </div>
                       
                       <h3 className="text-lg font-semibold mb-1">
-                        <Link href={`/products/detail/leddriveric/${product.id}`} className="hover:underline">
+                        <Link 
+                          href={`/products/detail/${product.id}`}
+                          className="hover:underline"
+                        >
                           {product.part_number || product.name}
                         </Link>
                       </h3>
@@ -484,7 +505,7 @@ export default function ProductList({
                               ? "bg-green-50 text-green-600 hover:bg-green-100 hover:text-green-700"
                               : "hover:bg-green-50 hover:text-green-600"
                           )}
-                          onClick={() => handleToggleCompare(product)}
+                          onClick={() => onToggleCompare(product)}
                         >
                           {compareStore && compareStore.items.some(c => c.id === product.id) ? (
                             <Scale className="h-3.5 w-3.5 mr-1 fill-green-500 text-green-500" />
@@ -493,14 +514,14 @@ export default function ProductList({
                           )}
                           비교
                         </Button>
-                        <Button 
-                          variant="default" 
+                        <Button
+                          variant="outline"
                           size="sm"
+                          className="h-8 text-xs"
                           asChild
                         >
-                          <Link href={`/products/detail/leddriveric/${product.id}`}>
-                            <ExternalLink className="h-4 w-4 mr-1" />
-                            상세 보기
+                          <Link href={`/products/detail/${product.id}`}>
+                            상세보기
                           </Link>
                         </Button>
                       </div>

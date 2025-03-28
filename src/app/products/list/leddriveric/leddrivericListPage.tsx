@@ -112,6 +112,8 @@ export default function LEDDriverICListPage() {
 
   // compareStore 추가
   const compareStore = useCompareItems();
+  const bookmarkStore = useBookmarks();
+  const quoteStore = useQuoteCart();
 
   // URL 매개변수 검색
   React.useEffect(() => {
@@ -325,12 +327,6 @@ export default function LEDDriverICListPage() {
     }
   };
 
-  // 필터 적용
-  const applyFilters = () => {
-    setAppliedFilterState(filterState);
-    setActiveFilters(Object.keys(filterState).filter(key => filterState[key] !== undefined));
-  };
-
   // 검색어 적용
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -338,6 +334,138 @@ export default function LEDDriverICListPage() {
 
   // 모바일 필터 패널 표시 여부
   const [showFilterPanel, setShowFilterPanel] = React.useState(false);
+
+  // 필터 적용 함수
+  const applyFilters = React.useCallback(() => {
+    // 빈 배열이나 빈 문자열 등 의미없는 필터값은 제거
+    const cleanedFilterState = Object.fromEntries(
+      Object.entries(filterState).filter(([_, value]) => {
+        if (value === undefined || value === null) return false;
+        if (Array.isArray(value) && value.length === 0) return false;
+        if (typeof value === 'string' && value === '') return false;
+        return true;
+      })
+    );
+    
+    // 활성 필터 추적 업데이트
+    setActiveFilters(Object.keys(cleanedFilterState));
+    
+    // 적용된 필터 상태 업데이트
+    setAppliedFilterState(cleanedFilterState);
+    
+    // 필터링 로직 업데이트를 위한 강제 리렌더링
+    setForceUpdate(prev => !prev);
+    
+    // URL 쿼리 파라미터 업데이트 (선택사항)
+    if (typeof window !== "undefined") {
+      // searchParamsCache.stringify 메소드를 구현하거나 다른 방법으로 쿼리 문자열 생성
+      const queryParams = new URLSearchParams();
+      Object.entries(cleanedFilterState).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          value.forEach(v => queryParams.append(key, String(v)));
+        } else {
+          queryParams.set(key, String(value));
+        }
+      });
+      
+      const url = new URL(window.location.href);
+      
+      if (queryParams.toString()) {
+        url.search = queryParams.toString();
+      } else {
+        url.search = '';
+      }
+      
+      window.history.pushState({}, '', url);
+    }
+    
+    // 모바일에서 필터 패널 닫기
+    setShowFilterPanel(false);
+  }, [filterState, setShowFilterPanel]);
+
+  // 비교 상품 추가/제거 함수
+  const handleToggleCompare = React.useCallback((product: ProductSchema) => {
+    const { items, addItem, removeItem } = compareStore;
+    const isInCompare = items.some(item => item.id === product.id);
+    
+    if (isInCompare) {
+      removeItem(product.id);
+    } else {
+      // 최대 4개 제한
+      if (items.length >= 4) {
+        // 알림 표시 로직 추가
+        alert('최대 4개 상품까지 비교 가능합니다.');
+        return;
+      }
+      
+      // 추가 시 이벤트 발생
+      addItem({
+        id: product.id,
+        name: product.name,
+        manufacturer: product.manufacturer?.name || '',
+        part_number: product.part_number || '',
+        thumbnail: product.images?.[0]?.url || '/placeholder.webp',
+        category: product.category?.name || '',
+        specifications: product.specifications || {}
+      } as any); // specifications 타입 이슈를 해결하기 위해 as any 사용
+    }
+    
+    // 비교 다이얼로그 업데이트를 위한 상태 변경 트리거
+    setForceUpdate(prev => !prev);
+  }, [compareStore]);
+
+  // 비교 목록 초기화
+  const handleClearCompare = React.useCallback(() => {
+    compareStore.clearItems();
+    
+    // 비교 다이얼로그 업데이트를 위한 상태 변경 트리거
+    setForceUpdate(prev => !prev);
+  }, [compareStore]);
+  
+  // 비교 다이얼로그 상태 업데이트를 위한 강제 리렌더링 상태
+  const [forceUpdate, setForceUpdate] = React.useState(false);
+
+  // 북마크 토글 함수
+  const handleToggleBookmark = React.useCallback((product: ProductSchema) => {
+    const isBookmarked = bookmarkStore.isBookmarked(product.id);
+    
+    if (isBookmarked) {
+      bookmarkStore.removeBookmark(product.id);
+    } else {
+      bookmarkStore.addBookmark({
+        id: product.id,
+        name: product.name,
+        subtitle: product.subtitle || '',
+        manufacturerName: product.manufacturer?.name || '',
+        manufacturerId: product.manufacturer?.id || 0,
+        addedAt: new Date().toISOString(),
+        imageUrl: product.images?.[0]?.url || '',
+        packageType: product.specifications?.package_type || '',
+        category: product.category?.name || '기타'
+      });
+    }
+  }, [bookmarkStore]);
+
+  // 견적함 토글 함수
+  const handleToggleQuote = React.useCallback((product: ProductSchema) => {
+    const isInQuote = quoteStore.isInQuote(product.id);
+    
+    if (isInQuote) {
+      quoteStore.removeItem(product.id);
+    } else {
+      quoteStore.addItem({
+        id: product.id,
+        name: product.name,
+        quantity: 1,
+        subtitle: product.subtitle || '',
+        manufacturerName: product.manufacturer?.name || '',
+        manufacturerId: product.manufacturer?.id || 0,
+        addedAt: new Date().toISOString(),
+        imageUrl: product.images?.[0]?.url || '',
+        packageType: product.specifications?.package_type || ''
+      });
+    }
+  }, [quoteStore]);
 
   if (isLoading) {
     return (
@@ -442,12 +570,24 @@ export default function LEDDriverICListPage() {
                   products={filteredData} 
                   itemsPerPage={itemsPerPage}
                   onItemsPerPageChange={setItemsPerPage}
+                  isBookmarked={(id) => bookmarkStore.isBookmarked(id)}
+                  isInQuote={(id) => quoteStore.isInQuote(id)}
+                  isInCompare={(id) => compareStore.items.some(item => item.id === id)}
+                  onToggleBookmark={handleToggleBookmark}
+                  onToggleQuote={handleToggleQuote}
+                  onToggleCompare={handleToggleCompare}
                 />
               ) : (
                 <ProductList 
                   products={filteredData} 
                   itemsPerPage={itemsPerPage}
                   onItemsPerPageChange={setItemsPerPage}
+                  isBookmarked={(id) => bookmarkStore.isBookmarked(id)}
+                  isInQuote={(id) => quoteStore.isInQuote(id)}
+                  isInCompare={(id) => compareStore.items.some(item => item.id === id)}
+                  onToggleBookmark={handleToggleBookmark}
+                  onToggleQuote={handleToggleQuote}
+                  onToggleCompare={handleToggleCompare}
                 />
               )
             )}
@@ -457,7 +597,7 @@ export default function LEDDriverICListPage() {
           {compareStore?.isCompareDialogOpen && (
             <CompareDialog 
               items={compareStore?.items || []} 
-              onClear={() => compareStore?.clearItems?.()}
+              onClear={handleClearCompare}
               onRemoveItem={(id: number) => compareStore?.removeItem(id)}
             />
           )}

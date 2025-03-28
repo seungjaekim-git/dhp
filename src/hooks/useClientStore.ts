@@ -23,6 +23,7 @@ export interface QuoteCartHook {
   addItem: (item: QuoteCartItem) => void;
   removeItem: (id: number) => void;
   updateQuantity: (id: number, quantity: number) => void;
+  isInQuote: (id: number) => boolean;
   clearCart: () => void;
   getItemCount: () => number;
   getTotalQuantity: () => number;
@@ -57,6 +58,7 @@ export const useQuoteCart = (): QuoteCartHook => {
     updateQuantity: store.updateQuantity,
     clearCart: store.clearCart,
     getItemCount: store.getItemCount,
-    getTotalQuantity: store.getTotalQuantity
+    getTotalQuantity: store.getTotalQuantity,
+    isInQuote: store.isInQuote
   };
 }; 

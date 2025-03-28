@@ -21,6 +21,7 @@ interface QuoteCartState {
   clearCart: () => void;
   getItemCount: () => number;
   getTotalQuantity: () => number;
+  isInQuote: (id: number) => boolean;
 }
 
 export const useQuoteCartStore = create<QuoteCartState>()(
@@ -62,7 +63,9 @@ export const useQuoteCartStore = create<QuoteCartState>()(
       
       getItemCount: () => get().items.length,
       
-      getTotalQuantity: () => get().items.reduce((sum, item) => sum + item.quantity, 0)
+      getTotalQuantity: () => get().items.reduce((sum, item) => sum + item.quantity, 0),
+
+      isInQuote: (id: number) => get().items.some(item => item.id === id)
     }),
     {
       name: 'quote-cart-storage',

@@ -88,12 +88,12 @@ export function SelectFilter({ label, value, onChange, options }: SelectFilterPr
   return (
     <div className="space-y-2">
       {label && <Label>{label}</Label>}
-      <Select value={value || 'all'} onValueChange={onChange}>
+      <Select value={value || ''} onValueChange={onChange}>
         <SelectTrigger className="w-full">
           <SelectValue placeholder={`${label || '옵션'} 선택...`} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">전체</SelectItem>
+          <SelectItem value="">전체</SelectItem>
           {options.map(option => (
             <SelectItem key={option} value={option}>
               {option}
@@ -116,11 +116,10 @@ export function MultiSelectFilter({ label, value = [], onChange, options }: Mult
   const [open, setOpen] = React.useState(false);
   
   const handleToggle = (option: string) => {
-    if (value.includes(option)) {
-      onChange(value.filter(v => v !== option));
-    } else {
-      onChange([...value, option]);
-    }
+    const newValue = value.includes(option)
+      ? value.filter(v => v !== option)
+      : [...value, option];
+    onChange(newValue);
   };
   
   const clearSelection = () => {
@@ -169,7 +168,10 @@ export function MultiSelectFilter({ label, value = [], onChange, options }: Mult
                   {options.map(option => (
                     <CommandItem
                       key={option}
-                      onSelect={() => handleToggle(option)}
+                      onSelect={() => {
+                        handleToggle(option);
+                        setOpen(false);
+                      }}
                       className="flex items-center"
                     >
                       <Checkbox
@@ -186,7 +188,10 @@ export function MultiSelectFilter({ label, value = [], onChange, options }: Mult
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => clearSelection()}
+                onClick={() => {
+                  clearSelection();
+                  setOpen(false);
+                }}
                 className="text-xs"
               >
                 초기화
@@ -376,121 +381,200 @@ export function LEDDriverICFilters({
   onClearFilters: () => void;
   appliedFilters: string[];
 }) {
-  const [open, setOpen] = React.useState(false);
-
+  const filterCount = Object.keys(filterState).filter(key => {
+    const value = filterState[key];
+    return value !== undefined && 
+           value !== null && 
+           !(Array.isArray(value) && value.length === 0) &&
+           !(typeof value === 'string' && value === '');
+  }).length;
+  
   return (
-    <div className="space-y-5">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* 제조사 필터 */}
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold text-lg flex items-center">
+          <Filter className="w-4 h-4 mr-2" />
+          필터
+          {filterCount > 0 && (
+            <Badge className="ml-2 bg-blue-500 hover:bg-blue-600">
+              {filterCount}
+            </Badge>
+          )}
+        </h3>
+        <Button variant="ghost" size="sm" onClick={onClearFilters} disabled={filterCount === 0}>
+          <X className="w-3 h-3 mr-1" />
+          초기화
+        </Button>
+      </div>
+      
+      {/* 제조사 필터 */}
+      <div className="space-y-4">
+        <div className="font-medium text-sm">제조사</div>
         <MultiSelectFilter
-          label="제조사"
+          label=""
           value={filterState.manufacturers || []}
-          onChange={(value) => onFilterChange('manufacturers', value.length > 0 ? value : undefined)}
+          onChange={(value) => onFilterChange('manufacturers', value)}
           options={filterOptions.manufacturers || []}
         />
-
+      </div>
+      
+      {/* 카테고리 필터 */}
+      <div className="space-y-4">
+        <div className="font-medium text-sm">카테고리</div>
+        <CheckboxFilter
+          label=""
+          value={filterState.categories || []}
+          onChange={(value) => onFilterChange('categories', value)}
+          options={filterOptions.categories || []}
+        />
+      </div>
+      
+      {/* 전기적 특성 필터 */}
+      <div className="space-y-4">
+        <div className="font-medium text-sm">전기적 특성</div>
+        
+        {/* 입력 전압 필터 */}
+        <DualSliderFilter
+          label="입력 전압 범위"
+          value={filterState.inputVoltage || [0, 60]}
+          onChange={(value) => onFilterChange('inputVoltage', value)}
+          min={0}
+          max={60}
+          unit="V"
+        />
+        
+        {/* 출력 전압 필터 */}
+        <DualSliderFilter
+          label="출력 전압 범위"
+          value={filterState.outputVoltage || [0, 60]}
+          onChange={(value) => onFilterChange('outputVoltage', value)}
+          min={0}
+          max={60}
+          unit="V"
+        />
+        
+        {/* 출력 전류 필터 */}
+        <DualSliderFilter
+          label="출력 전류 범위"
+          value={filterState.outputCurrent || [0, 3000]}
+          onChange={(value) => onFilterChange('outputCurrent', value)}
+          min={0}
+          max={3000}
+          unit="mA"
+        />
+        
+        {/* 스위칭 주파수 필터 */}
+        <DualSliderFilter
+          label="스위칭 주파수"
+          value={filterState.switchingFrequency || [0, 2000]}
+          onChange={(value) => onFilterChange('switchingFrequency', value)}
+          min={0}
+          max={2000}
+          unit="kHz"
+        />
+        
+        {/* 채널 수 필터 */}
+        <CheckboxFilter
+          label="채널 수"
+          value={filterState.channels || []}
+          onChange={(value) => onFilterChange('channels', value)}
+          options={['1', '2', '3', '4+']}
+        />
+      </div>
+      
+      {/* 물리적 특성 필터 */}
+      <div className="space-y-4">
+        <div className="font-medium text-sm">물리적 특성</div>
+        
         {/* 패키지 타입 필터 */}
         <MultiSelectFilter
           label="패키지 타입"
           value={filterState.packageTypes || []}
-          onChange={(value) => onFilterChange('packageTypes', value.length > 0 ? value : undefined)}
+          onChange={(value) => onFilterChange('packageTypes', value)}
           options={filterOptions.packageTypes || []}
         />
-
-        {/* 채널 수 필터 */}
-        <TextFilter
-          label="채널 수"
-          value={filterState.channels || ''}
-          onChange={(value) => onFilterChange('channels', value || undefined)}
-        />
-
-        {/* 입력 전압 필터 */}
-        <DualSliderFilter
-          label="입력 전압"
-          value={filterState.inputVoltage || [filterOptions.voltageRange?.input?.min || 0, filterOptions.voltageRange?.input?.max || 60]}
-          onChange={(value) => onFilterChange('inputVoltage', value)}
-          min={filterOptions.voltageRange?.input?.min || 0}
-          max={filterOptions.voltageRange?.input?.max || 60}
-          unit="V"
-        />
-
-        {/* 출력 전류 필터 */}
-        <DualSliderFilter
-          label="출력 전류"
-          value={filterState.outputCurrent || [filterOptions.currentRange?.output?.min || 0, filterOptions.currentRange?.output?.max || 1500]}
-          onChange={(value) => onFilterChange('outputCurrent', value)}
-          min={filterOptions.currentRange?.output?.min || 0}
-          max={filterOptions.currentRange?.output?.max || 1500}
-          unit="mA"
-        />
-
-        {/* 토폴로지 필터 */}
+        
+        {/* 마운팅 타입 필터 */}
         <MultiSelectFilter
-          label="토폴로지"
-          value={filterState.topologies || []}
-          onChange={(value) => onFilterChange('topologies', value.length > 0 ? value : undefined)}
-          options={filterOptions.topologies || ["Buck", "Boost", "Buck-Boost", "Charge Pump", "Linear Regulator", "Constant Current Sink", "SEPIC", "Flyback", "Forward", "Half-Bridge", "Full-Bridge"]}
+          label="마운팅 타입"
+          value={filterState.mountingTypes || []}
+          onChange={(value) => onFilterChange('mountingTypes', value)}
+          options={filterOptions.mountingTypes || []}
         />
-
-        {/* 디밍 방식 필터 */}
-        <MultiSelectFilter
-          label="디밍 방식"
-          value={filterState.dimmingMethods || []}
-          onChange={(value) => onFilterChange('dimmingMethods', value.length > 0 ? value : undefined)}
-          options={filterOptions.dimmingMethods || ["PWM", "Analog"]}
-        />
-
-        {/* 내부 스위치 필터 */}
-        <MultiSelectFilter
-          label="내부 스위치"
-          value={filterState.internalSwitch || []}
-          onChange={(value) => onFilterChange('internalSwitch', value.length > 0 ? value : undefined)}
-          options={["있음", "없음"]}
-        />
-
-        {/* 써멀 패드 필터 */}
-        <MultiSelectFilter
-          label="써멀 패드"
-          value={filterState.thermalPad || []}
-          onChange={(value) => onFilterChange('thermalPad', value.length > 0 ? value : undefined)}
-          options={["있음", "없음"]}
-        />
-
+        
         {/* 동작 온도 필터 */}
         <DualSliderFilter
-          label="동작 온도"
+          label="동작 온도 범위"
           value={filterState.operatingTemperature || [-40, 125]}
           onChange={(value) => onFilterChange('operatingTemperature', value)}
           min={-55}
           max={150}
           unit="°C"
         />
-
+        
+        {/* 내부 스위치 필터 */}
+        <CheckboxFilter
+          label="내부 스위치"
+          value={filterState.internalSwitch || []}
+          onChange={(value) => onFilterChange('internalSwitch', value)}
+          options={['있음', '없음']}
+        />
+        
+        {/* 써멀 패드 필터 */}
+        <CheckboxFilter
+          label="써멀 패드"
+          value={filterState.thermalPad || []}
+          onChange={(value) => onFilterChange('thermalPad', value)}
+          options={['있음', '없음']}
+        />
+      </div>
+      
+      {/* 제어 특성 필터 */}
+      <div className="space-y-4">
+        <div className="font-medium text-sm">제어 특성</div>
+        
+        {/* 토폴로지 필터 */}
+        <MultiSelectFilter
+          label="토폴로지"
+          value={filterState.topologies || []}
+          onChange={(value) => onFilterChange('topologies', value)}
+          options={filterOptions.topologies || []}
+        />
+        
+        {/* 디밍 방식 필터 */}
+        <MultiSelectFilter
+          label="디밍 방식"
+          value={filterState.dimmingMethods || []}
+          onChange={(value) => onFilterChange('dimmingMethods', value)}
+          options={filterOptions.dimmingMethods || []}
+        />
+      </div>
+      
+      {/* 인증 및 응용분야 필터 */}
+      <div className="space-y-4">
+        <div className="font-medium text-sm">인증 및 응용분야</div>
+        
         {/* 인증 필터 */}
         <MultiSelectFilter
           label="인증"
           value={filterState.certifications || []}
-          onChange={(value) => onFilterChange('certifications', value.length > 0 ? value : undefined)}
+          onChange={(value) => onFilterChange('certifications', value)}
           options={filterOptions.certifications || []}
         />
-
-        {/* 응용 분야 필터 */}
+        
+        {/* 응용분야 필터 */}
         <MultiSelectFilter
-          label="응용 분야"
+          label="응용분야"
           value={filterState.applications || []}
-          onChange={(value) => onFilterChange('applications', value.length > 0 ? value : undefined)}
+          onChange={(value) => onFilterChange('applications', value)}
           options={filterOptions.applications || []}
         />
       </div>
-
-      <div className="flex items-center justify-between pt-4 border-t">
-        <Button variant="outline" onClick={onClearFilters} disabled={appliedFilters.length === 0}>
-          <X className="mr-2 h-4 w-4" />
-          필터 초기화
-        </Button>
-        <Button onClick={onApplyFilters}>
-          <Check className="mr-2 h-4 w-4" />
-          필터 적용
+      
+      {/* 하단 적용 버튼 */}
+      <div className="pt-4 sticky bottom-0 bg-background border-t mt-8">
+        <Button className="w-full" onClick={onApplyFilters}>
+          필터 적용하기
         </Button>
       </div>
     </div>
