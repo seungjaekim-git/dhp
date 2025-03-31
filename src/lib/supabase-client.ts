@@ -255,3 +255,311 @@ export async function getAllProducts() {
     return [];
   }
 }
+
+// LED Driver IC 필터링 함수
+export async function getLEDDriverICs(filters?: any) {
+  try {
+    let query = supabase
+      .from('products')
+      .select(`
+        id,
+        name,
+        subtitle,
+        part_number,
+        manufacturer_id,
+        manufacturers (id, name),
+        specifications,
+        description,
+        images (id, title, url, description),
+        product_categories (category_id, categories (id, name, description)),
+        product_applications (application_id, applications (id, name, description)),
+        product_certifications (certification_id, certifications (id, name, description))
+      `)
+      .order('name');
+
+    // 필터링 로직 적용
+    if (filters) {
+      // 검색어 필터링
+      if (filters.search) {
+        query = query.or(`name.ilike.%${filters.search}%,subtitle.ilike.%${filters.search}%,part_number.ilike.%${filters.search}%`);
+      }
+
+      // 제조사 필터링
+      if (filters.manufacturers && filters.manufacturers.length > 0) {
+        query = query.in('manufacturer_id', filters.manufacturers);
+      }
+
+      // 카테고리 필터링 (서브쿼리 사용)
+      if (filters.categories && filters.categories.length > 0) {
+        query = query.filter('product_categories.category_id', 'in', `(${filters.categories.join(',')})`);
+      }
+
+      // 사양 기반 필터링 (JSONB 필터링)
+      // 토폴로지 필터링
+      if (filters.topology && filters.topology.length > 0) {
+        const topologyCondition = filters.topology.map((t: string) => `specifications->>'topology' ? '${t}'`).join(' OR ');
+        query = query.filter(topologyCondition);
+      }
+
+      // 디밍 방식 필터링
+      if (filters.dimming_method && filters.dimming_method.length > 0) {
+        const dimmingCondition = filters.dimming_method.map((d: string) => `specifications->>'dimming_method' ? '${d}'`).join(' OR ');
+        query = query.filter(dimmingCondition);
+      }
+
+      // 패키지 타입 필터링
+      if (filters.package_type && filters.package_type.length > 0) {
+        query = query.in(`specifications->package_type`, filters.package_type);
+      }
+
+      // 마운팅 타입 필터링
+      if (filters.mounting_type && filters.mounting_type.length > 0) {
+        query = query.in(`specifications->mounting_type`, filters.mounting_type);
+      }
+
+      // 전압/전류/온도 등 범위 필터링
+      if (filters.input_voltage) {
+        if (filters.input_voltage[0] > 0) {
+          query = query.gte(`specifications->input_voltage->min`, filters.input_voltage[0]);
+        }
+        if (filters.input_voltage[1] < 100) {
+          query = query.lte(`specifications->input_voltage->max`, filters.input_voltage[1]);
+        }
+      }
+
+      if (filters.output_voltage) {
+        if (filters.output_voltage[0] > 0) {
+          query = query.gte(`specifications->output_voltage->min`, filters.output_voltage[0]);
+        }
+        if (filters.output_voltage[1] < 100) {
+          query = query.lte(`specifications->output_voltage->max`, filters.output_voltage[1]);
+        }
+      }
+
+      if (filters.output_current) {
+        if (filters.output_current[0] > 0) {
+          query = query.gte(`specifications->output_current->min`, filters.output_current[0]);
+        }
+        if (filters.output_current[1] < 5000) {
+          query = query.lte(`specifications->output_current->max`, filters.output_current[1]);
+        }
+      }
+
+      if (filters.operating_temperature) {
+        if (filters.operating_temperature[0] > -40) {
+          query = query.gte(`specifications->operating_temperature->min`, filters.operating_temperature[0]);
+        }
+        if (filters.operating_temperature[1] < 125) {
+          query = query.lte(`specifications->operating_temperature->max`, filters.operating_temperature[1]);
+        }
+      }
+
+      if (filters.switching_frequency) {
+        if (filters.switching_frequency[0] > 0) {
+          query = query.gte(`specifications->switching_frequency->min`, filters.switching_frequency[0]);
+        }
+        if (filters.switching_frequency[1] < 2000) {
+          query = query.lte(`specifications->switching_frequency->max`, filters.switching_frequency[1]);
+        }
+      }
+
+      // Boolean 필터 (internal_switch, thermal_pad)
+      if (filters.internal_switch !== null && filters.internal_switch !== undefined) {
+        query = query.eq(`specifications->internal_switch`, filters.internal_switch);
+      }
+
+      if (filters.thermal_pad !== null && filters.thermal_pad !== undefined) {
+        query = query.eq(`specifications->thermal_pad`, filters.thermal_pad);
+      }
+
+      // 채널 필터링
+      if (filters.channels && filters.channels.length > 0) {
+        query = query.in(`specifications->channels`, filters.channels);
+      }
+
+      // 통신 인터페이스 타입 필터링
+      if (filters.communication_interface && filters.communication_interface.type && filters.communication_interface.type.length > 0) {
+        query = query.in(`specifications->communication_interface->type`, filters.communication_interface.type);
+      }
+
+      // 전류 정확도 필터링
+      if (filters.current_accuracy && filters.current_accuracy.between_ics) {
+        if (filters.current_accuracy.between_ics[0] > 0) {
+          query = query.gte(`specifications->current_accuracy->between_ics`, filters.current_accuracy.between_ics[0]);
+        }
+        if (filters.current_accuracy.between_ics[1] < 100) {
+          query = query.lte(`specifications->current_accuracy->between_ics`, filters.current_accuracy.between_ics[1]);
+        }
+      }
+
+      if (filters.current_accuracy && filters.current_accuracy.between_channels) {
+        if (filters.current_accuracy.between_channels[0] > 0) {
+          query = query.gte(`specifications->current_accuracy->between_channels`, filters.current_accuracy.between_channels[0]);
+        }
+        if (filters.current_accuracy.between_channels[1] < 100) {
+          query = query.lte(`specifications->current_accuracy->between_channels`, filters.current_accuracy.between_channels[1]);
+        }
+      }
+    }
+
+    // 데이터 가져오기
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Error fetching LED Driver ICs:', error);
+      return { products: [], filterOptions: {} };
+    }
+
+    // 필터 옵션 데이터도 함께 가져오기
+    const filterOptions = await getLEDDriverICFilterOptions();
+
+    return {
+      products: data || [],
+      filterOptions
+    };
+  } catch (error) {
+    console.error('Error in getLEDDriverICs:', error);
+    return { products: [], filterOptions: {} };
+  }
+}
+
+// LED Driver IC 필터 옵션 가져오기
+export async function getLEDDriverICFilterOptions() {
+  try {
+    // 제조사 목록 가져오기
+    const { data: manufacturers } = await supabase
+      .from('manufacturers')
+      .select('id, name')
+      .order('name');
+
+    // 카테고리 목록 가져오기
+    const { data: categories } = await supabase
+      .from('categories')
+      .select('id, name')
+      .order('name');
+
+    // 제품 데이터에서 고유 값 추출 (패키지 타입, 토폴로지 등)
+    const { data: products } = await supabase
+      .from('products')
+      .select('specifications')
+      .not('specifications', 'is', null);
+
+    // 제품 데이터에서 필터 옵션 추출
+    const topologies = new Set<string>();
+    const dimmingMethods = new Set<string>();
+    const packageTypes = new Set<string>();
+    const mountingTypes = new Set<string>();
+    const channels = new Set<string>();
+    const communicationTypes = new Set<string>();
+    
+    let minInputVoltage = Infinity;
+    let maxInputVoltage = 0;
+    let minOutputVoltage = Infinity;
+    let maxOutputVoltage = 0;
+    let minOutputCurrent = Infinity;
+    let maxOutputCurrent = 0;
+    let minOperatingTemp = Infinity;
+    let maxOperatingTemp = -Infinity;
+    let minSwitchingFreq = Infinity;
+    let maxSwitchingFreq = 0;
+    
+    products?.forEach(product => {
+      const specs = product.specifications;
+      
+      // 토폴로지
+      if (specs.topology && Array.isArray(specs.topology)) {
+        specs.topology.forEach((t: string) => topologies.add(t));
+      }
+      
+      // 디밍 방식
+      if (specs.dimming_method && Array.isArray(specs.dimming_method)) {
+        specs.dimming_method.forEach((d: string) => dimmingMethods.add(d));
+      }
+      
+      // 패키지 타입
+      if (specs.package_type) {
+        packageTypes.add(specs.package_type);
+      }
+      
+      // 마운팅 타입
+      if (specs.mounting_type) {
+        mountingTypes.add(specs.mounting_type);
+      }
+      
+      // 채널
+      if (specs.channels) {
+        channels.add(String(specs.channels));
+      }
+      
+      // 통신 인터페이스
+      if (specs.communication_interface && specs.communication_interface.type) {
+        if (Array.isArray(specs.communication_interface.type)) {
+          specs.communication_interface.type.forEach((t: string) => communicationTypes.add(t));
+        } else {
+          communicationTypes.add(specs.communication_interface.type);
+        }
+      }
+      
+      // 범위 값 업데이트
+      if (specs.input_voltage) {
+        minInputVoltage = Math.min(minInputVoltage, specs.input_voltage.min || Infinity);
+        maxInputVoltage = Math.max(maxInputVoltage, specs.input_voltage.max || 0);
+      }
+      
+      if (specs.output_voltage) {
+        minOutputVoltage = Math.min(minOutputVoltage, specs.output_voltage.min || Infinity);
+        maxOutputVoltage = Math.max(maxOutputVoltage, specs.output_voltage.max || 0);
+      }
+      
+      if (specs.output_current) {
+        minOutputCurrent = Math.min(minOutputCurrent, specs.output_current.min || Infinity);
+        maxOutputCurrent = Math.max(maxOutputCurrent, specs.output_current.max || 0);
+      }
+      
+      if (specs.operating_temperature) {
+        minOperatingTemp = Math.min(minOperatingTemp, specs.operating_temperature.min || Infinity);
+        maxOperatingTemp = Math.max(maxOperatingTemp, specs.operating_temperature.max || -Infinity);
+      }
+      
+      if (specs.switching_frequency) {
+        minSwitchingFreq = Math.min(minSwitchingFreq, specs.switching_frequency.min || Infinity);
+        maxSwitchingFreq = Math.max(maxSwitchingFreq, specs.switching_frequency.max || 0);
+      }
+    });
+    
+    // 기본값 보정
+    minInputVoltage = minInputVoltage === Infinity ? 0 : minInputVoltage;
+    minOutputVoltage = minOutputVoltage === Infinity ? 0 : minOutputVoltage;
+    minOutputCurrent = minOutputCurrent === Infinity ? 0 : minOutputCurrent;
+    minOperatingTemp = minOperatingTemp === Infinity ? -40 : minOperatingTemp;
+    minSwitchingFreq = minSwitchingFreq === Infinity ? 0 : minSwitchingFreq;
+    
+    // 필터 옵션 반환
+    return {
+      manufacturers: manufacturers?.map(m => ({ id: m.id, name: m.name })) || [],
+      categories: categories?.map(c => ({ id: c.id, name: c.name })) || [],
+      topologies: Array.from(topologies),
+      dimmingMethods: Array.from(dimmingMethods),
+      packageTypes: Array.from(packageTypes),
+      mountingTypes: Array.from(mountingTypes),
+      channels: Array.from(channels),
+      communicationTypes: Array.from(communicationTypes),
+      voltage: {
+        input: { min: minInputVoltage, max: maxInputVoltage || 100 },
+        output: { min: minOutputVoltage, max: maxOutputVoltage || 100 }
+      },
+      current: {
+        output: { min: minOutputCurrent, max: maxOutputCurrent || 5000 }
+      },
+      temperature: {
+        operating: { min: minOperatingTemp, max: maxOperatingTemp || 125 }
+      },
+      frequency: {
+        switching: { min: minSwitchingFreq, max: maxSwitchingFreq || 2000 }
+      }
+    };
+  } catch (error) {
+    console.error('Error in getLEDDriverICFilterOptions:', error);
+    return {};
+  }
+}

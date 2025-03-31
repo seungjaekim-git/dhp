@@ -22,23 +22,49 @@ interface BookmarkState {
   getBookmarkCount: () => number;
 }
 
+// 유틸리티 함수들
+const findBookmarkIndex = (items: BookmarkedProduct[], id: number): number =>
+  items.findIndex(item => item.id === id);
+
+const validateProduct = (product: BookmarkedProduct): boolean => {
+  return !!(product && product.id && product.name && product.manufacturerId);
+};
+
 export const useBookmarkStore = create<BookmarkState>()(
   persist(
     (set, get) => ({
       items: [],
       
-      addBookmark: (product) => set((state) => {
-        if (state.items.some(item => item.id === product.id)) {
-          return state; // 이미 북마크된 상품은 추가하지 않음
+      addBookmark: (product) => {
+        if (!validateProduct(product)) {
+          console.error('Invalid product data');
+          return;
         }
-        return { items: [...state.items, { ...product, addedAt: new Date().toISOString() }] };
-      }),
+
+        set((state) => {
+          if (findBookmarkIndex(state.items, product.id) > -1) {
+            return state; // 이미 북마크된 상품은 추가하지 않음
+          }
+          return { 
+            items: [...state.items, { ...product, addedAt: new Date().toISOString() }] 
+          };
+        });
+      },
       
-      removeBookmark: (id) => set((state) => ({
-        items: state.items.filter(item => item.id !== id)
-      })),
+      removeBookmark: (id) => {
+        if (!id) {
+          console.error('Invalid bookmark id');
+          return;
+        }
+        set((state) => ({
+          items: state.items.filter(item => item.id !== id)
+        }));
+      },
       
-      isBookmarked: (id) => get().items.some(item => item.id === id),
+      isBookmarked: (id) => {
+        if (!id) return false;
+        return get().items.some(item => item.id === id);
+      },
       
       clearBookmarks: () => set({ items: [] }),
       
@@ -46,6 +72,7 @@ export const useBookmarkStore = create<BookmarkState>()(
     }),
     {
       name: 'bookmarks-storage',
+      partialize: (state) => ({ items: state.items }), // 필요한 상태만 저장
     }
   )
 ); 
