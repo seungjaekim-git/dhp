@@ -81,10 +81,11 @@ model documents {
 }
 
 model features {
-  id               BigInt             @id @default(autoincrement())
-  name             String             @unique
-  description      String?
-  product_features product_features[]
+  id                BigInt             @id @default(autoincrement())
+  name              String             @unique
+  description       String?
+  description_jsonb Json?
+  product_features  product_features[]
 
   @@index([name], map: "idx_feature_name")
 }
@@ -141,21 +142,26 @@ model manufacturer_phones {
 model manufacturers {
   id                    BigInt                  @id @default(autoincrement())
   name                  String                  @unique
-  website_url               String?
+  website_url           String?
   established           String?
   headquarters          String?
   business_type         String?
   company_overview      String?
   business_overview     String?
   key_milestones        Json?
-  annual_revenue        String?
-  sales_markets         String[]
   logo                  String?
   building              String?
   linkedin_link         String?
-  facebook_link         String?
   country_id            BigInt?
   role                  String?                 @default("manufacturer")
+  product_category      String?
+  employees             String?
+  emails                String?
+  phones                String?
+  description           String?
+  annual_revenue        String?
+  sales_markets         String?
+  facebook_link         String?
   manufacturer_branches manufacturer_branches[]
   manufacturer_emails   manufacturer_emails[]
   manufacturer_faxes    manufacturer_faxes[]
@@ -273,11 +279,11 @@ model product_documents {
 }
 
 model product_features {
-  product_id BigInt
-  feature_id BigInt
+  product_id  BigInt
+  feature_id  BigInt
   description String?
-  features   features @relation(fields: [feature_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  products   products @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  features    features @relation(fields: [feature_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  products    products @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([product_id, feature_id])
 }
@@ -286,7 +292,7 @@ model products {
   id                     BigInt                   @id @default(autoincrement())
   name                   String                   @unique
   manufacturer_id        BigInt?
-  part_number            String?                  @unique
+  part_number            String?
   specifications         Json
   description            String?
   storage_type_id        BigInt?

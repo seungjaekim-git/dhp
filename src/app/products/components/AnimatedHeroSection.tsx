@@ -26,6 +26,7 @@ interface AnimatedHeroSectionProps {
     textColor: string;
     hoverColor: string;
   }[];
+  theme?: 'light' | 'dark';
 }
 
 export default function AnimatedHeroSection({
@@ -34,6 +35,7 @@ export default function AnimatedHeroSection({
   breadcrumb,
   description,
   badges = [],
+  theme = 'light',
 }: AnimatedHeroSectionProps) {
   return (
     <div className="relative">
@@ -50,7 +52,7 @@ export default function AnimatedHeroSection({
         </div>
       </div>
 
-      <div className="relative z-20 px-6 pt-32 pb-24 md:pt-40 md:pb-32 max-w-[1400px] mx-auto">
+      <div className="relative z-20 px-6 py-16 sm:px-10 sm:py-24 max-w-7xl mx-auto">
         {/* Breadcrumbs at top - Enlarged */}
         <motion.div 
           initial={{ opacity: 0, y: -10 }}

@@ -59,6 +59,35 @@
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* 기본 배경 색상 */
+    --bg-primary: #0A0E17;
+    --bg-secondary: #111827;
+    --bg-tertiary: #1F2937;
+    
+    /* 주요 브랜드 색상 */
+    --brand-primary: #3B82F6;   /* 기본 파란색 */
+    --brand-secondary: #2563EB; /* 진한 파란색 */
+    --brand-accent: #10B981;    /* 포인트 색상 (초록) */
+    
+    /* 텍스트 색상 */
+    --text-primary: #F9FAFB;
+    --text-secondary: #D1D5DB;
+    --text-tertiary: #9CA3AF;
+    --text-disabled: #6B7280;
+    
+    /* 테두리 색상 */
+    --border-primary: rgba(75, 85, 99, 0.6);
+    --border-secondary: rgba(55, 65, 81, 0.8);
+    
+    /* 카드/요소 배경 */
+    --card-bg: rgba(17, 24, 39, 0.7);
+    --card-bg-hover: rgba(31, 41, 55, 0.8);
+    
+    /* 그림자 */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.7);
   }
 
   .dark {
@@ -119,7 +148,7 @@
   }
 
   body {
-    @apply bg-background text-foreground text-[14px] sm:text-base;
+    @apply bg-[var(--bg-primary)] text-[var(--text-primary)] font-['Pretendard',sans-serif];
   }
 
   .dark {
@@ -128,6 +157,16 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+  }
+
+  /* 제목 스타일 */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold;
+  }
+  
+  /* 모노스페이스 폰트 */
+  .font-mono {
+    font-family: 'IBM Plex Mono', monospace;
   }
 }
 
@@ -179,4 +218,86 @@
   .compact-btn {
     @apply py-1.5 px-3 sm:py-2 sm:px-4 text-xs sm:text-sm;
   }
+}
+
+@layer components {
+  /* 카드 스타일 */
+  .tech-card {
+    @apply bg-[var(--card-bg)] border border-[var(--border-primary)] rounded-lg overflow-hidden transition-all duration-300;
+  }
+  
+  /* 버튼 스타일 */
+  .btn-primary {
+    @apply bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white px-4 py-2 rounded-md transition-colors;
+  }
+  
+  .btn-outline {
+    @apply border border-[var(--border-primary)] text-[var(--text-primary)] hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] px-4 py-2 rounded-md transition-colors;
+  }
+}
+
+/* 애니메이션 */
+@keyframes pulse-subtle {
+  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+}
+
+.pulse-animation {
+  animation: pulse-subtle 2s infinite;
+}
+
+@keyframes rotate-y {
+  0% { transform: rotateY(0deg); }
+  100% { transform: rotateY(360deg); }
+}
+
+.rotate-y-animation {
+  animation: rotate-y 15s linear infinite;
+}
+
+.hover-scale {
+  transition: transform 0.3s ease;
+}
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+/* 페이지 전환 애니메이션 */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+.page-transition-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+.page-transition-exit-active {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 200ms, transform 200ms;
+}
+
+/* 커스텀 스크롤바 */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--border-primary);
+  border-radius: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
 }

@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { ProductsSidebarClient } from "./components/ProductsSidebarClient";
 import AnimatedHeroSection from "./components/AnimatedHeroSection";
 import AnimatedContentSection from "./components/AnimatedContentSection";
+import { cn } from "@/lib/utils";
 
 interface BreadcrumbItem {
   label: string;
@@ -24,6 +25,7 @@ interface ProductsLayoutProps {
     textColor: string;
     hoverColor: string;
   }[];
+  theme?: 'light' | 'dark';
 }
 
 export default function ProductsLayout({
@@ -33,11 +35,17 @@ export default function ProductsLayout({
   breadcrumb,
   description,
   badges = [],
+  theme = 'light',
 }: ProductsLayoutProps) {
   const pathname = usePathname() || "/products";
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className={cn(
+      "min-h-screen",
+      theme === 'dark' 
+        ? "bg-black text-white" 
+        : "bg-gray-50 text-gray-900"
+    )}>
       {/* Hero Section - Full width, bold typography */}
       <AnimatedHeroSection
         title={title}
@@ -45,6 +53,7 @@ export default function ProductsLayout({
         breadcrumb={breadcrumb}
         description={description}
         badges={badges}
+        theme={theme}
       />
 
       {/* Main Content */}
@@ -52,7 +61,7 @@ export default function ProductsLayout({
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sticky sidebar */}
           <div className="w-full lg:w-72 order-2 lg:order-1">
-            <ProductsSidebarClient />
+            <ProductsSidebarClient theme={theme} />
           </div>
           
           {/* Main content area */}

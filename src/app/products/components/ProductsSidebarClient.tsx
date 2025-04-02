@@ -66,7 +66,11 @@ const applications = [
   { id: "aerospace", name: "항공우주", count: 8 },
 ];
 
-export function ProductsSidebarClient() {
+interface ProductsSidebarClientProps {
+  theme?: 'light' | 'dark';
+}
+
+export function ProductsSidebarClient({ theme = 'light' }: ProductsSidebarClientProps) {
   const pathname = usePathname();
   const [categoryOpen, setCategoryOpen] = useState(true);
   const [manufacturerOpen, setManufacturerOpen] = useState(false);

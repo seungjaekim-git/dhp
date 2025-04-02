@@ -1,26 +1,11 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo, useCallback, useTransition } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Slider } from '@/components/ui/slider'
 import { useToast } from '@/hooks/use-toast'
 import { useBookmarkStore } from '@/store/bookmarkStore'
 import { useQuoteCartStore } from '@/store/quoteCartStore'
-import { 
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import {
   Pagination,
   PaginationContent,
@@ -30,41 +15,12 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
-import { Search, SlidersHorizontal, X, Bookmark, ShoppingCart, ExternalLink, List } from 'lucide-react'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import Link from 'next/link'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import {
-  ChevronDown,
-  ChevronRight,
-  Info,
-  Cpu,
-  Zap,
-  Settings,
-  Box,
-  Clock,
-  RadioTower,
-  Grid,
-  Terminal
-} from 'lucide-react'
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
+import { Search, X } from 'lucide-react'
 import ProductCard from "./ProductCard"
-import { ExpandableTabs } from "@/components/ui/expandable-tabs"
+import ProductFilter from './ProductFilter'
+import ProductFilterBadges from './ProductFilterBadges'
 
 interface ProductListProps {
   products: any[];
@@ -75,10 +31,10 @@ export default function ProductList({ products, filterOptions }: ProductListProp
   const { toast } = useToast()
   const { addBookmark, removeBookmark, isBookmarked } = useBookmarkStore();
   const { addItem, isInQuote } = useQuoteCartStore();
+  const [isPending, startTransition] = useTransition();
   
   const [filteredProducts, setFilteredProducts] = useState(products)
   const [searchQuery, setSearchQuery] = useState('')
-  const [showFilters, setShowFilters] = useState(false)
   
   // 페이지네이션 상태
   const [currentPage, setCurrentPage] = useState(1)
@@ -86,6 +42,13 @@ export default function ProductList({ products, filterOptions }: ProductListProp
   const [totalPages, setTotalPages] = useState(1)
   const [currentItems, setCurrentItems] = useState<any[]>([])
   
+  // 정렬 상태
+  const [sortOption, setSortOption] = useState<{field: string, direction: 'asc' | 'desc'}>({
+    field: 'name',
+    direction: 'asc'
+  });
+  
+  // 필터 상태
   const [activeFilters, setActiveFilters] = useState<{
     manufacturers: number[];
     topologies: string[];
@@ -94,7 +57,13 @@ export default function ProductList({ products, filterOptions }: ProductListProp
     channels: string[];
     inputVoltage: [number, number];
     outputVoltage: [number, number];
+    outputCurrent: [number, number];
+    switchingFrequency: [number, number];
+    operatingTemperature: [number, number];
     hasInternalSwitch: boolean | null;
+    hasThermalPad: boolean | null;
+    communicationInterfaces: string[];
+    pwmResolutions: string[];
   }>({
     manufacturers: [],
     topologies: [],
@@ -103,80 +72,20 @@ export default function ProductList({ products, filterOptions }: ProductListProp
     channels: [],
     inputVoltage: [0, 100],
     outputVoltage: [0, 100],
+    outputCurrent: [0, 5000],
+    switchingFrequency: [0, 2000],
+    operatingTemperature: [-40, 125],
     hasInternalSwitch: null,
+    hasThermalPad: null,
+    communicationInterfaces: [],
+    pwmResolutions: [],
   })
-
-  const [activeTab, setActiveTab] = useState("basics");
-  const [cardTabs, setCardTabs] = useState<{ [key: string]: string }>({});
-
-  const tabs = [
-    { title: "기본 정보", icon: Info },
-    { title: "전력 특성", icon: Zap },
-    { title: "성능 특성", icon: Cpu },
-    { title: "물리적 특성", icon: Box },
-    { title: "주파수 특성", icon: Clock },
-    { title: "인터페이스", icon: Terminal },
-    { title: "LED 매트릭스", icon: Grid }
-  ];
-
-  // 북마크 토글 핸들러
-  const handleBookmarkToggle = (product: any) => {
-    const isBookmarkedStatus = product.id ? isBookmarked(product.id) : false;
-    
-    if (isBookmarkedStatus) {
-      removeBookmark(product.id);
-      toast({
-        title: "북마크 제거",
-        description: `${product.name} 북마크가 제거되었습니다.`,
-        variant: "default",
-        duration: 3000,
-      });
-    } else {
-      addBookmark({
-        id: product.id,
-        name: product.name,
-        subtitle: product.subtitle || product.part_number || '',
-        manufacturerName: product.manufacturers && typeof product.manufacturers === 'object' && 'name' in product.manufacturers
-          ? product.manufacturers.name
-          : '미상 제조사',
-        manufacturerId: product.manufacturer_id || 0,
-        addedAt: new Date().toISOString(),
-        imageUrl: product.images?.[0]?.url || '',
-        packageType: product.specifications?.package_type || '',
-        category: 'LED 드라이버 IC'
-      });
-      toast({
-        title: "북마크 추가",
-        description: `${product.name} 북마크에 추가되었습니다.`,
-        variant: "default",
-        duration: 3000,
-      });
-    }
-  };
-
-  // 견적 추가 핸들러
-  const handleAddToQuote = (product: any) => {
-    addItem({
-      id: product.id,
-      name: product.name,
-      quantity: 1,
-      subtitle: product.subtitle || product.part_number || '',
-      manufacturerName: product.manufacturers && typeof product.manufacturers === 'object' && 'name' in product.manufacturers
-        ? product.manufacturers.name
-        : '미상 제조사',
-      manufacturerId: product.manufacturer_id || 0,
-      addedAt: new Date().toISOString(),
-      imageUrl: product.images?.[0]?.url || '',
-      packageType: product.specifications?.package_type || '',
-    });
-    
-    toast({
-      title: "견적 추가",
-      description: `${product.name} 견적에 추가되었습니다.`,
-      variant: "default",
-      duration: 3000,
-    });
-  };
+  
+  // 알림 상태
+  const [filterNotice, setFilterNotice] = useState<{show: boolean, count: number}>({
+    show: false,
+    count: 0
+  });
 
   // Initialize voltage ranges from filter options if available
   useEffect(() => {
@@ -191,489 +100,676 @@ export default function ProductList({ products, filterOptions }: ProductListProp
           filterOptions.voltage.output?.min || 0,
           filterOptions.voltage.output?.max || 100
         ]
-      }))
+      }));
     }
-  }, [filterOptions])
+
+    if (filterOptions?.current) {
+      setActiveFilters(prev => ({
+        ...prev,
+        outputCurrent: [
+          filterOptions.current.output?.min || 0,
+          filterOptions.current.output?.max || 5000
+        ]
+      }));
+    }
+
+    if (filterOptions?.frequency) {
+      setActiveFilters(prev => ({
+        ...prev,
+        switchingFrequency: [
+          filterOptions.frequency.switching?.min || 0,
+          filterOptions.frequency.switching?.max || 2000
+        ]
+      }));
+    }
+
+    if (filterOptions?.temperature) {
+      setActiveFilters(prev => ({
+        ...prev,
+        operatingTemperature: [
+          filterOptions.temperature.operating?.min || -40,
+          filterOptions.temperature.operating?.max || 125
+        ]
+      }));
+    }
+
+    // filterOptions.packageTypes가 없으면 products에서 추출
+    if (!filterOptions.packageTypes && products.length > 0) {
+      const packageTypes = Array.from(
+        new Set(
+          products
+            .filter(p => p.specifications?.package_type)
+            .map(p => p.specifications.package_type)
+        )
+      );
+      filterOptions.packageTypes = packageTypes;
+    }
+    
+    // PWM 해상도 추출
+    if (!filterOptions.pwmResolutions && products.length > 0) {
+      const resolutions = products
+        .filter(p => p.specifications?.pwm?.resolution)
+        .flatMap(p => {
+          const res = p.specifications.pwm.resolution;
+          return Array.isArray(res) ? res : [res];
+        })
+        .filter(Boolean);
+      
+      filterOptions.pwmResolutions = Array.from(new Set(resolutions));
+    }
+  }, [filterOptions, products])
+
+  // 필터 적용 개수 계산
+  const filterCounts = useMemo<{
+    manufacturers: number;
+    topologies: number;
+    dimmingMethods: number;
+    packageTypes: number;
+    channels: number;
+    voltages: number;
+    currents: number;
+    frequencies: number;
+    temperatures: number;
+    internalSwitch: number;
+    thermalPad: number;
+    communicationInterfaces: number;
+    pwmResolutions: number;
+    total: number;
+  }>(() => {
+    return {
+      manufacturers: activeFilters.manufacturers.length,
+      topologies: activeFilters.topologies.length,
+      dimmingMethods: activeFilters.dimmingMethods.length,
+      packageTypes: activeFilters.packageTypes.length,
+      channels: activeFilters.channels.length,
+      voltages: (
+        activeFilters.inputVoltage[0] > (filterOptions?.voltage?.input?.min || 0) ||
+        activeFilters.inputVoltage[1] < (filterOptions?.voltage?.input?.max || 100) ||
+        activeFilters.outputVoltage[0] > (filterOptions?.voltage?.output?.min || 0) ||
+        activeFilters.outputVoltage[1] < (filterOptions?.voltage?.output?.max || 100)
+      ) ? 1 : 0,
+      currents: (
+        activeFilters.outputCurrent[0] > (filterOptions?.current?.output?.min || 0) ||
+        activeFilters.outputCurrent[1] < (filterOptions?.current?.output?.max || 5000)
+      ) ? 1 : 0,
+      frequencies: (
+        activeFilters.switchingFrequency[0] > (filterOptions?.frequency?.switching?.min || 0) ||
+        activeFilters.switchingFrequency[1] < (filterOptions?.frequency?.switching?.max || 2000)
+      ) ? 1 : 0,
+      temperatures: (
+        activeFilters.operatingTemperature[0] > (filterOptions?.temperature?.operating?.min || -40) ||
+        activeFilters.operatingTemperature[1] < (filterOptions?.temperature?.operating?.max || 125)
+      ) ? 1 : 0,
+      internalSwitch: activeFilters.hasInternalSwitch !== null ? 1 : 0,
+      thermalPad: activeFilters.hasThermalPad !== null ? 1 : 0,
+      communicationInterfaces: activeFilters.communicationInterfaces.length,
+      pwmResolutions: activeFilters.pwmResolutions.length,
+      total: 0 // 아래에서 계산
+    };
+  }, [
+    activeFilters, 
+    filterOptions?.voltage?.input, 
+    filterOptions?.voltage?.output,
+    filterOptions?.current?.output,
+    filterOptions?.frequency?.switching,
+    filterOptions?.temperature?.operating
+  ]);
+
+  // 총 필터 개수 계산
+  useEffect(() => {
+    (filterCounts as any).total = 
+      filterCounts.manufacturers + 
+      filterCounts.topologies + 
+      filterCounts.dimmingMethods + 
+      filterCounts.packageTypes + 
+      filterCounts.channels +
+      filterCounts.voltages +
+      filterCounts.currents +
+      filterCounts.frequencies +
+      filterCounts.temperatures +
+      filterCounts.internalSwitch +
+      filterCounts.thermalPad +
+      filterCounts.communicationInterfaces +
+      filterCounts.pwmResolutions;
+  }, [filterCounts]);
+
+  // 제품 정렬 함수
+  const sortProducts = useCallback((products: any[], option: {field: string, direction: 'asc' | 'desc'}) => {
+    return [...products].sort((a, b) => {
+      let valueA: any;
+      let valueB: any;
+
+      // 정렬 필드에 따라 값 추출
+      switch (option.field) {
+        case 'name':
+          valueA = a.name || '';
+          valueB = b.name || '';
+          break;
+        case 'manufacturer':
+          valueA = a.manufacturers?.name || '';
+          valueB = b.manufacturers?.name || '';
+          break;
+        case 'channels':
+          valueA = a.specifications?.channels || 0;
+          valueB = b.specifications?.channels || 0;
+          break;
+        case 'voltage':
+          valueA = a.specifications?.input_voltage?.max || 0;
+          valueB = b.specifications?.input_voltage?.max || 0;
+          break;
+        default:
+          valueA = a.name || '';
+          valueB = b.name || '';
+      }
+
+      // 오름차순/내림차순에 따라 비교
+      if (option.direction === 'asc') {
+        return typeof valueA === 'string' ? valueA.localeCompare(valueB) : valueA - valueB;
+      } else {
+        return typeof valueA === 'string' ? valueB.localeCompare(valueA) : valueB - valueA;
+      }
+    });
+  }, []);
 
   // Filter products when search or filters change
-  useEffect(() => {
-    let results = [...products]
-    
-    // 검색어 필터링
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase()
-      results = results.filter(product => 
-        product.name?.toLowerCase().includes(query) ||
-        product.subtitle?.toLowerCase().includes(query) ||
-        product.part_number?.toLowerCase().includes(query) ||
-        (product.manufacturers && typeof product.manufacturers === 'object' && 
-         'name' in product.manufacturers && 
-         product.manufacturers.name?.toLowerCase().includes(query))
-      )
-    }
-    
-    // 제조사 필터링
-    if (activeFilters.manufacturers.length > 0) {
-      results = results.filter(product => 
-        activeFilters.manufacturers.includes(product.manufacturer_id)
-      )
-    }
-    
-    // 토폴로지 필터링
-    if (activeFilters.topologies.length > 0) {
-      results = results.filter(product => {
-        if (!product.specifications?.topology) return false
-        
-        if (Array.isArray(product.specifications.topology)) {
-          return product.specifications.topology.some((t: string) => 
-            activeFilters.topologies.includes(t)
-          )
-        }
-        
-        return activeFilters.topologies.includes(product.specifications.topology)
-      })
-    }
-    
-    // 디밍 방식 필터링
-    if (activeFilters.dimmingMethods.length > 0) {
-      results = results.filter(product => {
-        if (!product.specifications?.dimming_method) return false
-        
-        if (Array.isArray(product.specifications.dimming_method)) {
-          return product.specifications.dimming_method.some((d: string) => 
-            activeFilters.dimmingMethods.includes(d)
-          )
-        }
-        
-        return activeFilters.dimmingMethods.includes(product.specifications.dimming_method)
-      })
-    }
-    
-    // 패키지 타입 필터링
-    if (activeFilters.packageTypes.length > 0) {
-      results = results.filter(product =>
-        activeFilters.packageTypes.includes(product.specifications?.package_type)
-      )
-    }
-    
-    // 채널 필터링
-    if (activeFilters.channels.length > 0) {
-      results = results.filter(product =>
-        activeFilters.channels.includes(String(product.specifications?.channels))
-      )
-    }
-    
-    // 전압 범위 필터링
-    results = results.filter(product => {
-      // 입력 전압 필터링
-      if (product.specifications?.input_voltage) {
-        const min = product.specifications.input_voltage.min
-        const max = product.specifications.input_voltage.max
-        
-        if (min !== undefined && max !== undefined) {
-          // 제품 전압 범위가 필터 범위와 겹치는지 확인
-          return (
-            (min <= activeFilters.inputVoltage[1] && max >= activeFilters.inputVoltage[0])
-          )
-        }
+  const applyFilters = useCallback(() => {
+    startTransition(() => {
+      let results = [...products]
+      const originalCount = results.length;
+      
+      // 검색어 필터링
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase()
+        results = results.filter(product => 
+          product.name?.toLowerCase().includes(query) ||
+          product.subtitle?.toLowerCase().includes(query) ||
+          product.part_number?.toLowerCase().includes(query) ||
+          (product.manufacturers && typeof product.manufacturers === 'object' && 
+           'name' in product.manufacturers && 
+           product.manufacturers.name?.toLowerCase().includes(query))
+        )
       }
       
-      return true // 입력 전압 정보가 없으면 필터링하지 않음
-    })
-    
-    // 출력 전압 필터링
-    results = results.filter(product => {
-      if (product.specifications?.output_voltage) {
-        const min = product.specifications.output_voltage.min
-        const max = product.specifications.output_voltage.max
-        
-        if (min !== undefined && max !== undefined) {
-          return (
-            (min <= activeFilters.outputVoltage[1] && max >= activeFilters.outputVoltage[0])
-          )
-        }
+      // 제조사 필터링
+      if (activeFilters.manufacturers.length > 0) {
+        results = results.filter(product => 
+          activeFilters.manufacturers.includes(product.manufacturer_id)
+        )
       }
       
-      return true // 출력 전압 정보가 없으면 필터링하지 않음
-    })
-    
-    // 내부 스위치 필터링
-    if (activeFilters.hasInternalSwitch !== null) {
-      results = results.filter(product =>
-        product.specifications?.internal_switch === activeFilters.hasInternalSwitch
-      )
-    }
-    
-    setFilteredProducts(results)
-    setCurrentPage(1) // 필터 변경 시 첫 페이지로 이동
-  }, [searchQuery, activeFilters, products])
+      // 토폴로지 필터링
+      if (activeFilters.topologies.length > 0) {
+        results = results.filter(product => {
+          if (!product.specifications?.topology) return false
+          
+          if (Array.isArray(product.specifications.topology)) {
+            return product.specifications.topology.some((t: string) => 
+              activeFilters.topologies.includes(t)
+            )
+          }
+          
+          return activeFilters.topologies.includes(product.specifications.topology)
+        })
+      }
+      
+      // 디밍 방식 필터링
+      if (activeFilters.dimmingMethods.length > 0) {
+        results = results.filter(product => {
+          if (!product.specifications?.dimming_method) return false
+          
+          if (Array.isArray(product.specifications.dimming_method)) {
+            return product.specifications.dimming_method.some((d: string) => 
+              activeFilters.dimmingMethods.includes(d)
+            )
+          }
+          
+          return activeFilters.dimmingMethods.includes(product.specifications.dimming_method)
+        })
+      }
+      
+      // 패키지 타입 필터링
+      if (activeFilters.packageTypes.length > 0) {
+        results = results.filter(product =>
+          activeFilters.packageTypes.includes(product.specifications?.package_type)
+        )
+      }
+      
+      // 채널 필터링
+      if (activeFilters.channels.length > 0) {
+        results = results.filter(product =>
+          activeFilters.channels.includes(String(product.specifications?.channels))
+        )
+      }
+      
+      // 입력 전압 필터링 (최대값 기준)
+      if (activeFilters.inputVoltage[0] > (filterOptions?.voltage?.input?.min || 0) || 
+          activeFilters.inputVoltage[1] < (filterOptions?.voltage?.input?.max || 100)) {
+        results = results.filter(product => {
+          if (product.specifications?.input_voltage?.max !== undefined) {
+            const maxVoltage = product.specifications.input_voltage.max;
+            // 최대값이 필터 범위 내에 있는지 확인
+            return maxVoltage >= activeFilters.inputVoltage[0] && 
+                   maxVoltage <= activeFilters.inputVoltage[1];
+            }
+          return false; // 입력 전압 정보가 없으면 필터링에서 제외
+        });
+      }
+      
+      // 출력 전압 필터링 (최대값 기준)
+      if (activeFilters.outputVoltage[0] > (filterOptions?.voltage?.output?.min || 0) || 
+          activeFilters.outputVoltage[1] < (filterOptions?.voltage?.output?.max || 100)) {
+        results = results.filter(product => {
+          if (product.specifications?.output_voltage?.max !== undefined) {
+            const maxVoltage = product.specifications.output_voltage.max;
+            // 최대값이 필터 범위 내에 있는지 확인
+            return maxVoltage >= activeFilters.outputVoltage[0] && 
+                   maxVoltage <= activeFilters.outputVoltage[1];
+          }
+          return false; // 출력 전압 정보가 없으면 필터링에서 제외
+        });
+      }
+      
+      // 출력 전류 필터링 (최대값 기준)
+      if (activeFilters.outputCurrent[0] > (filterOptions?.current?.output?.min || 0) || 
+          activeFilters.outputCurrent[1] < (filterOptions?.current?.output?.max || 5000)) {
+        results = results.filter(product => {
+          if (product.specifications?.output_current?.max !== undefined) {
+            const maxCurrent = product.specifications.output_current.max;
+            // 최대값이 필터 범위 내에 있는지 확인
+            return maxCurrent >= activeFilters.outputCurrent[0] && 
+                   maxCurrent <= activeFilters.outputCurrent[1];
+          }
+          return false; // 출력 전류 정보가 없으면 필터링에서 제외
+        });
+      }
+      
+      // 스위칭 주파수 필터링 (최대값 기준)
+      if (activeFilters.switchingFrequency[0] > (filterOptions?.frequency?.switching?.min || 0) || 
+          activeFilters.switchingFrequency[1] < (filterOptions?.frequency?.switching?.max || 2000)) {
+        results = results.filter(product => {
+          if (product.specifications?.switching_frequency?.max !== undefined) {
+            const maxFreq = product.specifications.switching_frequency.max;
+            // 최대값이 필터 범위 내에 있는지 확인
+            return maxFreq >= activeFilters.switchingFrequency[0] && 
+                   maxFreq <= activeFilters.switchingFrequency[1];
+          }
+          return false; // 스위칭 주파수 정보가 없으면 필터링에서 제외
+        });
+      }
+      
+      // 동작 온도 범위 필터링
+      if (activeFilters.operatingTemperature[0] > (filterOptions?.temperature?.operating?.min || -40) || 
+          activeFilters.operatingTemperature[1] < (filterOptions?.temperature?.operating?.max || 125)) {
+        results = results.filter(product => {
+          if (product.specifications?.operating_temperature) {
+            const min = product.specifications.operating_temperature.min;
+            const max = product.specifications.operating_temperature.max;
+            
+            if (min !== undefined && max !== undefined) {
+              // 온도 범위가 필터 범위와 겹치는지 확인
+              return max >= activeFilters.operatingTemperature[0] && 
+                     min <= activeFilters.operatingTemperature[1];
+            }
+          }
+          return false; // 동작 온도 정보가 없으면 필터링에서 제외
+        });
+      }
+      
+      // 내부 스위치 필터링
+      if (activeFilters.hasInternalSwitch !== null) {
+        results = results.filter(product =>
+          product.specifications?.internal_switch === activeFilters.hasInternalSwitch
+        )
+      }
+      
+      // Thermal Pad 필터링
+      if (activeFilters.hasThermalPad !== null) {
+        results = results.filter(product =>
+          product.specifications?.thermal_pad === activeFilters.hasThermalPad
+        )
+      }
+      
+      // 통신 인터페이스 필터링
+      if (activeFilters.communicationInterfaces.length > 0) {
+        results = results.filter(product => {
+          if (!product.specifications?.communication_interface?.type) return false
+          
+          if (Array.isArray(product.specifications.communication_interface.type)) {
+            return product.specifications.communication_interface.type.some((t: string) => 
+              activeFilters.communicationInterfaces.includes(t)
+            )
+          }
+          
+          return activeFilters.communicationInterfaces.includes(product.specifications.communication_interface.type)
+        })
+      }
+      
+      // PWM 해상도 필터링
+      if (activeFilters.pwmResolutions.length > 0) {
+        results = results.filter(product => {
+          if (!product.specifications?.pwm?.resolution) return false
+          
+          if (Array.isArray(product.specifications.pwm.resolution)) {
+            return product.specifications.pwm.resolution.some((r: string) => 
+              activeFilters.pwmResolutions.includes(r)
+            )
+          }
+          
+          return activeFilters.pwmResolutions.includes(product.specifications.pwm.resolution)
+        })
+      }
+      
+      // 필터링 결과가 변경되었으면 알림
+      if (results.length !== originalCount) {
+        setFilterNotice({
+          show: true,
+          count: results.length
+        });
+        
+        // 3초 후 알림 숨김
+        setTimeout(() => {
+          setFilterNotice(prev => ({...prev, show: false}));
+        }, 3000);
+      }
+      
+      // 정렬 적용
+      results = sortProducts(results, sortOption);
+      
+      // 결과 저장
+      setFilteredProducts(results);
 
-  // 페이지네이션 처리
-  useEffect(() => {
-    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage)
-    setTotalPages(totalPages || 1)
-    
-    const indexOfLastItem = currentPage * itemsPerPage
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage
-    const items = filteredProducts.slice(indexOfFirstItem, indexOfLastItem)
-    setCurrentItems(items)
-  }, [filteredProducts, currentPage, itemsPerPage])
+      // 페이지네이션 업데이트
+      const total = Math.ceil(results.length / itemsPerPage);
+      setTotalPages(total);
+      
+      // 현재 페이지가 총 페이지 수보다 크면 첫 페이지로 리셋
+      if (currentPage > total && total > 0) {
+        setCurrentPage(1);
+      }
+    });
+  }, [
+    products, 
+    searchQuery, 
+    activeFilters, 
+    sortOption, 
+    sortProducts, 
+    itemsPerPage, 
+    currentPage,
+    filterOptions
+  ]);
 
-  // 페이지 변경 핸들러
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page)
-  }
+  // 필터 변경 시 필터 적용 (버튼 클릭으로 변경되어 자동 적용 X)
+  const handleFilterChange = useCallback((filterType: string, value: any) => {
+    setActiveFilters(prev => {
+      // 배열 필터인 경우
+      if (Array.isArray(prev[filterType]) && !Array.isArray(value)) {
+        // 체크박스 토글 형식 (추가/제거)
+        const array = prev[filterType] as any[];
+        return {
+          ...prev,
+          [filterType]: array.includes(value)
+            ? array.filter(item => item !== value)
+            : [...array, value]
+        };
+      }
+      // 그 외의 경우 직접 값 설정
+      return {
+        ...prev,
+        [filterType]: value
+      };
+    });
+  }, []);
 
   // 필터 초기화
-  const resetFilters = () => {
+  const resetFilters = useCallback(() => {
     setActiveFilters({
       manufacturers: [],
       topologies: [],
       dimmingMethods: [],
       packageTypes: [],
       channels: [],
-      inputVoltage: filterOptions?.voltage?.input 
-        ? [filterOptions.voltage.input.min || 0, filterOptions.voltage.input.max || 100]
-        : [0, 100],
-      outputVoltage: filterOptions?.voltage?.output
-        ? [filterOptions.voltage.output.min || 0, filterOptions.voltage.output.max || 100] 
-        : [0, 100],
+      inputVoltage: [
+        filterOptions?.voltage?.input?.min || 0, 
+        filterOptions?.voltage?.input?.max || 100
+      ],
+      outputVoltage: [
+        filterOptions?.voltage?.output?.min || 0, 
+        filterOptions?.voltage?.output?.max || 100
+      ],
+      outputCurrent: [
+        filterOptions?.current?.output?.min || 0, 
+        filterOptions?.current?.output?.max || 5000
+      ],
+      switchingFrequency: [
+        filterOptions?.frequency?.switching?.min || 0, 
+        filterOptions?.frequency?.switching?.max || 2000
+      ],
+      operatingTemperature: [
+        filterOptions?.temperature?.operating?.min || -40, 
+        filterOptions?.temperature?.operating?.max || 125
+      ],
       hasInternalSwitch: null,
-    })
-    setSearchQuery('')
-  }
+      hasThermalPad: null,
+      communicationInterfaces: [],
+      pwmResolutions: [],
+    });
+    
+    // 필터 초기화 후 필터 적용
+    setTimeout(() => applyFilters(), 0);
+  }, [filterOptions, applyFilters]);
 
-  // 토글 필터
-  const toggleFilter = (filterType: keyof typeof activeFilters, value: any) => {
-    setActiveFilters(prev => {
-      const newFilters = { ...prev }
-      
-      if (Array.isArray(newFilters[filterType])) {
-        const arrayFilter = newFilters[filterType] as any[]
-        if (arrayFilter.includes(value)) {
-          // 이미 있으면 제거
-          newFilters[filterType] = arrayFilter.filter(item => item !== value) as any
-        } else {
-          // 없으면 추가
-          newFilters[filterType] = [...arrayFilter, value] as any
-        }
-      } else {
-        // Boolean 값이나 다른 타입의 필터
-        newFilters[filterType] = value as any
+  // 전압 필터 초기화
+  const resetVoltageFilters = useCallback(() => {
+    setActiveFilters(prev => ({
+      ...prev,
+      inputVoltage: [
+        filterOptions?.voltage?.input?.min || 0, 
+        filterOptions?.voltage?.input?.max || 100
+      ],
+      outputVoltage: [
+        filterOptions?.voltage?.output?.min || 0, 
+        filterOptions?.voltage?.output?.max || 100
+      ]
+    }));
+  }, [filterOptions?.voltage?.input, filterOptions?.voltage?.output]);
+
+  // 정렬 변경 핸들러
+  const handleSortChange = useCallback((field: string) => {
+    setSortOption(prev => {
+      if (prev.field === field) {
+        // 같은 필드면 방향만 전환
+        return {
+          field,
+          direction: prev.direction === 'asc' ? 'desc' : 'asc'
+        };
       }
       
-      return newFilters
-    })
-  }
+      // 다른 필드면 해당 필드로 오름차순 정렬
+      return {
+        field,
+        direction: 'asc'
+      };
+    });
+    
+    // 정렬 변경 시 필터 적용
+    setTimeout(() => applyFilters(), 0);
+  }, [applyFilters]);
 
-  const handleTabChange = (productId: string, tab: string) => {
-    setCardTabs(prev => ({
-      ...prev,
-      [productId]: tab
-    }));
-  };
+  // 검색어 변경 핸들러
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1); // 검색 시 첫 페이지로
+  }, []);
 
-  const handleGlobalTabChange = (index: number | null) => {
-    if (index !== null) {
-      const tabKeys = ["basics", "power", "performance", "physical", "frequency", "interface", "led"];
-      setActiveTab(tabKeys[index]);
+  // 검색어 변경 시 필터 적용 (즉시)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      applyFilters();
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, [searchQuery, applyFilters]);
+
+  // 페이지 변경 시 아이템 슬라이싱
+  useEffect(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    setCurrentItems(filteredProducts.slice(startIndex, endIndex));
+  }, [filteredProducts, currentPage, itemsPerPage]);
+
+  // 초기 필터 적용
+  useEffect(() => {
+    applyFilters();
+  }, [sortOption, applyFilters]);
+
+  // 상품 즐겨찾기 핸들러
+  const handleProductBookmark = useCallback((productId: number) => {
+    if (isBookmarked(productId)) {
+      removeBookmark(productId);
+      toast({
+        title: "북마크 제거",
+        description: "제품이 북마크에서 제거되었습니다.",
+        variant: "default",
+      });
+    } else {
+      const product = products.find(p => p.id === productId);
+      if (product) {
+        addBookmark({
+          id: product.id,
+          name: product.name,
+          subtitle: product.subtitle || '',
+          manufacturerName: product.manufacturers && typeof product.manufacturers === 'object' && 'name' in product.manufacturers
+            ? product.manufacturers.name
+            : '미상 제조사',
+          manufacturerId: product.manufacturer_id || 0,
+          addedAt: new Date().toISOString(),
+          imageUrl: product.images?.[0]?.url || '',
+          packageType: product.specifications?.package_type || '',
+          category: 'LED 드라이버 IC'
+        });
+        toast({
+          title: "북마크 추가",
+          description: "제품이 북마크에 추가되었습니다.",
+          variant: "default",
+        });
+      }
     }
-  };
+  }, [products, addBookmark, removeBookmark, isBookmarked, toast]);
+
+  // 페이지 변경 핸들러
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }, []);
 
   return (
     <div className="space-y-6">
-      {/* 검색 및 필터 헤더 */}
+      {/* 검색 및 필터 영역 */}
       <div className="flex flex-col sm:flex-row gap-4">
+        {/* 검색 입력창 */}
         <div className="relative flex-1">
           <Input
+            placeholder="제품명, 제조사 또는 파트 번호로 검색..." 
+            className="pl-10 h-12 bg-gray-900 border-gray-800 text-white placeholder:text-gray-500"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="제품명, 제조사, 부품번호 검색..."
-            className="bg-white border-gray-200 pl-10 h-12 text-gray-900 placeholder:text-gray-500"
+            onChange={handleSearchChange}
           />
-          <Search className="absolute left-3 top-3.5 h-5 w-5 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
           {searchQuery && (
             <button 
-              onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-3.5"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+              onClick={() => {
+                setSearchQuery('');
+                applyFilters();
+              }}
             >
-              <X className="h-5 w-5 text-gray-500 hover:text-gray-700" />
+              <X className="h-4 w-4" />
             </button>
           )}
         </div>
-        <div className="flex gap-2">
-          <Button 
-            onClick={() => setShowFilters(!showFilters)}
-            variant="outline" 
-            className={cn(
-              "gap-2 h-12 px-4",
-              showFilters && "bg-blue-50 text-blue-600 border-blue-200"
-            )}
-          >
-            <SlidersHorizontal className="h-5 w-5" />
-            <span className="hidden sm:inline">필터</span>
-            {Object.values(activeFilters).some(f => 
-              Array.isArray(f) ? f.length > 0 : f !== null
-            ) && (
-              <Badge className="ml-1 bg-blue-100 text-blue-600">
-                {(activeFilters.manufacturers.length + 
-                 activeFilters.topologies.length + 
-                 activeFilters.dimmingMethods.length + 
-                 activeFilters.packageTypes.length + 
-                 activeFilters.channels.length +
-                 (activeFilters.hasInternalSwitch !== null ? 1 : 0)
-                )}
-              </Badge>
-            )}
-          </Button>
-          <Button 
-            onClick={resetFilters}
-            variant="ghost" 
-            className="h-12 text-gray-500 hover:text-gray-700"
-          >
-            <span className="hidden sm:inline">초기화</span>
-            <X className="h-5 w-5 sm:hidden" />
-          </Button>
-        </div>
+        
+        {/* 필터 컴포넌트 */}
+        <ProductFilter 
+          filterOptions={filterOptions}
+          activeFilters={activeFilters}
+          filterCounts={filterCounts}
+          sortOption={sortOption}
+          onFilterChange={handleFilterChange}
+          onSortChange={handleSortChange}
+          onResetFilters={resetFilters}
+        />
       </div>
 
-      {/* Active filter 표시 */}
-      {Object.values(activeFilters).some(f => Array.isArray(f) ? f.length > 0 : f !== null) && (
-        <div className="flex flex-wrap gap-2">
-          {activeFilters.manufacturers.length > 0 && activeFilters.manufacturers.map(id => {
-            const manufacturer = filterOptions?.manufacturers?.find((m: any) => m.id === id);
-            return manufacturer ? (
-              <Badge key={`manufacturer-${id}`} variant="outline" className="bg-gray-50 gap-2 px-3 py-1.5 text-gray-600">
-                {manufacturer.name}
-                <button onClick={() => toggleFilter('manufacturers', id)}>
-                  <X className="h-3 w-3" />
-                </button>
-              </Badge>
-            ) : null;
-          })}
-          
-          {activeFilters.topologies.length > 0 && activeFilters.topologies.map(topology => (
-            <Badge key={`topology-${topology}`} variant="outline" className="bg-gray-50 gap-2 px-3 py-1.5 text-gray-600">
-              {topology}
-              <button onClick={() => toggleFilter('topologies', topology)}>
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          ))}
-          
-          {/* ... 기타 활성 필터들 표시 ... */}
+      {/* 필터 뱃지 (활성화된 필터 표시) */}
+      <ProductFilterBadges 
+        activeFilters={activeFilters}
+        filterOptions={filterOptions}
+        filterCounts={filterCounts}
+        onFilterChange={handleFilterChange}
+        onResetVoltageFilters={resetVoltageFilters}
+      />
+
+      {/* 검색 결과 카운트 및 필터 알림 */}
+      <div className="flex items-center justify-between">
+        <div className="text-white">
+          총 <span className="font-semibold text-blue-400">{filteredProducts.length}</span>개 제품
         </div>
-      )}
-
-      {/* 필터 패널 */}
-      {showFilters && (
-        <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-4">
-          <ScrollArea className="h-[300px] pr-4">
-            <Accordion type="multiple" className="space-y-2">
-              {/* 제조사 필터 */}
-              <AccordionItem value="manufacturers" className="border-gray-800">
-                <AccordionTrigger className="hover:no-underline py-2">제조사</AccordionTrigger>
-                <AccordionContent className="space-y-2 pl-1">
-                  {filterOptions?.manufacturers?.map((manufacturer: any) => (
-                    <div key={manufacturer.id} className="flex items-center space-x-2">
-                      <Checkbox 
-                        id={`manufacturer-${manufacturer.id}`}
-                        checked={activeFilters.manufacturers.includes(manufacturer.id)}
-                        onCheckedChange={() => toggleFilter('manufacturers', manufacturer.id)}
-                      />
-                      <Label 
-                        htmlFor={`manufacturer-${manufacturer.id}`}
-                        className="text-sm text-gray-300 cursor-pointer"
-                      >
-                        {manufacturer.name}
-                      </Label>
-                    </div>
-                  ))}
-                </AccordionContent>
-              </AccordionItem>
-
-              {/* 토폴로지 필터 */}
-              <AccordionItem value="topology" className="border-gray-800">
-                <AccordionTrigger className="hover:no-underline py-2">토폴로지</AccordionTrigger>
-                <AccordionContent className="space-y-2 pl-1">
-                  {filterOptions?.topologies?.map((topology: string) => (
-                    <div key={topology} className="flex items-center space-x-2">
-                      <Checkbox 
-                        id={`topology-${topology}`}
-                        checked={activeFilters.topologies.includes(topology)}
-                        onCheckedChange={() => toggleFilter('topologies', topology)}
-                      />
-                      <Label 
-                        htmlFor={`topology-${topology}`}
-                        className="text-sm text-gray-300 cursor-pointer"
-                      >
-                        {topology}
-                      </Label>
-                    </div>
-                  ))}
-                </AccordionContent>
-              </AccordionItem>
-
-              {/* 디밍 방식 필터 */}
-              <AccordionItem value="dimming" className="border-gray-800">
-                <AccordionTrigger className="hover:no-underline py-2">디밍 방식</AccordionTrigger>
-                <AccordionContent className="space-y-2 pl-1">
-                  {filterOptions?.dimmingMethods?.map((method: string) => (
-                    <div key={method} className="flex items-center space-x-2">
-                      <Checkbox 
-                        id={`dimming-${method}`}
-                        checked={activeFilters.dimmingMethods.includes(method)}
-                        onCheckedChange={() => toggleFilter('dimmingMethods', method)}
-                      />
-                      <Label 
-                        htmlFor={`dimming-${method}`}
-                        className="text-sm text-gray-300 cursor-pointer"
-                      >
-                        {method}
-                      </Label>
-                    </div>
-                  ))}
-                </AccordionContent>
-              </AccordionItem>
-
-              {/* 전압 필터 */}
-              <AccordionItem value="voltage" className="border-gray-800">
-                <AccordionTrigger className="hover:no-underline py-2">전압</AccordionTrigger>
-                <AccordionContent className="space-y-4 pl-1">
-                  <div className="space-y-2">
-                    <Label className="text-sm text-gray-300">
-                      입력 전압: {activeFilters.inputVoltage[0]}V - {activeFilters.inputVoltage[1]}V
-                    </Label>
-                    <Slider
-                      value={activeFilters.inputVoltage}
-                      min={filterOptions?.voltage?.input?.min || 0}
-                      max={filterOptions?.voltage?.input?.max || 100}
-                      step={1}
-                      onValueChange={(value) => {
-                        setActiveFilters(prev => ({...prev, inputVoltage: value as [number, number]}))
-                      }}
-                      className="py-2"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label className="text-sm text-gray-300">
-                      출력 전압: {activeFilters.outputVoltage[0]}V - {activeFilters.outputVoltage[1]}V
-                    </Label>
-                    <Slider
-                      value={activeFilters.outputVoltage}
-                      min={filterOptions?.voltage?.output?.min || 0}
-                      max={filterOptions?.voltage?.output?.max || 100}
-                      step={1}
-                      onValueChange={(value) => {
-                        setActiveFilters(prev => ({...prev, outputVoltage: value as [number, number]}))
-                      }}
-                      className="py-2"
-                    />
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-
-              {/* 채널 필터 */}
-              <AccordionItem value="channels" className="border-gray-800">
-                <AccordionTrigger className="hover:no-underline py-2">채널</AccordionTrigger>
-                <AccordionContent className="space-y-2 pl-1">
-                  {filterOptions?.channels?.map((channel: string) => (
-                    <div key={channel} className="flex items-center space-x-2">
-                      <Checkbox 
-                        id={`channel-${channel}`}
-                        checked={activeFilters.channels.includes(channel)}
-                        onCheckedChange={() => toggleFilter('channels', channel)}
-                      />
-                      <Label 
-                        htmlFor={`channel-${channel}`}
-                        className="text-sm text-gray-300 cursor-pointer"
-                      >
-                        {channel}
-                      </Label>
-                    </div>
-                  ))}
-                </AccordionContent>
-              </AccordionItem>
-
-              {/* 내부 스위치 필터 */}
-              <AccordionItem value="internalSwitch" className="border-gray-800">
-                <AccordionTrigger className="hover:no-underline py-2">내부 스위치</AccordionTrigger>
-                <AccordionContent className="space-y-2 pl-1">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="internal-switch-yes"
-                      checked={activeFilters.hasInternalSwitch === true}
-                      onCheckedChange={() => toggleFilter(
-                        'hasInternalSwitch', 
-                        activeFilters.hasInternalSwitch === true ? null : true
-                      )}
-                    />
-                    <Label 
-                      htmlFor="internal-switch-yes"
-                      className="text-sm text-gray-300 cursor-pointer"
-                    >
-                      내장
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="internal-switch-no"
-                      checked={activeFilters.hasInternalSwitch === false}
-                      onCheckedChange={() => toggleFilter(
-                        'hasInternalSwitch', 
-                        activeFilters.hasInternalSwitch === false ? null : false
-                      )}
-                    />
-                    <Label 
-                      htmlFor="internal-switch-no"
-                      className="text-sm text-gray-300 cursor-pointer"
-                    >
-                      외장
-                    </Label>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </ScrollArea>
-        </div>
-      )}
-
-      {/* 제품 목록 및 페이지네이션 */}
-      <div>
-        <p className="text-gray-600 mb-4">총 {filteredProducts.length}개 제품</p>
-        
-        <div className="w-full">
-          <div className="flex items-center gap-2 mb-4">
-            <ExpandableTabs
-              tabs={tabs}
-              className="flex-1"
-              activeColor="text-blue-600"
-              onChange={handleGlobalTabChange}
-            />
           </div>
           
-          <div className="grid gap-6">
+      {/* 필터링 적용 버튼 */}
+      {filterCounts.total > 0 && (
+        <div className="flex justify-end mt-2">
+          <Button
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={applyFilters}
+          >
+            필터링 적용하기
+          </Button>
+        </div>
+      )}
+      
+      {/* 필터링 알림 */}
+      {filterNotice.show && (
+        <div className="bg-blue-500/10 text-blue-400 border border-blue-500/20 p-2 rounded-md text-sm">
+          필터 적용 결과: {filterNotice.count}개 제품
+        </div>
+      )}
+      
+      {/* 제품 목록 */}
+      <div className="space-y-6">
             {currentItems.length > 0 ? (
-              currentItems.map((product) => (
+          currentItems.map(product => (
                 <ProductCard 
                   key={product.id} 
                   product={product} 
-                  activeTab={activeTab}
-                  onTabChange={handleGlobalTabChange}
                 />
               ))
             ) : (
-              <div className="text-center py-8 text-gray-500 border border-gray-200 rounded-lg bg-white">
-                검색 조건에 맞는 제품이 없습니다
-              </div>
+          <div className="flex flex-col items-center justify-center py-16 text-gray-400 text-center">
+            <Search className="w-12 h-12 mb-4 text-gray-600" />
+            <h3 className="text-xl font-medium mb-2">검색 결과가 없습니다</h3>
+            <p className="max-w-md text-gray-500">
+              다른 검색어를 입력하거나 필터 조건을 변경해보세요.
+            </p>
+            {filterCounts.total > 0 && (
+              <Button
+                variant="outline"
+                className="mt-4 border-gray-700 text-gray-300 hover:text-white"
+                onClick={resetFilters}
+              >
+                필터 초기화
+              </Button>
             )}
           </div>
+        )}
         </div>
         
         {/* 페이지네이션 */}
         {totalPages > 1 && (
-          <Pagination className="mt-4">
+        <Pagination className="mt-8">
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious 
@@ -682,47 +778,53 @@ export default function ProductList({ products, filterOptions }: ProductListProp
                     e.preventDefault();
                     if (currentPage > 1) handlePageChange(currentPage - 1);
                   }}
-                  className={currentPage === 1 ? "pointer-events-none opacity-50" : "text-gray-600 hover:text-gray-900"}
+                  className={cn(
+                  currentPage === 1 && "pointer-events-none opacity-50"
+                  )}
                 />
               </PaginationItem>
               
-              {Array.from({ length: totalPages }).map((_, i) => {
-                const page = i + 1;
-                if (
-                  page === 1 || 
-                  page === totalPages || 
-                  (page >= currentPage - 1 && page <= currentPage + 1)
-                ) {
+            {/* 페이지 링크 */}
+            {Array.from({ length: Math.min(5, totalPages) }).map((_, index) => {
+              // 표시할 페이지 번호를 계산 (현재 페이지 기준으로 -2 ~ +2 범위로)
+              let pageNum: number;
+              
+              if (totalPages <= 5) {
+                // 총 페이지가 5개 이하면 순차적으로 표시
+                pageNum = index + 1;
+              } else if (currentPage <= 3) {
+                // 앞부분이면 1~5까지 표시
+                pageNum = index + 1;
+              } else if (currentPage >= totalPages - 2) {
+                // 뒷부분이면 마지막 5개 표시
+                pageNum = totalPages - 4 + index;
+              } else {
+                // 중간이면 현재 페이지 기준 +-2 표시
+                pageNum = currentPage - 2 + index;
+              }
+              
                   return (
-                    <PaginationItem key={page}>
+                <PaginationItem key={pageNum}>
                       <PaginationLink 
                         href="#" 
                         onClick={(e) => {
                           e.preventDefault();
-                          handlePageChange(page);
+                      handlePageChange(pageNum);
                         }}
-                        isActive={page === currentPage}
-                        className="text-gray-600 hover:text-gray-900 data-[active=true]:bg-blue-50 data-[active=true]:text-blue-600"
+                    isActive={currentPage === pageNum}
                       >
-                        {page}
+                    {pageNum}
                       </PaginationLink>
                     </PaginationItem>
                   );
-                }
-                
-                if (
-                  (page === 2 && currentPage > 3) || 
-                  (page === totalPages - 1 && currentPage < totalPages - 2)
-                ) {
-                  return (
-                    <PaginationItem key={`ellipsis-${page}`}>
-                      <PaginationEllipsis className="text-gray-500" />
+            })}
+            
+            {/* 이후 페이지가 많이 있으면 생략 표시 */}
+            {currentPage < totalPages - 2 && totalPages > 5 && (
+              <PaginationItem>
+                <PaginationEllipsis />
                     </PaginationItem>
-                  );
-                }
-                
-                return null;
-              })}
+            )}
               
               <PaginationItem>
                 <PaginationNext 
@@ -731,13 +833,14 @@ export default function ProductList({ products, filterOptions }: ProductListProp
                     e.preventDefault();
                     if (currentPage < totalPages) handlePageChange(currentPage + 1);
                   }}
-                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : "text-gray-600 hover:text-gray-900"}
+                  className={cn(
+                  currentPage === totalPages && "pointer-events-none opacity-50"
+                  )}
                 />
               </PaginationItem>
             </PaginationContent>
           </Pagination>
         )}
-      </div>
     </div>
   )
 } 

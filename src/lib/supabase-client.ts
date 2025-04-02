@@ -207,12 +207,7 @@ export async function getAllProducts() {
         part_number,
         description,
         manufacturer_id,
-        manufacturers (name),
-        category,
-        applications,
-        parameters,
-        datasheet_url,
-        stock_status
+        manufacturers (name),       
       `)
       .order('id');
 
@@ -237,7 +232,6 @@ export async function getAllProducts() {
             manufacturer_id: product.manufacturer_id,
             manufacturer_name: product.manufacturers?.name || "Unknown",
             manufacturer: product.manufacturers?.name || "Unknown",
-            category: product.category || "",
             applications: product.applications || [],
             parameters: product.parameters || {},
             image: image ? image.url : null,

@@ -58,11 +58,6 @@ export default async function ProductDetailPage({
   if (!product) {
     notFound();
   }
-
-  // 관련 제품 - 같은 카테고리의 다른 제품
-  const relatedProducts = allProducts
-    .filter(p => p.category === product.category && p.id !== product.id)
-    .slice(0, 4);
     
   // 제품 파라미터 그룹화
   const paramGroups = product.parameters ? Object.entries(product.parameters)
@@ -101,13 +96,7 @@ export default async function ProductDetailPage({
             )}
           </div>
           
-          <div className="mt-4 flex items-center justify-between">
-            <div className="flex items-center">
-              <Badge variant="outline" className="bg-blue-500/10 text-blue-300 border-blue-500/20">
-                {product.category}
-              </Badge>
-            </div>
-            
+          <div className="mt-4 flex items-center justify-between">            
             {product.stock_status && (
               <Badge className={
                 product.stock_status === "재고 있음" 
@@ -125,10 +114,6 @@ export default async function ProductDetailPage({
           <div>
             <div className="flex items-center text-sm text-gray-400 mb-2">
               <Link href="/products/list" className="hover:text-blue-400">제품</Link>
-              <ChevronRight className="h-4 w-4 mx-1" />
-              <Link href={`/products/list?category=${product.category}`} className="hover:text-blue-400">
-                {product.category}
-              </Link>
               <ChevronRight className="h-4 w-4 mx-1" />
               <span className="text-gray-500 truncate">{product.name}</span>
             </div>
@@ -310,63 +295,7 @@ export default async function ProductDetailPage({
           </Card>
         </TabsContent>
         
-        {/* 관련 제품 탭 내용 */}
-        <TabsContent value="related" className="mt-6">
-          <Card className="bg-gray-900 border-gray-800">
-            <CardHeader>
-              <CardTitle>관련 제품</CardTitle>
-              <CardDescription>
-                {product.category} 카테고리의 유사 제품
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {relatedProducts.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                  {relatedProducts.map((relatedProduct) => (
-                    <Link key={relatedProduct.id} href={`/products/detail/${relatedProduct.id}`}>
-                      <div className="border border-gray-800 rounded-lg p-4 hover:bg-gray-800/50 transition-colors group">
-                        <div className="relative aspect-square rounded overflow-hidden bg-gray-800 mb-3">
-                          {relatedProduct.image ? (
-                            <Image
-                              src={relatedProduct.image}
-                              alt={relatedProduct.name}
-                              fill
-                              className="object-contain p-2"
-                            />
-                          ) : (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <FileText className="h-8 w-8 text-gray-600" />
-                            </div>
-                          )}
-                        </div>
-                        
-                        <h3 className="font-medium text-gray-200 group-hover:text-blue-400 truncate">
-                          {relatedProduct.name}
-                        </h3>
-                        
-                        <p className="text-sm text-gray-400 mt-1">
-                          {relatedProduct.manufacturer_name}
-                        </p>
-                        
-                        <div className="mt-2 flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs bg-gray-800 text-gray-300 border-gray-700">
-                            {relatedProduct.category}
-                          </Badge>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex items-center justify-center p-8 border border-dashed border-gray-800 rounded-lg">
-                  <div className="text-center">
-                    <p className="text-gray-400">관련 제품이 없습니다.</p>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+      
       </Tabs>
       
       {/* 비교 다이얼로그 추가 */}
