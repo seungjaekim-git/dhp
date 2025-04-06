@@ -2,9 +2,7 @@
 const nextConfig = {
   output: "export",
   ssr: false,
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+
   // basePath: '/renewal',
   transpilePackages: ['@radix-ui'],
   webpack: (config) => {

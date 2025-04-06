@@ -148,6 +148,19 @@ export async function getManufacturerBySlug(slug: string) {
   return data;
 }
 
+
+export async function getManufacturerById(id: number) {
+  const { data, error } = await supabase
+    .from('manufacturers')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  return data;
+}
+
+
+
 // Function to get products by manufacturer ID
 export async function getProductsByManufacturerId(manufacturerId: number) {
   const { data, error } = await supabase
@@ -207,7 +220,11 @@ export async function getAllProducts() {
         part_number,
         description,
         manufacturer_id,
-        manufacturers (name),       
+        specifications,
+        storage_type_id,
+        product_applications(application_id, applications(id, name, description)),
+        manufacturers(id, name, website_url),
+        images(id, url, description)
       `)
       .order('id');
 
@@ -218,28 +235,28 @@ export async function getAllProducts() {
 
     // If we found products, get the first image for each product
     if (data && data.length > 0) {
-      const productsWithImages = await Promise.all(
-        data.map(async (product) => {
-          const image = await getFirstProductImage(product.id);
-          
-          // 필요한 형식으로 데이터 변환
-          return {
-            id: product.id,
-            name: product.name,
-            part_number: product.part_number,
-            partNumber: product.part_number,
-            description: product.description || "",
-            manufacturer_id: product.manufacturer_id,
-            manufacturer_name: product.manufacturers?.name || "Unknown",
-            manufacturer: product.manufacturers?.name || "Unknown",
-            applications: product.applications || [],
-            parameters: product.parameters || {},
-            image: image ? image.url : null,
-            datasheet_url: product.datasheet_url,
-            stock_status: product.stock_status
-          };
-        })
-      );
+      const productsWithImages = data.map((product) => {
+        const firstImage = product.images && product.images.length > 0 ? product.images[0] : null;
+        
+        // Extract applications from the nested structure
+        const applications = product.product_applications?.map(pa => pa.applications) || [];
+        
+        // 필요한 형식으로 데이터 변환
+        return {
+          id: product.id,
+          name: product.name,
+          part_number: product.part_number,
+          partNumber: product.part_number,
+          description: product.description || "",
+          manufacturer_id: product.manufacturer_id,
+          manufacturer_name: product.manufacturers ? product.manufacturers.name : "Unknown",
+          manufacturer: product.manufacturers ? product.manufacturers.name : "Unknown",
+          applications: applications,
+          parameters: product.specifications || {},
+          image: firstImage ? firstImage.url : null,
+          storage_type_id: product.storage_type_id
+        };
+      });
       return productsWithImages;
     }
 
@@ -417,6 +434,37 @@ export async function getLEDDriverICs(filters?: any) {
   }
 }
 
+// LED Driver IC 타입 정의
+interface LEDDriverICDetail {
+  id: number;
+  name: string;
+  subtitle?: string;
+  partNumber: string;
+  description: string;
+  manufacturer_id: number;
+  manufacturer_name: string;
+  manufacturer: {
+    id: number;
+    name: string;
+    website_url?: string;
+  };
+  image: string | null;
+  images: Array<{
+    id: number;
+    url: string;
+    title?: string;
+    description?: string;
+  }>;
+  applications: Array<{
+    id: number;
+    name: string;
+    description?: string;
+  }>;
+  parameters: Record<string, any>;
+  datasheet_url: string | null;
+  stock_status: string;
+}
+
 // LED Driver IC 필터 옵션 가져오기
 export async function getLEDDriverICFilterOptions() {
   try {
@@ -555,5 +603,137 @@ export async function getLEDDriverICFilterOptions() {
   } catch (error) {
     console.error('Error in getLEDDriverICFilterOptions:', error);
     return {};
+  }
+}
+
+// 단일 LED Driver IC 제품 정보 가져오기
+export async function getLEDDriverICById(id: string): Promise<LEDDriverICDetail | null> {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select(`
+        id,
+        name,
+        subtitle,
+        part_number,
+        description,
+        specifications,
+        manufacturer_id,
+        manufacturers (id, name, website_url),
+        images (id, url, title, description),
+        product_categories (category_id, categories (id, name, description)),
+        product_applications (application_id, applications (id, name, description)),
+        product_certifications (certification_id, certifications (id, name, description)),
+        product_documents (document_id, documents (id, title, url, type_id))
+      `)
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error('Error fetching LED Driver IC:', error);
+      return null;
+    }
+
+    // 제품 이미지 처리
+    const images = data.images || [];
+    const primaryImage = images.length > 0 && typeof images[0]?.url === 'string' ? 
+      images[0].url : null;
+
+    // 제품 응용분야 처리 - 필요한 형식으로 변환
+    const applications = (data.product_applications || []).map(pa => {
+      const app = pa.applications;
+      // 타입 확인 및 안전한 변환
+      if (app && typeof app === 'object') {
+        return {
+          id: typeof app.id === 'number' ? app.id : Number(app.id || 0),
+          name: typeof app.name === 'string' ? app.name : String(app.name || ''),
+          description: app.description ? String(app.description) : undefined
+        };
+      }
+      // 기본값 반환
+      return {
+        id: 0,
+        name: 'Unknown',
+        description: undefined
+      };
+    });
+
+    // 제품 문서 처리
+    const datasheets = data.product_documents?.filter(pd => {
+      // 타입 안전하게 처리
+      const doc = pd.documents;
+      return doc && typeof doc === 'object' && 'type_id' in doc && doc.type_id === 1;
+    }).map(pd => pd.documents) || [];
+
+    // 재고 상태 결정 - 실제 로직은 비즈니스 요구에 맞게 조정
+    const stockStatus = data.specifications?.stock_status || "재고 있음";
+
+    // 제조사 정보 처리
+    const manufacturerData = data.manufacturers || {};
+    const manufacturer = {
+      id: typeof manufacturerData.id === 'number' ? 
+        manufacturerData.id : Number(manufacturerData.id),
+      name: typeof manufacturerData.name === 'string' ? 
+        manufacturerData.name : String(manufacturerData.name),
+      website_url: manufacturerData.website_url || undefined
+    };
+
+    // 데이터시트 URL 처리
+    let datasheetUrl: string | null = null;
+    if (datasheets.length > 0 && 
+        typeof datasheets[0] === 'object' && 
+        'url' in datasheets[0] && 
+        typeof datasheets[0].url === 'string') {
+      datasheetUrl = datasheets[0].url;
+    }
+
+    // 최종 반환 객체 생성
+    const result: LEDDriverICDetail = {
+      id: typeof data.id === 'number' ? data.id : Number(data.id),
+      name: typeof data.name === 'string' ? data.name : String(data.name),
+      subtitle: data.subtitle ? String(data.subtitle) : undefined,
+      partNumber: data.part_number ? String(data.part_number) : "",
+      description: data.description ? String(data.description) : "",
+      manufacturer_id: typeof data.manufacturer_id === 'number' ? 
+        data.manufacturer_id : Number(data.manufacturer_id),
+      manufacturer_name: manufacturer.name,
+      manufacturer: manufacturer,
+      image: primaryImage,
+      images: images.map(img => ({
+        id: typeof img.id === 'number' ? img.id : Number(img.id),
+        url: typeof img.url === 'string' ? img.url : String(img.url),
+        title: img.title ? String(img.title) : undefined,
+        description: img.description ? String(img.description) : undefined
+      })),
+      applications: applications,
+      parameters: data.specifications || {},
+      datasheet_url: datasheetUrl,
+      stock_status: typeof stockStatus === 'string' ? stockStatus : String(stockStatus)
+    };
+
+    return result;
+  } catch (error) {
+    console.error('Error in getLEDDriverICById:', error);
+    return null;
+  }
+}
+
+// 모든 LED Driver IC 제품의 ID 목록만 가져오기
+export async function getAllLEDDriverICIds() {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('id')
+      .order('id');
+
+    if (error) {
+      console.error('Error fetching LED Driver IC IDs:', error);
+      return [];
+    }
+
+    return data.map(product => product.id.toString());
+  } catch (error) {
+    console.error('Error in getAllLEDDriverICIds:', error);
+    return [];
   }
 }
