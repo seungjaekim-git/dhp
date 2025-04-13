@@ -1,5 +1,5 @@
 import ProductsLayout from "./ProductsLayout";
-import { Package, Building, Zap, Cpu, Bolt, Car, Factory, Smartphone } from "lucide-react";
+import { Package, Building, Zap, Cpu, Bolt, Car, Factory, Smartphone, Lightbulb, CircuitBoard, Cable, Plug, Thermometer } from "lucide-react";
 import { getAllManufacturers } from "@/lib/supabase-client";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,45 +13,74 @@ export default async function ProductsPage() {
   const productCategories = [
     { 
       title: "LED 드라이버 IC", 
-      description: "고효율 LED 컨트롤러 및 드라이버 솔루션", 
-      icon: "💡", 
+      description: "고효율 LED 컨트롤러 및 드라이버 솔루션으로, 다양한 LED 조명 애플리케이션에 최적화된 성능을 제공합니다. 정밀한 전류 제어와 높은 효율성을 통해 에너지 소비를 최소화합니다.", 
+      icon: <Lightbulb className="w-6 h-6" />, 
       color: "from-blue-500 to-cyan-400",
-      href: "/products/list?category=led-drivers" 
+      href: "/products/list?category=led-drivers",
+      subcategories: [
+        { name: "일반 조명용 LED 드라이버" },
+        { name: "디스플레이 백라이트 드라이버" },
+        { name: "자동차 LED 드라이버" },
+        { name: "무선 조광 LED 드라이버" },
+        { name: "RGB LED 드라이버" }
+      ]
     },
     { 
-      title: "전력 관리 IC", 
-      description: "에너지 효율적인 전력 관리 솔루션", 
-      icon: "⚡", 
+      title: "다이오드", 
+      description: "정류, 보호 및 신호 처리용 다이오드 제품으로, 회로 보호와 신호 처리에 필수적인 반도체 소자입니다. 다양한 패키지와 특성을 갖춘 제품으로 다양한 애플리케이션에 대응합니다.", 
+      icon: <CircuitBoard className="w-6 h-6" />, 
       color: "from-amber-500 to-orange-400",
-      href: "/products/list?category=power-management" 
+      href: "/products/list?category=diodes",
+      subcategories: [
+        { name: "정류 다이오드" },
+        { name: "제너 다이오드" },
+        { name: "쇼트키 다이오드" },
+        { name: "TVS 다이오드" },
+        { name: "LED 다이오드" }
+      ]
     },
     { 
-      title: "모션 센서", 
-      description: "고성능 모션 감지 및 추적 솔루션", 
-      icon: "🔄", 
+      title: "케이블", 
+      description: "다양한 용도에 맞는 고품질 케이블 제품으로, 신호 전송과 전력 공급에 최적화된 성능을 제공합니다. 산업용, 자동차, 통신 등 다양한 환경에서 안정적인 연결을 보장합니다.", 
+      icon: <Cable className="w-6 h-6" />, 
       color: "from-green-500 to-emerald-400",
-      href: "/products/list?category=motion-sensors" 
+      disabled: true,
+      comingSoon: true,
+      subcategories: [
+        { name: "산업용 케이블" },
+        { name: "자동차 케이블" },
+        { name: "통신 케이블" },
+        { name: "전원 케이블" }
+      ]
     },
     { 
-      title: "마이크로컨트롤러", 
-      description: "다양한 응용 분야를 위한 고성능 MCU", 
-      icon: "🎮", 
+      title: "커넥터", 
+      description: "신뢰성 높은 전기적 연결을 위한 커넥터로, 다양한 환경에서 안정적인 신호 및 전력 전송을 보장합니다. 산업용, 자동차, 소비자 가전 등 다양한 분야에 최적화된 제품을 제공합니다.", 
+      icon: <Plug className="w-6 h-6" />, 
       color: "from-purple-500 to-indigo-400",
-      href: "/products/list?category=microcontrollers" 
+      disabled: true,
+      comingSoon: true,
+      subcategories: [
+        { name: "보드 간 커넥터" },
+        { name: "I/O 커넥터" },
+        { name: "전원 커넥터" },
+        { name: "RF 커넥터" }
+      ]
     },
     { 
-      title: "통신 IC", 
-      description: "유/무선 통신을 위한 반도체 솔루션", 
-      icon: "📡", 
+      title: "센서", 
+      description: "온도, 습도, 압력 등 다양한 센서 제품으로, 환경 모니터링 및 제어 시스템에 필수적인 요소입니다. 고정밀 측정과 빠른 응답 시간을 통해 정확한 데이터 수집을 지원합니다.", 
+      icon: <Thermometer className="w-6 h-6" />, 
       color: "from-red-500 to-pink-400",
-      href: "/products/list?category=communication-ics" 
-    },
-    { 
-      title: "센서 솔루션", 
-      description: "온도, 습도, 압력 등 다양한 센서 제품", 
-      icon: "🌡️", 
-      color: "from-teal-500 to-green-400",
-      href: "/products/list?category=sensors" 
+      disabled: true,
+      comingSoon: true,
+      subcategories: [
+        { name: "온도 센서" },
+        { name: "습도 센서" },
+        { name: "압력 센서" },
+        { name: "모션 센서" },
+        { name: "가스 센서" }
+      ]
     }
   ];
 
@@ -93,7 +122,7 @@ export default async function ProductsPage() {
         { label: "홈", href: "/" },
         { label: "제품 소개" }
       ]}
-      description="대한플러스전자에서 제공하는 다양한 제품과 솔루션을 살펴보세요."
+      description="대한플러스전자에서 제공하는 LED 드라이버 IC, 다이오드 등 다양한 전자부품 제품을 살펴보세요."
       badges={[
         {
           text: "LED 드라이버 IC",
@@ -102,36 +131,47 @@ export default async function ProductsPage() {
           hoverColor: "hover:bg-blue-500/30" 
         },
         { 
-          text: "센서 모듈", 
-          bgColor: "bg-green-500/20", 
-          textColor: "text-green-300", 
-          hoverColor: "hover:bg-green-500/30" 
-        },
-        { 
-          text: "전력 관리 IC", 
+          text: "다이오드", 
           bgColor: "bg-amber-500/20", 
           textColor: "text-amber-300", 
           hoverColor: "hover:bg-amber-500/30" 
+        },
+        { 
+          text: "준비중", 
+          bgColor: "bg-gray-500/20", 
+          textColor: "text-gray-300", 
+          hoverColor: "hover:bg-gray-500/30" 
         }
       ]}
     >
       <div className="space-y-16">
         {/* 제품 카테고리 섹션 */}
-        <div>
-          <div className="flex items-center gap-3 mb-6">
-            <h2 className="text-2xl font-bold text-white">제품 카테고리</h2>
-            <div className="h-px flex-1 bg-gradient-to-r from-gray-700 to-transparent"></div>
-          </div>
-          <p className="text-gray-400 mb-8">다양한 전자부품 제품군을 살펴보고 귀사에 적합한 솔루션을 찾아보세요.</p>
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-3xl -z-10"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -z-10"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl -z-10"></div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {productCategories.map((category, index) => (
-              <ProductCategoryCard 
-                key={index}
-                category={category}
-                index={index}
-              />
-            ))}
+          <div className="p-8 rounded-3xl">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="h-10 w-1 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
+              <h2 className="text-2xl font-bold text-white">제품 카테고리</h2>
+              <div className="h-px flex-1 bg-gradient-to-r from-gray-700 to-transparent"></div>
+            </div>
+            
+            <p className="text-gray-300 mb-8 max-w-3xl">
+              LED 드라이버 IC와 다이오드 제품을 살펴보고 귀사에 적합한 솔루션을 찾아보세요. 
+              케이블, 커넥터, 센서 제품은 현재 준비 중이며, 곧 서비스가 시작될 예정입니다.
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+              {productCategories.map((category, index) => (
+                <ProductCategoryCard 
+                  key={index}
+                  category={category}
+                  index={index}
+                />
+              ))}
+            </div>
           </div>
         </div>
         

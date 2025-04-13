@@ -284,7 +284,18 @@ export async function getLEDDriverICs(filters?: any) {
         images (id, title, url, description),
         product_categories (category_id, categories (id, name, description)),
         product_applications (application_id, applications (id, name, description)),
-        product_certifications (certification_id, certifications (id, name, description))
+        product_certifications (certification_id, certifications (id, name, description)),
+        product_features (
+          feature_id,
+          description,
+          features (
+            id,
+            name,
+            description,
+            description_jsonb
+          )
+        ),
+        product_documents (document_id, documents (id, title, url, type_id))
       `)
       .order('name');
 
@@ -410,6 +421,12 @@ export async function getLEDDriverICs(filters?: any) {
         if (filters.current_accuracy.between_channels[1] < 100) {
           query = query.lte(`specifications->current_accuracy->between_channels`, filters.current_accuracy.between_channels[1]);
         }
+      }
+
+      // 피처 기반 필터링 (product_features)
+      if (filters.features && filters.features.length > 0) {
+        const featureIdsStr = filters.features.join(',');
+        query = query.filter('product_features.feature_id', 'in', `(${featureIdsStr})`);
       }
     }
 
@@ -576,10 +593,17 @@ export async function getLEDDriverICFilterOptions() {
     minOperatingTemp = minOperatingTemp === Infinity ? -40 : minOperatingTemp;
     minSwitchingFreq = minSwitchingFreq === Infinity ? 0 : minSwitchingFreq;
     
+    // 제품 특징(Features) 목록 가져오기
+    const { data: features } = await supabase
+      .from('features')
+      .select('id, name, description')
+      .order('name');
+
     // 필터 옵션 반환
     return {
       manufacturers: manufacturers?.map(m => ({ id: m.id, name: m.name })) || [],
       categories: categories?.map(c => ({ id: c.id, name: c.name })) || [],
+      features: features?.map(f => ({ id: f.id, name: f.name, description: f.description })) || [],
       topologies: Array.from(topologies),
       dimmingMethods: Array.from(dimmingMethods),
       packageTypes: Array.from(packageTypes),
