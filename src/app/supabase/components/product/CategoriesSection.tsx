@@ -4,9 +4,9 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
-import { X, Plus } from "lucide-react";
+import { X, Plus, Layers, FileText } from "lucide-react";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { UseFormReturn } from "react-hook-form";
 import { FormValues, Category, Application, Certification, Feature } from "../../types/product";
@@ -33,27 +33,29 @@ export default function CategoriesSection({
   addApplication
 }: CategoriesSectionProps) {
   const [featureSearchTerm, setFeatureSearchTerm] = useState("");
+  const [filteredCategories, setFilteredCategories] = useState(categories);
   
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>분류 및 특성</CardTitle>
+    <Card className="border border-gray-700 rounded-lg overflow-hidden bg-gray-800/50 shadow-md hover:shadow-lg transition-all">
+      <CardHeader className="bg-gray-900/70 border-b border-gray-700">
+        <CardTitle className="text-xl font-semibold flex items-center gap-2 text-blue-300">
+          <Layers className="h-5 w-5" />
+          분류 및 특성
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-8 pt-6 text-white">
         <FormField
           control={form.control}
           name="categories"
-          render={({ field }) => {
-            const [filteredCategories, setFilteredCategories] = useState(categories);
-            return (
-            <FormItem>
-              <FormLabel>카테고리</FormLabel>
+          render={({ field }) => (
+            <FormItem className="space-y-4">
+              <FormLabel className="text-white font-medium">카테고리</FormLabel>
               <FormControl>
                 <div className="flex flex-wrap gap-2">
                   {field.value?.map((categoryId: string) => {
                     const category = categories.find(c => c.id.toString() === categoryId);
                     return category ? (
-                      <Badge key={categoryId} variant="secondary" className="flex items-center gap-1">
+                      <Badge key={categoryId} variant="secondary" className="flex items-center gap-1 bg-blue-900/30 border border-blue-700/50 text-blue-100 hover:bg-blue-800/30">
                         {category.name}
                         <Button
                           variant="ghost"
@@ -70,19 +72,19 @@ export default function CategoriesSection({
                   })}
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="h-8">
-                        <Plus className="h-4 w-4" /> 카테고리 선택
+                      <Button variant="outline" size="sm" className="h-8 border-gray-700 bg-gray-800 hover:bg-gray-700 hover:text-white">
+                        <Plus className="h-4 w-4 mr-1" /> 카테고리 선택
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-[400px] max-h-[600px] overflow-y-auto">
+                    <DialogContent className="max-w-[400px] max-h-[600px] overflow-y-auto border-gray-700 bg-gray-800">
                       <DialogHeader>
-                        <DialogTitle>카테고리 선택</DialogTitle>
+                        <DialogTitle className="text-blue-300">카테고리 선택</DialogTitle>
                       </DialogHeader>
                       <div className="py-4">
                         <Input
                           type="search"
                           placeholder="카테고리 검색..."
-                          className="mb-4"
+                          className="mb-4 bg-gray-900 border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                           onChange={(e) => {
                             const searchInput = e.target.value.toLowerCase();
                             setFilteredCategories(
@@ -92,13 +94,14 @@ export default function CategoriesSection({
                             );
                           }}
                         />
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                           {filteredCategories.map((category) => (
-                            <div key={category.id} className="flex items-center gap-2">
+                            <div key={category.id} className="flex items-center gap-2 text-gray-300">
                               <input
                                 type="checkbox"
                                 id={`category-${category.id}`}
                                 checked={field.value?.includes(category.id.toString())}
+                                className="rounded text-blue-500 bg-gray-700 border-gray-600 focus:ring-blue-600"
                                 onChange={(e) => {
                                   const categoryId = category.id.toString();
                                   if (e.target.checked) {
@@ -114,7 +117,9 @@ export default function CategoriesSection({
                         </div>
                       </div>
                       <DialogFooter>
-                        <Button type="button" variant="secondary" onClick={() => field.onChange([])}>
+                        <Button type="button" variant="secondary" 
+                          className="bg-gray-700 hover:bg-gray-600 text-gray-200"
+                          onClick={() => field.onChange([])}>
                           초기화
                         </Button>
                       </DialogFooter>
@@ -122,16 +127,17 @@ export default function CategoriesSection({
                   </Dialog>
                 </div>
               </FormControl>
+              <FormMessage className="text-red-400" />
             </FormItem>
-          )}}
+          )}
         />
 
         <FormField
           control={form.control}
           name="applications"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>응용 분야</FormLabel>
+            <FormItem className="space-y-4">
+              <FormLabel className="text-white font-medium">응용 분야</FormLabel>
               <FormControl>
                 <div className="space-y-4">
                   <div className="flex flex-wrap gap-2">
@@ -142,7 +148,7 @@ export default function CategoriesSection({
                           key={appId}
                           variant="outline"
                           size="sm"
-                          className="h-8 flex items-center gap-1"
+                          className="h-8 flex items-center gap-1 bg-blue-900/30 border border-blue-700/50 text-blue-100 hover:bg-blue-800/40"
                           onClick={() => {
                             const newValue = field.value.filter((id: string) => id !== appId);
                             field.onChange(newValue);
@@ -158,21 +164,22 @@ export default function CategoriesSection({
                   <div className="space-y-2">
                     <Textarea 
                       placeholder="name&#10;응용분야1&#10;응용분야2"
-                      className="min-h-[100px]"
+                      className="min-h-[100px] bg-gray-900 border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                       id="applications-textarea"
                     />
-                    <div className="mt-2 mb-3 text-sm text-gray-500">
+                    <div className="mt-2 mb-3 text-sm text-gray-300">
                       <p>각 줄에 하나의 응용분야 이름을 입력하세요</p>
-                      <p>첫 줄에 <code>name</code> 헤더를 포함할 수 있습니다</p>
+                      <p>첫 줄에 <code className="bg-gray-700 px-1 rounded">name</code> 헤더를 포함할 수 있습니다</p>
                     </div>
-                    <div className="border rounded p-3 mb-3 max-h-[150px] overflow-y-auto">
-                      <p className="text-sm font-medium mb-2">입력 미리보기:</p>
-                      <div id="applications-preview" className="text-sm">
+                    <div className="border border-gray-700 bg-gray-900/50 rounded-md p-4 mb-3 max-h-[150px] overflow-y-auto">
+                      <p className="text-sm font-medium mb-2 text-blue-300">입력 미리보기:</p>
+                      <div id="applications-preview" className="text-sm text-gray-300">
                         아직 입력된 내용이 없습니다
                       </div>
                     </div>
                     <Button
                       type="button"
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
                       onClick={async () => {
                         const textareaElement = document.getElementById('applications-textarea') as HTMLTextAreaElement;
                         const previewElement = document.getElementById('applications-preview');
@@ -272,11 +279,12 @@ export default function CategoriesSection({
                         }
                       }}
                     >
-                      입력하기
+                      <FileText className="h-4 w-4 mr-1" /> 분석 및 적용
                     </Button>
                   </div>
                 </div>
               </FormControl>
+              <FormMessage className="text-red-400" />
             </FormItem>
           )}
         />
@@ -286,7 +294,7 @@ export default function CategoriesSection({
           name="certifications"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>인증</FormLabel>
+              <FormLabel className="text-white font-medium">인증</FormLabel>
               <FormControl>
                 <div className="flex flex-wrap gap-2">
                   {field.value?.map((certId: string) => {
@@ -365,7 +373,7 @@ export default function CategoriesSection({
           name="features"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>특징</FormLabel>
+              <FormLabel className="text-white font-medium">특징</FormLabel>
               <FormControl>
                 <div className="space-y-4">
                   <div className="flex flex-wrap gap-2">
@@ -395,7 +403,7 @@ export default function CategoriesSection({
                       className="min-h-[100px]"
                       id="features-textarea"
                     />
-                    <div className="mt-2 mb-3 text-sm text-gray-500">
+                    <div className="mt-2 mb-3 text-sm text-gray-300">
                       <p>CSV 형식으로 입력: <code>이름,설명</code> (각 줄에 하나씩)</p>
                       <p>첫 줄에 <code>name,description</code> 헤더를 포함할 수 있습니다</p>
                       <p>설명은 제품-특징 관계에 대한 설명입니다 (제품 저장 시 적용됩니다)</p>

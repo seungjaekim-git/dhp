@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { supabase } from '@/lib/supabase-client';
+import { toast } from 'sonner';
 import { 
   INITIAL_FORM_VALUES, 
   FormValues, 
@@ -25,6 +26,7 @@ export function useProductForm() {
   const [filteredFeatures, setFilteredFeatures] = useState<Feature[]>([]);
   const [loading, setLoading] = useState(false);
   const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([]);
+  const [productForms, setProductForms] = useState<FormValues[]>([INITIAL_FORM_VALUES]);
 
   const form = useForm<FormValues>({
     defaultValues: INITIAL_FORM_VALUES
@@ -98,8 +100,8 @@ export function useProductForm() {
     setApplications([...applications, newApp]);
   };
 
-  const onSubmit = async (data: FormValues) => {
-    setLoading(true);
+  // 단일 제품 저장 함수 (여러 제품을 병렬로 처리하기 위해 분리)
+  const saveProduct = async (data: FormValues, index: number): Promise<{ success: boolean; productId?: number; error?: any }> => {
     try {
       // 새로운 응용 분야 추가
       if (data.newApplication) {
@@ -110,7 +112,7 @@ export function useProductForm() {
           .single();
           
         if (appError) throw appError;
-        setApplications([...applications, newApp]);
+        setApplications(prevApps => [...prevApps, newApp]);
       }
 
       // 새로운 인증 추가
@@ -122,7 +124,7 @@ export function useProductForm() {
           .single();
           
         if (certError) throw certError;
-        setCertifications([...certifications, newCert]);
+        setCertifications(prevCerts => [...prevCerts, newCert]);
       }
 
       // 새로운 특징 추가 (name만 features 테이블에 저장)
@@ -136,7 +138,7 @@ export function useProductForm() {
           
         if (featError) throw featError;
         newFeatureId = newFeat.id;
-        setFeatures([...features, newFeat]);
+        setFeatures(prevFeats => [...prevFeats, newFeat]);
       }
 
       // 이미지 업로드 처리
@@ -168,43 +170,6 @@ export function useProductForm() {
         };
       }));
 
-      // LEDDriverIC 스키마의 단위 기준으로 specifications 데이터 변환
-      const convert = require('convert-units');
-      let convertedSpecs = { ...data.specifications };
-      
-      if (convertedSpecs.input_voltage) {
-        ['min', 'max', 'typ'].forEach(key => {
-          if (convertedSpecs.input_voltage[key]) {
-            convertedSpecs.input_voltage[key] = convert(convertedSpecs.input_voltage[key])
-              .from(convertedSpecs.input_voltage.unit)
-              .to('V');
-          }
-        });
-        convertedSpecs.input_voltage.unit = 'V';
-      }
-
-      if (convertedSpecs.output_current) {
-        ['min', 'max', 'typ'].forEach(key => {
-          if (convertedSpecs.output_current[key]) {
-            convertedSpecs.output_current[key] = convert(convertedSpecs.output_current[key])
-              .from(convertedSpecs.output_current.unit)
-              .to('mA');
-          }
-        });
-        convertedSpecs.output_current.unit = 'mA';
-      }
-
-      if (convertedSpecs.switching_frequency) {
-        ['min', 'max', 'typ'].forEach(key => {
-          if (convertedSpecs.switching_frequency[key]) {
-            convertedSpecs.switching_frequency[key] = convert(convertedSpecs.switching_frequency[key])
-              .from(convertedSpecs.switching_frequency.unit)
-              .to('kHz');
-          }
-        });
-        convertedSpecs.switching_frequency.unit = 'kHz';
-      }
-
       // 제품 데이터 저장 (새로운 'tables' 필드 포함)
       const { data: product, error } = await supabase
         .from("products")
@@ -213,7 +178,7 @@ export function useProductForm() {
           subtitle: data.subtitle,
           manufacturer_id: data.manufacturer_id,
           part_number: data.part_number,
-          specifications: convertedSpecs,
+          specifications: data.specifications,
           tables: data.tables,
           description: data.description,
           storage_type_id: data.storage_type_id,
@@ -249,76 +214,106 @@ export function useProductForm() {
         },
         {
           table: "product_features",
-          data: [
-            // 기존 특징들
-            ...(data.features?.map((featureId: string) => ({
-              product_id: product.id,
-              feature_id: parseInt(featureId),
-              description: data.featureDescriptions?.[featureId] || null
-            })) || []),
-            // 새로 추가된 특징 (있는 경우)
-            ...(newFeatureId ? [{
-              product_id: product.id,
-              feature_id: newFeatureId,
-              description: data.newFeatureDescription || null
-            }] : [])
-          ]
+          data: data.features?.map((featureId: string) => ({
+            product_id: product.id,
+            feature_id: parseInt(featureId),
+            description: (data.feature_descriptions || {})[featureId]
+          })) || []
         }
       ];
 
-      // 이미지 저장
-      if (imageUrls.length > 0) {
-        const { error: imgError } = await supabase
-          .from("images")
-          .insert(imageUrls.filter(Boolean).map(img => ({
-            ...img,
+      // 관계 데이터 병렬 저장
+      const relationSaves = relations.map(async rel => {
+        if (rel.data.length === 0) return;
+        const { error } = await supabase.from(rel.table).insert(rel.data);
+        if (error) throw error;
+      });
+
+      // 이미지 및 문서 정보 저장
+      const media = [
+        {
+          table: "product_images",
+          data: imageUrls.filter(Boolean).map((img: any) => ({
             product_id: product.id,
-            updated_at: new Date().toISOString()
-          })));
-        if (imgError) throw imgError;
-      }
-
-      // 문서 저장 및 product_documents 관계 생성
-      if (documentUrls.length > 0) {
-        const { data: savedDocs, error: docError } = await supabase
-          .from("documents")
-          .insert(documentUrls.filter(Boolean))
-          .select();
-          
-        if (docError) throw docError;
-
-        const productDocumentsData = savedDocs.map(doc => ({
-          product_id: product.id,
-          document_id: doc.id
-        }));
-
-        const { error: prodDocError } = await supabase
-          .from("product_documents")
-          .insert(productDocumentsData);
-        if (prodDocError) throw prodDocError;
-      }
-
-      // 관계 테이블에 데이터 저장
-      for (const relation of relations) {
-        if (relation.data.length > 0) {
-          const { error: relError } = await supabase
-            .from(relation.table)
-            .insert(relation.data);
-          if (relError) throw relError;
+            url: img.url,
+            title: img.title,
+            description: img.description
+          }))
+        },
+        {
+          table: "product_documents",
+          data: documentUrls.filter(Boolean).map((doc: any) => ({
+            product_id: product.id,
+            document_id: doc.id || null,
+            title: doc.title,
+            url: doc.url,
+            type_id: doc.type_id
+          }))
         }
-      }
+      ];
 
-      alert("제품이 성공적으로 등록되었습니다");
-      form.reset();
+      // 미디어 데이터 병렬 저장
+      const mediaSaves = media.map(async m => {
+        if (m.data.length === 0) return;
+        const { error } = await supabase.from(m.table).insert(m.data);
+        if (error) throw error;
+      });
+
+      // 모든 작업이 완료될 때까지 대기
+      await Promise.all([...relationSaves, ...mediaSaves]);
+
+      return { success: true, productId: product.id };
     } catch (error) {
-      console.error("제품 생성 오류:", error);
-      alert("제품 등록 중 오류가 발생했습니다");
+      console.error(`제품 ${index + 1} 저장 오류:`, error);
+      return { success: false, error };
+    }
+  };
+
+  const onSubmit = async (data: FormValues) => {
+    setLoading(true);
+    
+    try {
+      // 현재는 단일 제품 폼만 처리하지만, 나중에 여러 제품을 처리할 수 있도록 확장
+      const results = await saveProduct(data, 0);
+      
+      if (results.success) {
+        toast.success("제품이 성공적으로 등록되었습니다.");
+        form.reset(INITIAL_FORM_VALUES);
+      } else {
+        toast.error("제품 등록에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("제품 등록 중 오류 발생:", error);
+      toast.error("제품 등록에 실패했습니다.");
     } finally {
       setLoading(false);
     }
   };
 
-  const { handleSubmit } = form;
+  // 여러 제품 동시 저장
+  const saveMultipleProducts = async (productsData: FormValues[]) => {
+    setLoading(true);
+    
+    const results = await Promise.all(
+      productsData.map((productData, index) => saveProduct(productData, index))
+    );
+    
+    // 결과 처리
+    const successCount = results.filter(r => r.success).length;
+    const failedCount = results.length - successCount;
+    
+    if (successCount === results.length) {
+      toast.success(`${successCount}개 제품이 성공적으로 등록되었습니다.`);
+      form.reset(INITIAL_FORM_VALUES);
+    } else if (successCount > 0) {
+      toast.success(`${successCount}개 제품이 등록되었지만, ${failedCount}개는 실패했습니다.`);
+    } else {
+      toast.error("모든 제품 등록에 실패했습니다.");
+    }
+    
+    setLoading(false);
+    return { successCount, failedCount };
+  };
 
   return {
     form,
@@ -334,8 +329,10 @@ export function useProductForm() {
     documentTypes,
     setFilteredFeatures,
     addApplication,
-    handleSubmit,
+    handleSubmit: form.handleSubmit,
     onSubmit,
-    setFeatures
+    saveMultipleProducts,
+    productForms,
+    setProductForms
   };
 } 
